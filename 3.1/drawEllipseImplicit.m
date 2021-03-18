@@ -1,3 +1,10 @@
+%
+% Project: Approximation and Finite Elements in Isogeometric Problems
+% Author:  Luca Carlon
+% Date:    -
+%
+% Copyright (c) 2009-2021 Luca Carlon. All rights reserved.
+%
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
 % the Free Software Foundation, either version 3 of the License, or
@@ -9,12 +16,7 @@
 % GNU General Public License for more details.
 %
 % You should have received a copy of the GNU General Public License
-% along with this program.  If not, see <https://www.gnu.org/licenses/>.
-%
-% Copyright © 2008-2021 Luca Carlon
-
-%
-% Author: Luca Carlon
+% along with this program. If not, see <http://www.gnu.org/licenses/>.
 %
 
 % Draws an ellipse using an implicit equation.
