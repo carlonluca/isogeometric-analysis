@@ -1,3 +1,5 @@
+NOTE: work in progress, ignore this repo
+
 # isogeometric-analysis
 
 Data related to IGA.
