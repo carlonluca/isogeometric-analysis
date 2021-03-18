@@ -13,18 +13,27 @@
 %
 % Copyright © 2008-2021 Luca Carlon
 
-%
-% Author: Luca Carlon
-%
+% This function computes the Bezier curve with control points in P
+% on the domain u.
+function [x, y, z] = computeBezier(P, u)
+    % Determine the degree.
+    n = length(P(:, 1));
 
-% Draws an ellipse using an implicit equation.
+    % Determinare the dimension.
+    d = length(P(1, :));
 
-gdc = ezplot(@(x, y) x.^2/(3.5).^2 + y.^2/2.^2 - 1);
-axis equal
-axis([-4.5, 4.5, -2.5, 2.5]);
-set(gdc, 'Color', 'black');
-title('(a)');
-grid on
+    % Build Bernestein polynomials.
+    B = inline('factorial(n)./(factorial(i).*factorial(n - i)).*u.^i.*(1 - u).^(n-i)', 'i', 'n', 'u');
 
-% Export.
-% exportfig(gcf, 'ellipse.eps');
+    % Init.
+    x = 0;
+    y = 0;
+    z = 0;
+
+    % Compute the value.
+    for i = 0:1:(n - 1)
+        x = x + B(i, n - 1, u).*P(i + 1, 1);
+        y = y + B(i, n - 1, u).*P(i + 1, 2);
+        if d == 3, z = z + B(i, n - 1, u).*P(i + 1, 3); end
+    end
+endfunction

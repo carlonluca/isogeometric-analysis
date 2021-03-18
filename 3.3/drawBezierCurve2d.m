@@ -13,18 +13,6 @@
 %
 % Copyright © 2008-2021 Luca Carlon
 
-%
-% Author: Luca Carlon
-%
+% Draws a Bezier curve in the 2d space.
 
-% Draws an ellipse using an implicit equation.
-
-gdc = ezplot(@(x, y) x.^2/(3.5).^2 + y.^2/2.^2 - 1);
-axis equal
-axis([-4.5, 4.5, -2.5, 2.5]);
-set(gdc, 'Color', 'black');
-title('(a)');
-grid on
-
-% Export.
-% exportfig(gcf, 'ellipse.eps');
+drawBezierCurve([0, 0; 1, 1; 2, 0.5; 3, 0.5; 0.5, 1.5; 1.5, 0]);
