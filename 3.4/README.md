@@ -1,5 +1,5 @@
 ## B-Spline
-### drawBsplineBasisFuncs
+### drawBsplineBasisFuns
 ![basis](bspline_basis.svg.png)
 ### drawBsplineBasisDerivs
 Computes and draws b-spline basis functions and their derivatives.
@@ -21,3 +21,9 @@ Draws a b-spline curve.
     drawBsplineCurve(5, 2, [0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1], [0, 0, 0; 1, 1, 1; 2, 0.5, 0; 3, 0.5, 0; 0.5, 1.5, 0; 1.5, 0, 1]);
 
 ![basis](bspline_curve_3d.svg.png)
+### drawBivariateBsplineBasisFuns
+Draws bivariate basis functions.
+
+    drawBivariateBsplineBasisFuns([0, 0, 0, 0.5, 1, 1, 1], 3, 2, [0, 0, 0, 0.5, 1, 1, 1], 3, 2);
+
+![basis](bspline_bivariate_basis.svg.png)
