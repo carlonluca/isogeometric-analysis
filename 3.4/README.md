@@ -17,3 +17,7 @@ Draws a b-spline curve.
     drawBsplineCurve(5, 2, [0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1], [0, 0; 1, 1; 2, 0.5; 3, 0.5; 0.5, 1.5; 1.5, 0]);
 
 ![basis](bspline_curve.svg.png)
+
+    drawBsplineCurve(5, 2, [0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1], [0, 0, 0; 1, 1, 1; 2, 0.5, 0; 3, 0.5, 0; 0.5, 1.5, 0; 1.5, 0, 1]);
+
+![basis](bspline_curve_3d.svg.png)
