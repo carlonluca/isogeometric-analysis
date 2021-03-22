@@ -27,3 +27,10 @@ Draws bivariate basis functions.
     drawBivariateBsplineBasisFuns([0, 0, 0, 0.5, 1, 1, 1], 3, 2, [0, 0, 0, 0.5, 1, 1, 1], 3, 2);
 
 ![basis](bspline_bivariate_basis.svg.png)
+
+### drawBsplineSurf
+Draws a b-spline surface.
+
+    drawBsplineSurfDemo
+
+![surf](bspline_surf.svg.png)
