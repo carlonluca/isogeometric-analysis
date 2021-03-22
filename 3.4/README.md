@@ -29,8 +29,12 @@ Draws bivariate basis functions.
 ![basis](bspline_bivariate_basis.svg.png)
 
 ### drawBsplineSurf
-Draws a b-spline surface.
+Draws a b-spline surface. In the first demo, the basis functions are linear in both directions. In the second example, the same surface is drawn, but basis functions are quadratic in one direction.
 
     drawBsplineSurfDemo
 
 ![surf](bspline_surf.svg.png)
+
+    drawBsplineSurfDemo2
+
+![surf](bspline_surf_2.svg.png)
