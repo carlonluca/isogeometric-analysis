@@ -40,7 +40,6 @@ for p = 0:5
     Xi(p+1+length(Xi0):p+1+length(Xi0)+p) = Xi0(end);
     n = length(Xi) - p - 3;
     w = ones(1, n);
-    w(floor(length(w)./2)) = 3;
     title(sprintf('w = %s', mat2str(w)));
     for i = 0:n
         xi = 0:0.01:1;
