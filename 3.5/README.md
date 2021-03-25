@@ -1,8 +1,16 @@
 ## NURBS
-### drawNURBSBasisFuns
+NOTE: code in this directory needs code in 3.4.
 
-![nurbs](nurbs_basis.svg.png)
+### drawNURBSBasisFunsP5
+Draws NURBS basis funs of degrees in [0, 5].
+
+![basis](nurbs_basis.svg.png)
 
 ### drawNURBSBasisDerivs
 
 ![nurbs](nurbs_basis_derivs.svg.png)
+
+### drawNURBSCircle
+Draws a circle using NURBS.
+
+![circle](nurbs_circle.svg.png)

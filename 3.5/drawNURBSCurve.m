@@ -1,7 +1,7 @@
 %
 % Project: Approximation and Finite Elements in Isogeometric Problems
 % Author:  Luca Carlon
-% Date:    2009.11.20
+% Date:    2009.11.30
 %
 % Copyright (c) 2009-2021 Luca Carlon. All rights reserved.
 %
@@ -19,22 +19,32 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 %
 
-function [] = drawNURBSBasisFuns(n, p, Xi, w)
-hold on;
-xispace = linspace(Xi(1), Xi(length(Xi)), 1000);
-R(length(xispace)) = 0;
-for i = 0:n
-    for j = 0:length(xispace)-1
-        R(j+1) = computeNURBSBasisFun(i, xispace(j+1), n, p, Xi, w);
+function [] = drawNURBSCurve(n, p, Xi, Pw)
+    % Variable.
+    xi = linspace(0, 1, 1000);
+
+    hold on;
+    axis equal;
+
+    % Draw the curve.
+    for i = 1:length(xi)
+        C(i, :) = computeNURBSCurvePoint(n, p, Xi, Pw, xi(i));
     end
-    %plot(xispace, R, 'Color', hsv2rgb([i/(n+1), 1, 1]));
-    for j = 2:(length(xispace) - 2)
-        if R(j) ~= 0
-            if R(j+1) ~= 0
-                plot([xispace(j), xispace(j+1)], [R(j), R(j+1)],...
-                    'Color', hsv2rgb([i/(n+1), 1, 1]));
-            end
-        end
+    plot(C(:, 1), C(:, 2), 'k', 'LineWidth', 2);
+
+    % Compute the control points.
+    P(:, 1:length(Pw(1, :))-1) = 0;
+    for i = 1:length(Pw(:, 1))
+        P(i, :) = Pw(i, 1:length(Pw(1, :))-1)./Pw(i, end);
     end
-    clear R;
-end
+
+    % Draw the control points.
+    for i = 1:length(P(:, 1))
+        plot(P(i, 1), P(i, 2), '.', 'MarkerSize', 10, 'Color', 'red');
+    end
+
+    % Draw the lines.
+    for i = 1:length(P(:, 1))-1
+        plot([P(i, 1), P(i+1, 1)], [P(i, 2), P(i+1, 2)], '--', 'Color', 'k');
+    end
+endfunction
