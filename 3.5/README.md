@@ -14,3 +14,8 @@ Draws NURBS basis funs of degrees in [0, 5].
 Draws a circle using NURBS.
 
 ![circle](nurbs_circle.svg.png)
+
+### drawNURBSExampleCurve
+Shows the effect of different weights on the NUBS curve.
+
+![curve](nurbs_curve_example.svg.png)
