@@ -19,7 +19,7 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 %
 
-function [] = drawNURBSCurve(n, p, Xi, Pw)
+function [PL] = drawNURBSCurve(n, p, Xi, Pw, color = 'black', onlyCurve = false)
     % Variable.
     xi = linspace(0, 1, 1000);
 
@@ -30,7 +30,11 @@ function [] = drawNURBSCurve(n, p, Xi, Pw)
     for i = 1:length(xi)
         C(i, :) = computeNURBSCurvePoint(n, p, Xi, Pw, xi(i));
     end
-    plot(C(:, 1), C(:, 2), 'k', 'LineWidth', 2);
+    PL = plot(C(:, 1), C(:, 2), 'Color', color, 'LineWidth', 2);
+
+    if onlyCurve
+        return
+    end
 
     % Compute the control points.
     P(:, 1:length(Pw(1, :))-1) = 0;
