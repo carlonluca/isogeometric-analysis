@@ -16,6 +16,18 @@ Draws a circle using NURBS.
 ![circle](nurbs_circle.svg.png)
 
 ### drawNURBSExampleCurve
-Shows the effect of different weights on the NUBS curve.
+Draws a NURBS curve.
 
 ![curve](nurbs_curve_example.svg.png)
+
+### drawNURBSExampleWeights
+Shows the effect of different weights on the NUBS curve.
+
+![weight](nurbs_curve_weight.svg.png)
+
+### drawBivariateNURBSBasisFuns
+Draws bivariate NURBS basis functions with given weights. First image has equal weights, the second one shows the effect of different weights.
+
+![weight](nurbs_bivariate_basis.svg.png)
+
+![weight](nurbs_bivariate_basis_weight.svg.png)
