@@ -31,3 +31,8 @@ Draws bivariate NURBS basis functions with given weights. First image has equal 
 ![weight](nurbs_bivariate_basis.svg.png)
 
 ![weight](nurbs_bivariate_basis_weight.svg.png)
+
+### drawNURBSPlateHole
+Draws the plate with hole surface that is used for the simulations.
+
+![plate](nurbs_plate.svg.png)
