@@ -26,9 +26,8 @@
 %   Xi: knot vector;
 %   P: control points where P(i, j) indicates the j-th coordinate of the
 %       i-th control point.
-function [] = drawBsplineCurve(n, p, Xi, P)
+function [] = drawBsplineCurve(n, p, Xi, P, drawControlPoints = true, drawLines = true)
     hold on;
-    axis equal;
     box on;
     grid on;
     xlabel('x');
@@ -44,29 +43,33 @@ function [] = drawBsplineCurve(n, p, Xi, P)
     else plot(C(:, 1), C(:, 2), 'Color', 'black'); end;
 
     % Draw the control points.
-    for i = 1:length(P(:, 1))
-        if length(P(1, :)) == 3
-            plot3(P(i, 1), P(i, 2),...
-                P(i, 3),...
-                '.', 'MarkerSize', 15, 'Color', 'red');
-        else
-            plot(P(i, 1), P(i, 2),...
-                '.', 'MarkerSize', 15, 'Color', 'red');
+    if drawControlPoints
+        for i = 1:length(P(:, 1))
+            if length(P(1, :)) == 3
+                plot3(P(i, 1), P(i, 2),...
+                    P(i, 3),...
+                    '.', 'MarkerSize', 15, 'Color', 'red');
+            else
+                plot(P(i, 1), P(i, 2),...
+                    '.', 'MarkerSize', 15, 'Color', 'red');
+            end
         end
     end
 
     % Draw the lines.
-    for i = 1:length(P(:, 1))
-        if i+1<=length(P(:, 1))
-            if length(P(1, :)) == 3
-                plot3([P(i, 1), P(i+1, 1)],...
-                    [P(i, 2), P(i+1, 2)],...
-                    [P(i, 3), P(i+1, 3)],...
-                    '--');
-            else
-                plot([P(i, 1), P(i+1, 1)],...
-                    [P(i, 2), P(i+1, 2)],...
-                    '--');
+    if drawLines
+        for i = 1:length(P(:, 1))
+            if i+1<=length(P(:, 1))
+                if length(P(1, :)) == 3
+                    plot3([P(i, 1), P(i+1, 1)],...
+                        [P(i, 2), P(i+1, 2)],...
+                        [P(i, 3), P(i+1, 3)],...
+                        '--');
+                else
+                    plot([P(i, 1), P(i+1, 1)],...
+                        [P(i, 2), P(i+1, 2)],...
+                        '--');
+                end
             end
         end
     end
