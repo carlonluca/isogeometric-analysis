@@ -20,52 +20,63 @@
 %
 
 clear all;
-alfa = inline('-1./50');
-sigma = inline('0');
-f = inline('x');
+alfa = @(x) -1./50;
+sigma = @(x) 0;
+f = @(x) x;
 xi_a = 0;
 xi_b = 1;
-Xi = [0, 0, 1, 1];
 p = 1;
-n = 1;
-P(1, :) = [0, 0];
-P(2, :) = [1, 0];
-k = findSpan(n, p, 0.5, Xi);
-[n, Xi, P] = computeKnotInsertion(n, p, Xi, P, 0.5, k, 0, 1);
-[S, F, u] = computeIGA1DBsplines(alfa, sigma, f, xi_a, xi_b, Xi, p);
 
-% Plot the exact curve and the approximation.
-z = Xi(1):0.001:Xi(end);
-uexact = inline('x./3.*(25.*x.^2-22)');
-plot(z, uexact(z), 'Color', 'red', 'LineStyle', '--');
-hold on;
-box on;
-grid on;
-xlabel('x');
-ylabel('u_n');
-title('(a)');
+for s = 1:1:4
+    clear y;
+    clear P;
+    subplot(2, 2, s);
 
-P(1, end) = xi_a;
-P(2:end-1, end) = u;
-P(end, end) = xi_b;
+    P(1, :) = [0, 0];
+    P(2, :) = [1, 0];
+    Xi = [0, 0, 1, 1];
+    knots = linspace(0, 1, s + 2);
+    n = length(Xi) - p - 2;
+    for j = 2:1:(size(knots)(2) - 1)
+        k = findSpan(n, p, knots(j), Xi);
+        [n, Xi, P] = computeKnotInsertion(n, p, Xi, P, knots(j), k, 0, 1);
+    end
 
-axis([0, 1, -3, 1.2]);
+    [S, F, u] = computeIGA1DBsplines(alfa, sigma, f, xi_a, xi_b, Xi, p);
 
-drawBsplineCurve(n, p, Xi, P, true, false);
+    % Plot the exact curve and the approximation.
+    z = Xi(1):0.001:Xi(end);
+    uexact = @(x) x./3.*(25.*x.^2-22);
+    plot(z, uexact(z), 'Color', 'red', 'LineStyle', '--');
+    hold on;
+    box on;
+    grid on;
+    xlabel('x');
+    ylabel('u_n');
+    title('(a)');
 
-% Legend.
-legend('Exact', 'Approx');
+    P(1, end) = xi_a;
+    P(2:end-1, end) = u;
+    P(end, end) = xi_b;
 
-% % Plot basis functions.
-% subplot(2, 1, 2);
-% box on;
-% grid on;
-% hold on;
-% xlabel('x');
-% ylabel('R_{i,2}');
-% title('(b)');
-% for i = 0:(m-p-1)
-%     h = U(1):0.001:U(end);
-%     plot(h(1:(length(h)-1)), Nbf(U, i, p, h(1:(length(h)-1))),...
-%         'Color', hsv2rgb([i/(m-p), 1, 1]));
-% end
+    axis([0, 1, -3, 1.2]);
+
+    drawBsplineCurve(n, p, Xi, P, true, false);
+
+    % Legend.
+    legend('Exact', 'Approx');
+
+    % % Plot basis functions.
+    % subplot(2, 1, 2);
+    % box on;
+    % grid on;
+    % hold on;
+    % xlabel('x');
+    % ylabel('R_{i,2}');
+    % title('(b)');
+    % for i = 0:(m-p-1)
+    %     h = U(1):0.001:U(end);
+    %     plot(h(1:(length(h)-1)), Nbf(U, i, p, h(1:(length(h)-1))),...
+    %         'Color', hsv2rgb([i/(m-p), 1, 1]));
+    % end
+end
