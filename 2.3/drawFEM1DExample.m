@@ -53,16 +53,19 @@ for n = 0:2:6
         y(1, i) = y(1, i) + gamma(z(i));
     end
     
-    plot(z, y, 'Color', 'k');
+    p1 = plot(z, y, 'Color', 'k');
     hold on;
     uexact = inline('x.*(5.*x-4)');
-    plot(z, uexact(z), 'Color', 'red');
+    p2 = plot(z, uexact(z), 'Color', 'red');
     
     for i = 2:(length(u)-1)
         plot(x(i), u(i), 'o', 'Color', 'k');
     end
     plot(x(1), ua, 'o', 'Color', 'k');
     plot(x(end), ub, 'o', 'Color', 'k');
+
+    % Legend.
+    legend([p2, p1], 'Exact', 'Approx', 'Location', 'southeast');
 end
 
 hold off;
