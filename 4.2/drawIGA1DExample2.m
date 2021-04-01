@@ -27,10 +27,11 @@ xi_a = 0;
 xi_b = 1;
 p = 1;
 
-for s = 1:1:4
+subplotIndex = 1
+for s = 1:2:7
     clear y;
     clear P;
-    subplot(2, 2, s);
+    subplot(2, 2, subplotIndex++);
 
     P(1, :) = [0, 0];
     P(2, :) = [1, 0];

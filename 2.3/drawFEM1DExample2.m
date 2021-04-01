@@ -21,10 +21,11 @@
 
 % Example of FEM to solve the diff equation
 
-for n = 0:2:6
+subplotIndex = 1;
+for n = 1:1:6
     clear y;
     clear u;
-    subplot(2, 2, n./2+1);
+    subplot(3, 2, subplotIndex++);
     hold on;
     
     xlabel('x');

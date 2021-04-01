@@ -21,10 +21,11 @@
 
 % Example of FEM to solve the diff equation
 
-for n = 0:2:6
+subplotIndex = 1;
+for n = 1:1:6
     clear y;
     clear u;
-    subplot(2, 2, n./2+1);
+    subplot(3, 2, subplotIndex++);
     hold on;
     
     xlabel('x');
@@ -55,7 +56,7 @@ for n = 0:2:6
     
     p1 = plot(z, y, 'Color', 'k');
     hold on;
-    uexact = inline('x.*(5.*x-4)');
+    uexact = @(x) x.*(5.*x-4);
     p2 = plot(z, uexact(z), 'Color', 'red');
     
     for i = 2:(length(u)-1)
