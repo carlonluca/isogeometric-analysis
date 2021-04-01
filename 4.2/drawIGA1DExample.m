@@ -20,9 +20,9 @@
 %
 
 clear all;
-alfa = @(x) -1./50;
+alfa = @(x) -1;
 sigma = @(x) 0;
-f = @(x) x;
+f = @(x) 10;
 xi_a = 0;
 xi_b = 1;
 p = 1;
@@ -46,7 +46,7 @@ for s = 1:1:6
 
     % Plot the exact curve and the approximation.
     z = Xi(1):0.001:Xi(end);
-    uexact = @(x) x./3.*(25.*x.^2-22);
+    uexact = @(x) x.*(5.*x-4);
     plot(z, uexact(z), 'Color', 'red', 'LineStyle', '--');
     hold on;
     box on;
@@ -59,7 +59,7 @@ for s = 1:1:6
     P(2:end-1, end) = u;
     P(end, end) = xi_b;
 
-    axis([0, 1, -3, 1.2]);
+    axis([0, 1, -1, 1.2]);
 
     drawBsplineCurve(n, p, Xi, P, true, false);
 
