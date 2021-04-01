@@ -66,7 +66,7 @@ for n = 1:1:6
     plot(x(end), ub, 'o', 'Color', 'k');
 
     % Legend.
-    legend([p2, p1], 'Exact', 'Approx', 'Location', 'southeast');
+    %legend([p2, p1], 'Exact', 'Approx', 'Location', 'southeast');
 end
 
 hold off;
