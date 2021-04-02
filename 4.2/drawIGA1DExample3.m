@@ -1,7 +1,7 @@
 %
 % Project: Approximation and Finite Elements in Isogeometric Problems
 % Author:  Luca Carlon
-% Date:    2009.11.06
+% Date:    2021.04.02
 %
 % Copyright (c) 2009-2021 Luca Carlon. All rights reserved.
 %
@@ -25,7 +25,7 @@ sigma = @(x) 0;
 f = @(x) x;
 xi_a = 0;
 xi_b = 1;
-p = 1;
+p = 2;
 
 for s = 1:1:6
     clear y;
@@ -33,9 +33,10 @@ for s = 1:1:6
     subplot(3, 2, s);
 
     P(1, :) = [0, 0];
-    P(2, :) = [1, 0];
-    Xi = [0, 0, 1, 1];
-    knots = linspace(0, 1, s + 2);
+    P(2, :) = [0.5, 0];
+    P(3, :) = [1, 0];
+    Xi = [0, 0, 0, 1, 1, 1];
+    knots = linspace(0, 1, s + 1)
     n = length(Xi) - p - 2;
     for j = 2:1:(size(knots)(2) - 1)
         k = findSpan(n, p, knots(j), Xi);
