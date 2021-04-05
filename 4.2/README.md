@@ -21,3 +21,15 @@ The second script solves the problem:
 using IGA, with know insertion.
 
 ![example2](iga_knot_insertion_2.svg.png)
+
+### drawIGA1DExample3
+
+The third script solved the problem:
+
+    1/50*u''(x) = x
+    u(0) = 0
+    u(1) = 1
+
+using degree 2 b-spline basis functions.
+
+![example3](iga_knot_insertion_3.svg.png)
