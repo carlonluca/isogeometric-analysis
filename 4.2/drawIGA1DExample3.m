@@ -54,7 +54,7 @@ for s = 1:1:6
     grid on;
     xlabel('x');
     ylabel('u_n');
-    title(strcat('\Xi = ', mat2str(Xi, 2)));
+    title(strcat('\Xi = ', mat2str(Xi, 2)), "fontsize", 6);
 
     P(1, end) = xi_a;
     P(2:end-1, end) = u;
