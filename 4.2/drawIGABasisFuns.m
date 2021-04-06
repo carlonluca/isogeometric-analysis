@@ -40,6 +40,7 @@ end
 [S, F, u] = computeIGA1DBsplines(alfa, sigma, f, xi_a, xi_b, Xi, p);
 
 % Plot the exact curve and the approximation.
+subplot(2, 1, 1);
 z = Xi(1):0.001:Xi(end);
 uexact = @(x) x.*(5.*x-4);
 plot(z, uexact(z), 'Color', 'red', 'LineStyle', '--');
@@ -68,19 +69,26 @@ grid on;
 hold on;
 xlabel('x');
 ylabel('N_{i,2}');
-title('(b)');
-xi = 0:0.01:1;
-for j = 1:length(xi)
-    y(j) = computeBsplineBasis(p, n+p+1, Xi, i, xi(j));
-end
-
-for j = 2:(length(xi) - 1)
-    if y(1, j) ~= 0
-        if y(1, j+1) ~= 0
-            plot([xi(1, j), xi(1, j+1)], [y(1, j), y(1, j+1)],...
-                'Color', hsv2rgb([i/(n+1), 1, 1]));
+for i = 0:n
+    xi = 0:0.001:1;
+    for j = 1:length(xi)
+        y(j) = computeBsplineBasis(p, n+p+1, Xi, i, xi(j));
+    end
+    
+    for j = 2:(length(xi) - 1)
+        if y(1, j) ~= 0
+            if y(1, j+1) ~= 0
+                plot([xi(1, j), xi(1, j+1)], [y(1, j), y(1, j+1)],...
+                    'Color', hsv2rgb([i/(n+1), 1, 1]));
+            end
         end
     end
+    
+    clear y;
+    clear x;
+    [s, err] = sprintf('N_{i,%d}, i=0,...,%d', p, n);
+    ylabel(s);
+    xlabel('\xi');
 end
 
 clear y;
