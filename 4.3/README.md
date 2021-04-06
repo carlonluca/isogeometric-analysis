@@ -33,3 +33,9 @@ The third script solved the problem:
 using degree 2 b-spline basis functions.
 
 ![example3](iga_knot_insertion_3.svg.png)
+
+### drawIGABasisFuns
+
+This script shows how knot insertion can affect the precision of the estimation.
+
+![example4](iga_knot_insertion_basis_funs.svg.png)
