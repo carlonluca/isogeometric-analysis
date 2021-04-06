@@ -39,3 +39,9 @@ using degree 2 b-spline basis functions.
 This script shows how knot insertion can affect the precision of the estimation.
 
 ![example4](iga_knot_insertion_basis_funs.svg.png)
+
+### drawNURBSCircleKnotInsertion
+
+Know insertion for NURBS circle.
+
+![example5](iga_knot_insertion_circle.svg.png)
