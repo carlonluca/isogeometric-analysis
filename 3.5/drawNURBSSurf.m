@@ -31,8 +31,8 @@ ylabel('y');
 zlabel('z');
 
 % Define the sample values.
-spacexi = linspace(0, 1, 1000);
-spaceeta = linspace(0, 1, 1000);
+spacexi = linspace(0, 1, 100);
+spaceeta = linspace(0, 1, 100);
 
 % Define the points to be drawn.
 for i = 1:length(spacexi)

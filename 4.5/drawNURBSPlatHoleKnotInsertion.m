@@ -19,33 +19,12 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 %
 
-clear all;
+[n, p, Xi, m, q, Eta, P, d, w] = defineNURBSPlateHole();
 
 hold on;
 axis equal;
 box on;
 grid on;
-% Definition of the control points.
-P(1, 1, :) = [-1, 0, 0];
-P(2, 1, :) = [-1, sqrt(2)-1, 0];
-P(3, 1, :) = [1-sqrt(2), 1, 0];
-P(4, 1, :) = [0, 1, 0];
-
-P(1, 2, :) = [-2.5, 0, 0];
-P(2, 2, :) = [-2.5, 0.75, 0];
-P(3, 2, :) = [-0.75, 2.5, 0];
-P(4, 2, :) = [0, 2.5, 0];
-
-P(1, 3, :) = [-4, 0, 0];
-P(2, 3, :) = [-4, 4, 0];
-P(3, 3, :) = [-4, 4, 0];
-P(4, 3, :) = [0, 4, 0];
-
-d = length(P(1, 1, :));
-
-% Definition of the weights.
-w = ones(4, 3);
-% w(2:3, 1) = w(2:3, 1).*(1+1./sqrt(2))./2;
 
 Pw = zeros(size(P));
 for k = 1:d
@@ -53,18 +32,8 @@ for k = 1:d
 end
 Pw(:, :, d+1) = w;
 
-% Define the knot vectors.
-Xi = [0, 0, 0, 0.5, 1, 1, 1];
-Eta = [0, 0, 0, 1, 1, 1];
-
-% Define the scalars.
-n = 3;
-p = 2;
-m = 2;
-q = 2;
-
 subplot(2, 2, 1);
-title('(a)');
+title({ strcat("\Xi = ", mat2str(Xi, 2)), strcat("\Eta = ", mat2str(Eta, 2)) }, "fontsize", 6);
 drawNURBSSurf(n, p, Xi, m, q, Eta, Pw);
 
 for i = 0.25:0.25:0.75
@@ -84,7 +53,7 @@ for i = 0.25:0.25:0.75
 end
 
 subplot(2, 2, 2);
-title('(b)');
+title({ strcat("\Xi = ", mat2str(Xi, 2)), strcat("\Eta = ", mat2str(Eta, 2)) }, "fontsize", 6);
 drawNURBSSurf(n, p, Xi, m, q, Eta, Pw);
 
 for i = 0.125:0.125:0.875
@@ -104,7 +73,7 @@ for i = 0.125:0.125:0.875
 end
 
 subplot(2, 2, 3);
-title('(c)');
+title({ strcat("\Xi = ", mat2str(Xi, 2)), strcat("\Eta = ", mat2str(Eta, 2)) }, "fontsize", 6);
 drawNURBSSurf(n, p, Xi, m, q, Eta, Pw);
 
 for i = 0.0625:0.0625:0.9375
@@ -124,7 +93,7 @@ for i = 0.0625:0.0625:0.9375
 end
 
 subplot(2, 2, 4);
-title('(d)');
+title({ strcat("\Xi = ", mat2str(Xi, 2)), strcat("\Eta = ", mat2str(Eta, 2)) }, "fontsize", 6);
 drawNURBSSurf(n, p, Xi, m, q, Eta, Pw);
 
 
