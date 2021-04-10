@@ -1,7 +1,7 @@
 %
 % Project: Approximation and Finite Elements in Isogeometric Problems
 % Author:  Luca Carlon
-% Date:    2009.10.13
+% Date:    2009.11.24
 %
 % Copyright (c) 2009-2021 Luca Carlon. All rights reserved.
 %
@@ -19,34 +19,25 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 %
 
-% Returns data needed to draw a rectangular plate with a hole.
-function [n, p, Xi, m, q, Eta, P, d, w] = defineNURBSPlateHole()
+function [F] = rightHandIntegrand(n, p, Xi, m, q, Eta, Pw, xi, eta, ki, li, f)
+for l = 1:length(xi)
+    % Determination of the derivatives.
+    SKL = computeNURBSSurfDerivsPoint(n, p, Xi, m, q, Eta, Pw, xi(l), eta, 1);
 
-% Definition of the physical domain (plate with hole).
-P(1, 1, :) = [-1, 0, 0];
-P(2, 1, :) = [-1, sqrt(2)-1, 0];
-P(3, 1, :) = [1-sqrt(2), 1, 0];
-P(4, 1, :) = [0, 1, 0];
+    % Definition of the jacobian matrix.
+    DxDxi = [SKL(1+1, 0+1, 1), SKL(1+1, 0+1, 2);...
+        SKL(0+1, 1+1, 1), SKL(0+1, 1+1, 2)];
 
-P(1, 2, :) = [-2.5, 0, 0];
-P(2, 2, :) = [-2.5, 0.75, 0];
-P(3, 2, :) = [-0.75, 2.5, 0];
-P(4, 2, :) = [0, 2.5, 0];
+    % Evaluate the Jacobian.
+    Jx = det(DxDxi);
 
-P(1, 3, :) = [-4, 0, 0];
-P(2, 3, :) = [-4, 4, 0];
-P(3, 3, :) = [-4, 4, 0];
-P(4, 3, :) = [0, 4, 0];
+    % Definition of the weights.
+    wixi = Pw(:, li+1, end)';
+    wieta = Pw(ki+1, :, end);
+    
+    Rip = computeNURBSBasisFun(ki, xi(l), n, p, Xi, wixi).*computeNURBSBasisFun(li, eta, m, q, Eta, wieta);
 
-d = length(P(1, 1, :));
-
-% Define the knot vectors.
-Xi = [0, 0, 0, 0.5, 1, 1, 1];
-Eta = [0, 0, 0, 1, 1, 1];
-
-% Define the scalars.
-n = 3;
-p = 2;
-m = 2;
-q = 2;
-w = ones(4, 3);
+    % Integrand.
+    F(l) = Jx.*(1.*f).*(Rip);
+    %F(l) = f.*Rip;
+end

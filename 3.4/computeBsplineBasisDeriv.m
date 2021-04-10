@@ -19,7 +19,7 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 %
 
-% derivsBasisFun determines the derivatives of the i-th B-spline basis
+% computeBsplineBasisDeriv determines the derivatives of the i-th B-spline basis
 % function of degree p built over the knot vector Xi in the point xi of
 % degree up to degree n.
 % Input:

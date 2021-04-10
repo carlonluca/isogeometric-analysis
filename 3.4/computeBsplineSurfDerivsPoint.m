@@ -40,13 +40,13 @@
 %   Neta: returns derivsBasisFuns(etaSpan, eta, q, d, Eta);
 %   spanxi: returns spanxi = findSpan(n, p, xi, Xi);
 %   spaneta: returns findSpan(m, q, eta, Eta).
-function [SKL, Nxi, Neta, spanxi, spaneta] = computeBsplineSurfDerivPoint(n, p, Xi, m, q, Eta, P, xi, eta, d)
+function [SKL, Nxi, Neta, spanxi, spaneta] = computeBsplineSurfDerivsPoint(n, p, Xi, m, q, Eta, P, xi, eta, d)
    % Determine the span in which the point [xi, eta]^T is.
    spanxi = findSpan(n, p, xi, Xi);
    spaneta = findSpan(m, q, eta, Eta);
    % Determine the derivatives.
-   Nxi = computeBsplineBasisDeriv(spanxi, xi, p, d, Xi);
-   Neta = computeBsplineBasisDeriv(spaneta, eta, q, d, Eta);
+   Nxi = computeBsplineBasisDerivs(spanxi, xi, p, d, Xi);
+   Neta = computeBsplineBasisDerivs(spaneta, eta, q, d, Eta);
    SKL = zeros(d+1, length(P(1, 1, :)), d+1);
    for k = 0:d
       for l = 0:d
