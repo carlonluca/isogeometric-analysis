@@ -44,6 +44,7 @@ Implementation of Bezier curves and surfaces:
 Implementation of B-spline curves and surfaces:
 
 ![surf](3.4/bspline_surf_2.svg.png)
+![surf](3.4/bspline_surf_ring.svg.png)
 
 ## NURBS Curves and Surfaces
 

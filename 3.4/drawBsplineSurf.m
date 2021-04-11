@@ -108,6 +108,4 @@ function [] = drawBsplineSurf(n, p, Xi, m, q, Eta, P, varargin)
         plot3(S(:, 1), S(:, 2), S(:, 3), 'k');
     end
 
-    xlim ([-3, 0]);
-    ylim ([0, 3]);
 endfunction

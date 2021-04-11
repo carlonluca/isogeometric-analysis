@@ -1,7 +1,7 @@
 %
 % Project: Approximation and Finite Elements in Isogeometric Problems
 % Author:  Luca Carlon
-% Date:    -
+% Date:    2009.11.06
 %
 % Copyright (c) 2009-2021 Luca Carlon. All rights reserved.
 %
@@ -19,12 +19,8 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 %
 
-% Draws a sphere using an implicit equation.
-
-[x, y, z] = ndgrid(-1:0.1:1, -1:0.1:1, -1:0.1:1);
-F = x.^2 + y.^2 + z.^2 - 1;
-isosurface(F, 0);
+[n, p, Xi, m, q, Eta, P] = defineBsplineRing();
+axis([-6, 6, -6, 6, -2, 2]);
 colormap("jet");
-
-% Export.
-% exportfig(gcf, 'sphere.eps');
+colorbar;
+drawBsplineSurf(n, p, Xi, m, q, Eta, P);
