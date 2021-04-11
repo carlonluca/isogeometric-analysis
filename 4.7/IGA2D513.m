@@ -30,7 +30,7 @@ wp_force = wxi;
 % ======================
 f = inline('1', 'x', 'y');
 a_1 = inline('1', 'x', 'y');
-g_N = inline('9.*x', 'x', 'y');
+g_N = inline('x', 'x', 'y');
 
 % Mesh refinement.
 % ================
@@ -82,12 +82,14 @@ a = 0;
 b = 0;
 for ki = 0:n
     for li = 0:m
+        printf("Working: %f%%\n", (n*ki + li)/(n*m)*100)
+
         % ki and li are the indices of the first B-spline function.
         % If the node is a Dirichlet node, then skip to the next
         % iteration.
         if C(ki+1, li+1) == 1, continue; end;
         % Integration of the homogeneous part of the force vector.
-        F(a+1) = forceIntegralBsplines02...
+        F(a+1) = computeForceIntegralBsplines02...
             (n, p, Xi, m, q, Eta, P, ki, li, f, g_N, a_1, wp_force, N);
         % Iteration on the second B-spline basis function.
         for kj = 0:n
@@ -102,7 +104,7 @@ for ki = 0:n
                         % The term is subtracted from the force vector
                         % term.
                         F(a+1) = F(a+1)-D(kj+1, lj+1).*...
-                            stiffnessIntegralBsplines02...
+                            computeStiffnessIntegralBsplines02...
                             (n, p, Xi, m, q, Eta, P, ki, li, kj, lj,...
                             wp_stiffness, a_1);
                     end
@@ -113,7 +115,7 @@ for ki = 0:n
                 if b < a, b = b+1; continue; end
                 ki, kj, li, lj
                 % Stiffness term.
-                S(a+1, b+1) = stiffnessIntegralBsplines02...
+                S(a+1, b+1) = computeStiffnessIntegralBsplines02...
                     (n, p, Xi, m, q, Eta, P, ki, li, kj, lj,...
                     wp_stiffness, a_1);
                 b = b+1;
@@ -152,7 +154,7 @@ U = U+D;
 P(:, :, 3) = U;
 colormap("jet");
 drawBsplineSurf(n, p, Xi, m, q, Eta, P);
-%axis([-4, 0, 0, 4]);
-%view([-26, 18]);
+axis([-4, 0, 0, 4]);
+view([-26, 18]);
 shading interp;
 colorbar;
