@@ -23,8 +23,16 @@
 
 [x, y, z] = ndgrid(-1:0.1:1, -1:0.1:1, -1:0.1:1);
 F = x.^2 + y.^2 + z.^2 - 1;
-isosurface(F, 0);
+iso = .0;
 colormap("jet");
+[faces, verts, colors] = isosurface(x, y, z, F, iso, z);
+patch('Vertices', verts, 'Faces', faces, ...
+      'FaceVertexCData', colors, ...
+      'FaceColor', 'interp', ...
+      'edgecolor', 'interp');
+xlabel("x");
+ylabel("y");
+zlabel("z");
 
 % Export.
 % exportfig(gcf, 'sphere.eps');
