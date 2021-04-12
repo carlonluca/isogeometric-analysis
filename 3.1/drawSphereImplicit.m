@@ -25,6 +25,8 @@
 F = x.^2 + y.^2 + z.^2 - 1;
 iso = .0;
 colormap("jet");
+colorbar;
+axis equal;
 [faces, verts, colors] = isosurface(x, y, z, F, iso, z);
 patch('Vertices', verts, 'Faces', faces, ...
       'FaceVertexCData', colors, ...

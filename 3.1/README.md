@@ -12,4 +12,4 @@ Draws a sphere with implicit equation.
 ### drawSphereParametric
 Draws a sphere with parametric equation.
 
-![sphere_implicit](sphere.gif)
+![sphere_implicit](sphere_implicit.svg.png)

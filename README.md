@@ -31,7 +31,7 @@ results in:
 
 Examples for drawing implicit and parametric equations:
 
-![sphere_implicit](3.1/sphere.gif)
+![sphere_implicit](3.1/sphere_implicit.svg.png)
 
 ## Bezier Curves and Surfaces
 
