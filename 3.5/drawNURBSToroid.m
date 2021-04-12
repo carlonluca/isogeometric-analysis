@@ -1,9 +1,9 @@
 %
 % Project: Approximation and Finite Elements in Isogeometric Problems
 % Author:  Luca Carlon
-% Date:    2009.10.25
+% Date:    2021.04.12
 %
-% Copyright (c) 2009-2021 Luca Carlon. All rights reserved.
+% Copyright (c) 2021 Luca Carlon. All rights reserved.
 %
 % This program is free software: you can redistribute it and/or modify
 % it under the terms of the GNU General Public License as published by
@@ -19,9 +19,12 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 %
 
-[n, p, Xi, m, q, Eta, P, d, w] = defineNURBSPlateHole();
+[n, p, Xi, m, q, Eta, P, d, w] = defineNURBSToroid();
 
 hold on;
+axis([-6, 6, -6, 6, -2, 2]);
+colormap("jet");
+colorbar;
 axis equal;
 box on;
 grid on;

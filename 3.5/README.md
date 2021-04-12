@@ -36,3 +36,8 @@ Draws bivariate NURBS basis functions with given weights. First image has equal 
 Draws the plate with hole surface that is used for the simulations.
 
 ![plate](nurbs_plate.svg.png)
+
+### drawNURBSToroid
+Draws a toroid by providing proper data to the algorithms.
+
+![toroid](nurbs_toroid.svg.png)
