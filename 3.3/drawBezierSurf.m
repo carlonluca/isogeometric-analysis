@@ -45,6 +45,12 @@ for i = 1:1:length(u(1, :))
     end
 end
 
+xlabel('x');
+ylabel('y');
+zlabel('z');
+colormap('jet');
+colorbar;
+
 surfc(X, Y, Z);
 
 % Blocks the plot.
@@ -53,12 +59,12 @@ hold on;
 % Draw the lines.
 for i = 1:1:(length(P(1, 1, :)) - 1)
     for j = 1:1:length(P(1, :, 1))
-        plot3([P(1, j, i), P(1, j, i+1)], [P(2, j, i), P(2, j, i+1)], [P(3, j, i), P(3, j, i+1)], 'Color', [1, 0, 0], 'LineStyle', '-', 'LineWidth', 3);
+        plot3([P(1, j, i), P(1, j, i+1)], [P(2, j, i), P(2, j, i+1)], [P(3, j, i), P(3, j, i+1)], 'Color', [1, 0, 0], 'LineStyle', '--', 'LineWidth', 1);
     end
 end
 for i = 1:1:length(P(1, 1, :))
     for j = 1:1:(length(P(1, :, 1)) - 1)
-        plot3([P(1, j, i), P(1, j+1, i)], [P(2, j, i), P(2, j+1, i)], [P(3, j, i), P(3, j+1, i)], 'Color', [1, 0, 0], 'LineStyle', '-', 'LineWidth', 2);
+        plot3([P(1, j, i), P(1, j+1, i)], [P(2, j, i), P(2, j+1, i)], [P(3, j, i), P(3, j+1, i)], 'Color', [1, 0, 0], 'LineStyle', '--', 'LineWidth', 1);
     end
 end
 
@@ -68,8 +74,3 @@ for i = 1:1:length(P(1, :, 1))
         plot3(P(1, i, j), P(2, i, j), P(3, i, j), 'o', 'Color', 'k');
     end
 end
-
-xlabel('x');
-ylabel('y');
-zlabel('z');
-colorbar;
