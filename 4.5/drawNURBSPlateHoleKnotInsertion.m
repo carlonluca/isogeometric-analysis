@@ -25,6 +25,7 @@ hold on;
 axis equal;
 box on;
 grid on;
+colormap("jet");
 
 Pw = zeros(size(P));
 for k = 1:d

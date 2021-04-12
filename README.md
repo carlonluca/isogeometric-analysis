@@ -51,6 +51,7 @@ Implementation of B-spline curves and surfaces:
 Implementation of NURBS curves and surfaces:
 
 ![plate](3.5/nurbs_plate.svg.png)
+![plate](3.5/nurbs_toroid.svg.png)
 
 ## Isogeometric Analysis with Knot Insertion
 
@@ -58,7 +59,7 @@ Chapter 4.5 includes algorithms for knot insertion, to refine the approximation:
 
 ![example5](4.5/iga_knot_insertion_circle.svg.png)
 
-![example5](4.5/iga_knot_insertion_circle.svg.png)
+![example6](4.5/iga_knot_insertion_plate_hole.svg.png)
 
 In chapter 4.6 I created weights and Gauss points to speed up numerical quadrature during the IGA process.
 

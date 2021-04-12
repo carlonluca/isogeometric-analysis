@@ -45,3 +45,9 @@ This script shows how knot insertion can affect the precision of the estimation.
 Know insertion for NURBS circle.
 
 ![example5](iga_knot_insertion_circle.svg.png)
+
+### drawNURBSPlateHoleKnotInsertion
+
+Knot insertion on a plate with a hole.
+
+![example6](iga_knot_insertion_plate_hole.svg.png)
