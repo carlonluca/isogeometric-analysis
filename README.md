@@ -19,9 +19,7 @@ Note that the implementation is in no way optimized for speed. Computation of IG
 
 FEM is the main method used to numerically solve differential equations. The dissertation includes examples of solutions of 1D and 2D problems using this technique, but the 2D implementation uses Matlab/SimuLink, so it would need a specific implementation in Octave. 1D problems are showed instead in 2.3:
 
-    u''(x) = 10
-    u(0) = 0
-    u(1) = 1
+![eq](eq/eq_fem_h_refinement_1.png)
 
 results in:
 
