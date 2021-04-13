@@ -29,6 +29,8 @@ results in:
 
 Examples for drawing implicit and parametric equations:
 
+![eq](eq/sphere_implicit.png)
+
 ![sphere_implicit](3.1/sphere_implicit.svg.png)
 
 ## Bezier Curves and Surfaces
