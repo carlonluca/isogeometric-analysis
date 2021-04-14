@@ -49,7 +49,18 @@ Implementation of Bezier curves and surfaces:
 
 Implementation of B-spline curves and surfaces:
 
+![eq](3.4/eq_bspline_1.png)
+
+![eq](3.4/eq_bspline_2.png)
+
+![eq](3.4/eq_bspline_3.png)
+
+![eq](3.4/eq_bspline_4.png)
+
+![eq](3.4/eq_bspline_5.png)
+
 ![surf](3.4/bspline_surf_2.svg.png)
+
 ![surf](3.4/bspline_surf_ring.svg.png)
 
 ## NURBS Curves and Surfaces
@@ -57,6 +68,7 @@ Implementation of B-spline curves and surfaces:
 Implementation of NURBS curves and surfaces:
 
 ![plate](3.5/nurbs_plate.svg.png)
+
 ![plate](3.5/nurbs_toroid.svg.png)
 
 ## Isogeometric Analysis with Knot Insertion
