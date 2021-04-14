@@ -19,7 +19,7 @@ Note that the implementation is in no way optimized for speed. Computation of IG
 
 FEM is the main method used to numerically solve differential equations. The dissertation includes examples of solutions of 1D and 2D problems using this technique, but the 2D implementation uses Matlab/SimuLink, so it would need a specific implementation in Octave. 1D problems are showed instead in 2.3:
 
-![eq](eq/eq_fem_h_refinement_1.png)
+![eq](2.3/eq_fem_h_refinement_1.png)
 
 results in:
 
@@ -29,13 +29,19 @@ results in:
 
 Examples for drawing implicit and parametric equations:
 
-![eq](eq/sphere_implicit.png)
+![eq](3.1/eq_sphere.png)
 
 ![sphere_implicit](3.1/sphere_implicit.svg.png)
 
 ## Bezier Curves and Surfaces
 
 Implementation of Bezier curves and surfaces:
+
+![eq](3.3/eq_bezier_1.png)
+
+![eq](3.3/eq_bezier_2.png)
+
+![eq](3.3/eq_bezier_3.png)
 
 ![surf](3.3/bezier_surf.svg.png)
 
