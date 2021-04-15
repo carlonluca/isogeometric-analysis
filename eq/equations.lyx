@@ -156,7 +156,7 @@ B-spline
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\boldsymbol{C}\left(\xi\right)=\sum_{i=0}^{n}N_{i}^{n}\left(\xi\right)\boldsymbol{P}_{i},\;a\leq\xi\leq b
+\boldsymbol{C}\left(\xi\right)=\sum_{i=0}^{n}N_{i}^{p}\left(\xi\right)\boldsymbol{P}_{i},\;a\leq\xi\leq b
 \]
 
 \end_inset
@@ -167,7 +167,7 @@ B-spline
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\boldsymbol{S}\left(\xi,\eta\right)=\sum_{i=0}^{n}\sum_{j=0}^{m}N_{i}^{n}\left(\xi\right)N_{j}^{m}\left(\eta\right)\boldsymbol{P}_{i,j},\;\left\{ \begin{array}{l}
+\boldsymbol{S}\left(\xi,\eta\right)=\sum_{i=0}^{n}\sum_{j=0}^{m}N_{i}^{p}\left(\xi\right)N_{j}^{q}\left(\eta\right)\boldsymbol{P}_{i,j},\;\left\{ \begin{array}{l}
 a\leq\xi\leq b\\
 c\leq\eta\leq d
 \end{array}\right.
@@ -210,6 +210,46 @@ N_{i}^{p}\left(\xi\right)=\frac{\xi-\xi_{i}}{\xi_{i+p}-\xi_{i}}\cdot N_{i}^{p-1}
 \begin_inset Formula 
 \[
 H=\left[c,c,c,\eta_{q+1},\ldots,\eta_{m-q-1},d,d,d\right]
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+NURBS
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\boldsymbol{C}\left(\xi\right)=\sum_{i=0}^{n}R_{i}^{p}\left(\xi\right)\boldsymbol{P}_{i},\;a\leq\xi\leq b
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\boldsymbol{S}\left(\xi,\eta\right)=\sum_{i=0}^{n}\sum_{j=0}^{m}R_{i}^{p}\left(\xi\right)R_{j}^{q}\left(\eta\right)\boldsymbol{P}_{i,j},\;\left\{ \begin{array}{l}
+a\leq\xi\leq b\\
+c\leq\eta\leq d
+\end{array}\right.
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+R_{i}^{p}=\frac{N_{i}^{p}(\xi)\cdot w_{i}}{\underset{j=0}{\overset{n}{\sum}}N_{j}^{p}(\xi)\cdot w_{j}}
 \]
 
 \end_inset
