@@ -67,6 +67,12 @@ Implementation of B-spline curves and surfaces:
 
 Implementation of NURBS curves and surfaces:
 
+![plate](3.5/eq_nurbs_1.png)
+
+![plate](3.5/eq_nurbs_2.png)
+
+![plate](3.5/eq_nurbs_3.png)
+
 ![plate](3.5/nurbs_plate.svg.png)
 
 ![plate](3.5/nurbs_toroid.svg.png)
@@ -74,6 +80,10 @@ Implementation of NURBS curves and surfaces:
 ## Isogeometric Analysis with Knot Insertion
 
 Chapter 4.5 includes algorithms for knot insertion, to refine the approximation:
+
+![eq](4.5/eq_knot_insertion_1.png)
+
+![eq](4.5/eq_knot_insertion_2.png)
 
 ![example5](4.5/iga_knot_insertion_circle.svg.png)
 
@@ -83,9 +93,7 @@ In chapter 4.6 I created weights and Gauss points to speed up numerical quadratu
 
 In chapter 4.7 there are more examples of solving 2D problems with IGA, (e.g.):
 
-    ∇(∇u(x)) = 1, ∀x ∈ Ω
-    u(x) = 1, ∀x ∈ Γ
-    u(x) = 0, ∀x ∈ ∂Ω \ Γ
+![eq](4.7/eq_iga_1.png)
 
 ![solution](4.7/iga_2d_56_1.svg.png)
 

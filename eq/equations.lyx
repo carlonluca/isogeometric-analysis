@@ -116,7 +116,7 @@ Bezier
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\boldsymbol{C}\left(\xi\right)=\sum_{i=0}^{n}B_{i}^{n}\left(\xi\right)\boldsymbol{P}_{i},\;a\leq\xi\leq b
+\boldsymbol{C}\left(\xi\right)=\sum_{i=0}^{n}B_{i}^{p}\left(\xi\right)\boldsymbol{P}_{i},\;a\leq\xi\leq b
 \]
 
 \end_inset
@@ -127,10 +127,10 @@ Bezier
 \begin_layout Standard
 \begin_inset Formula 
 \[
-\boldsymbol{S}\left(\xi,\eta\right)=\sum_{i=0}^{n}\sum_{j=0}^{m}B_{i}^{n}\left(\xi\right)B_{j}^{m}\left(\eta\right)\boldsymbol{P}_{i,j},\;\left\{ \begin{array}{l}
+\boldsymbol{S}\left(\xi,\eta\right)=\sum_{i=0}^{n}\sum_{j=0}^{m}B_{i}^{p}\left(\xi\right)B_{j}^{q}\left(\eta\right)\boldsymbol{P}_{i,j},\;\left\{ \begin{array}{l}
 a\leq\xi\leq b\\
 c\leq\eta\leq d
-\end{array}\right..
+\end{array}\right.
 \]
 
 \end_inset
@@ -250,6 +250,52 @@ c\leq\eta\leq d
 \begin_inset Formula 
 \[
 R_{i}^{p}=\frac{N_{i}^{p}(\xi)\cdot w_{i}}{\underset{j=0}{\overset{n}{\sum}}N_{j}^{p}(\xi)\cdot w_{j}}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Knot insertion
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\bar{\boldsymbol{C}}^{w}\left(\xi\right)=\sum_{i=0}^{n+1}\bar{N}_{i}^{p}\left(\xi\right)\bar{\boldsymbol{P}}_{i}^{w_{i}}
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\bar{\boldsymbol{P}}_{i}^{w_{i}}=\alpha_{i}\boldsymbol{P}_{i}^{w_{i}}+\left(1-\alpha_{i}\right)\boldsymbol{P}_{i-1}^{w_{i-1}},\;\alpha_{i}=\left\{ \begin{array}{ll}
+1, & i\leq k-p\\
+\dfrac{\bar{\xi}-\xi_{i}}{\xi_{i+p}-\xi_{i}}, & k-p+1\leq i\leq k\\
+0, & i\geq k+1
+\end{array}\right.
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+IGA
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\left\{ \begin{array}{ll}
+\frac{d^{2}u(x)}{dx^{2}}=1 & \forall x\in\Omega\\
+u(x)=1 & x=\Gamma\\
+u(x)=0 & x=\partial\Omega\backslash\Gamma
+\end{array}\right.
 \]
 
 \end_inset
