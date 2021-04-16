@@ -17,3 +17,7 @@ The second script solves the problem:
     u(1) = 1
 
 ![example2](fem_h_refinement_2.svg.png)
+
+## drawLagrangePoly
+
+![example3](lagrange.svg.png)

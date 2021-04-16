@@ -25,6 +25,10 @@ results in:
 
 ![example1](2.3/fem_h_refinement_1.svg.png)
 
+Lagrande polynomials can be useful for the definition of nodal shape functions:
+
+![example2](2.3/lagrange.svg.png)
+
 ## Curves and Surfaces with Implicit and Parametric Forms
 
 Examples for drawing implicit and parametric equations:
