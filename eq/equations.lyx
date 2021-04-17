@@ -293,8 +293,8 @@ IGA
 \[
 \left\{ \begin{array}{ll}
 \frac{d^{2}u(x)}{dx^{2}}=1 & \forall x\in\Omega\\
-u(x)=1 & x=\Gamma\\
-u(x)=0 & x=\partial\Omega\backslash\Gamma
+u(x)=1 & \forall x\in\Gamma\\
+u(x)=0 & \forall x\in\partial\Omega\backslash\Gamma
 \end{array}\right.
 \]
 
