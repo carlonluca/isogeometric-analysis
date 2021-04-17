@@ -1,8 +1,6 @@
-**NOTE: work in progress.**
+# Isogeometric Analysis and Finite Element Method with Octave
 
-# Isogeometric Analysis and Finite Element Method
-
-The repo contains code to show how to implement FEM/IGA, coming from my dissertation (link below). Main topic is Isogeometric Analysis (IGA), but some code is there also for the Finite Element Method (FEM). The code was mostly written in 2009 for Matlab. In 2021 I improved it a bit and patched it to work with Octave, which seems to work very well. The repo contains:
+The repo contains code to show how to implement FEM/IGA, coming from my dissertation (link below). The scripts include functions that implement the algorithms (typically with the "compute" prefix) and scripts that show how to use the functions and the result on real examples (typically with the "draw" prefix). Main topic is Isogeometric Analysis (IGA), but some code is there also for the Finite Element Method (FEM). The code was mostly written in 2009 for Matlab. In 2021 I improved it a bit and patched it to work with **Octave**, which seems to work very well. The repo contains:
 
 * 2.3: code showing how to solve 1D problems using the Finite Element Method (FEM);
 * 3.1: examples on how to draw curves and surfaces with implicit and parametric equations;
@@ -101,8 +99,12 @@ In chapter 4.7 there are more examples of solving 2D problems with IGA, (e.g.):
 
 ![solution](4.7/iga_2d_56_1.svg.png)
 
-Refer to this [blog post](https://thebugfreeblog.blogspot.com/p/blog-page_17.html).
+## Links
+
+[Blog post](https://thebugfreeblog.blogspot.com/p/blog-page_17.html)
 
 Link to dissertation: https://bugfreeblog.page.link/isogeometric-analysis-dissertation.
 
 Link to presentation: https://bugfreeblog.page.link/isogeometric-analysis-presentation.
+
+The code was tested on [**GNU Octave version 6.2.0**](https://www.gnu.org/software/octave/index).
