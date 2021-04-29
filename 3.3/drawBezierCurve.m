@@ -22,7 +22,7 @@
 % Draws a Bezier curve in the 2d or 3d space from its control points. The function also
 % draws the basis functions below.
 
-function b = drawBezierCurve(P)
+function b = drawBezierCurve(P, curveWidth=2, curveColor=[1, 0, 0], basisColor=[])
     % Determine the dimension.
     d = length(P(1, :));
 
@@ -33,9 +33,9 @@ function b = drawBezierCurve(P)
     u = 0:0.001:1;
     [x, y, z] = computeBezier(P, u);
     if d == 2
-        plot(x, y, 'k', 'LineWidth', 2);
+        plot(x, y, 'k', 'LineWidth', curveWidth, 'Color', curveColor);
     else
-        plot3(x, y, z, 'k', 'LineWidth', 2);
+        plot3(x, y, z, 'k', 'LineWidth', curveWidth, 'Color', curveColor);
     end
 
     % Blocks the plot.
@@ -61,7 +61,7 @@ function b = drawBezierCurve(P)
 
     grid on;
     box on;
-    title('(a)');
+    title('Curve');
     xlabel('x');
     ylabel('y');
 
@@ -79,14 +79,19 @@ function b = drawBezierCurve(P)
         %else
         %    col = [0, 0, 1];
         %end
-        plot(u, B(i, length(P(:, 1)) - 1, u), 'Color', hsv2rgb([i/length(P(:, 1)), 1, 1]));
+        if isempty(basisColor)
+            col = hsv2rgb([i/length(P(:, 1)), 1, 1]);
+        else
+            col = basisColor;
+        end
+        plot(u, B(i, length(P(:, 1)) - 1, u), 'Color', col);
     end
 
     % Unblocks the plot.
     hold off;
     grid on;
     box on;
-    title('(b)');
+    title('Basis functions');
     xlabel('\xi');
     ylabel('\eta');
 endfunction
