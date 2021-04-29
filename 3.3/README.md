@@ -10,3 +10,5 @@ Draws the curve, control points and basis functions.
 ![3d](bezier_3d.svg.png)
 ### drawBezierSurf
 ![surf](bezier_surf.svg.png)
+### drawDegreeComparison
+![deg](bezier_deg.svg.png)
