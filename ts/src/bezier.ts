@@ -30,7 +30,24 @@ window.onload = () => {
     controlPoints.push(new Point(3, 0.5))
     controlPoints.push(new Point(0.5, 1.5))
     controlPoints.push(new Point(1.5, 0))
-    console.log("Hello " + new Bezier(controlPoints).controlPoints)
+
+    const bezier = new Bezier(controlPoints)
+    const xiValues = math.range(0, 1, 0.001).toArray()
+    let xValues = []
+    let yValues = []
+    xiValues.map(xi => {
+        let p = bezier.evaluate(xi)
+        xValues.push(p.x)
+        yValues.push(p.y)
+    })
+    console.log("xi: " + xValues + " bz: " + yValues)
+    const trace1 = {
+        x: xValues,
+        y: yValues,
+        type: 'scatter'
+    }
+    const data = [trace1]
+    Plotly.newPlot('myCanvas', data)
 }
 
 export class Bezier {
