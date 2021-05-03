@@ -22,5 +22,5 @@
 import { factorial } from "./factorial.js"
 
 export let bernstein = (i: number, n: number, xi: number) => {
-    return factorial(n)*Math.pow(xi, i)*Math.pow(1 - xi, n - 1)/(factorial(i)*factorial(n - i))
+    return factorial(n)*Math.pow(xi, i)*Math.pow(1 - xi, n - i)/(factorial(i)*factorial(n - i))
 }
