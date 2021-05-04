@@ -21,6 +21,8 @@
 
 import { Point } from "./point.js"
 import { Bezier } from "./bezier.js"
+import * as math from "mathjs"
+import * as Plotly from "plotly.js"
 
 /**
  * Draws the bezier curve into a plot.
@@ -40,8 +42,7 @@ export let drawBezierCurve = (controlPoints: Point[], plot: string) => {
     });
     const trace1 = {
         x: xValues,
-        y: yValues,
-        type: "scatter",
+        y: yValues
     };
     const data = [trace1];
     Plotly.newPlot(plot, data);

@@ -3,3 +3,7 @@ octave-workspace
 # Lyx
 *.lyx#
 *.lyx~
+
+node_modules
+js
+dist
