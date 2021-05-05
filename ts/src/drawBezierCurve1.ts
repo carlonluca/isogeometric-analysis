@@ -19,16 +19,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Point } from "./point.js";
-import { drawBezierCurve } from "./drawBezierCurve.js"
+import { Point } from "./point"
+import { drawBezierCurve } from "./drawBezierCurve"
 
-window.drawBezierCurve1 = (plot: string) => {
-    let controlPoints = []
-    controlPoints.push(new Point(0, 0))
-    controlPoints.push(new Point(1, 1))
-    controlPoints.push(new Point(2, 0.5))
-    controlPoints.push(new Point(3, 0.5))
-    controlPoints.push(new Point(0.5, 1.5))
-    controlPoints.push(new Point(1.5, 0))
-    drawBezierCurve(controlPoints, plot)
-}
+export let drawBezierCurve1 = (plot: string) => {
+    let controlPoints = [];
+    controlPoints.push(new Point(0, 0));
+    controlPoints.push(new Point(1, 1));
+    controlPoints.push(new Point(2, 0.5));
+    controlPoints.push(new Point(3, 0.5));
+    controlPoints.push(new Point(0.5, 1.5));
+    controlPoints.push(new Point(1.5, 0));
+    drawBezierCurve(controlPoints, plot);
+};

@@ -19,8 +19,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { factorial } from "./factorial.js"
+import { factorial } from "./factorial";
 
 export let bernstein = (i: number, n: number, xi: number) => {
-    return factorial(n)*Math.pow(xi, i)*Math.pow(1 - xi, n - i)/(factorial(i)*factorial(n - i))
-}
+    return (
+        (factorial(n) * Math.pow(xi, i) * Math.pow(1 - xi, n - i)) /
+        (factorial(i) * factorial(n - i))
+    );
+};

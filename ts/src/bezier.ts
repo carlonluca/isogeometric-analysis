@@ -19,8 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { bernstein } from "./bernstein.js"
-import { Point } from "./point.js"
+import { bernstein } from "./bernstein"
+import { Point } from "./point"
 
 export class Bezier {
     controlPoints: Point[] = []

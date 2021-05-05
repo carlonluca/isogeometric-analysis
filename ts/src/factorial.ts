@@ -19,17 +19,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-let _factorial = []
+let _factorial = [];
 
 /**
  * Computes the factorial of n.
- * @param n 
- * @returns 
+ * @param n
+ * @returns
  */
 export let factorial = (n: number) => {
     if (n == 0 || n == 1)
-        return 1
+        return 1;
     if (_factorial[n] > 0)
-        return _factorial[n]
-  return _factorial[n] = factorial(n-1) * n;
-}
+        return _factorial[n];
+    return (_factorial[n] = factorial(n - 1) * n);
+};

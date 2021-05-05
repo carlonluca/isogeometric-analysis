@@ -19,10 +19,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Point } from "./point.js"
-import { Bezier } from "./bezier.js"
-import * as math from "mathjs"
-import * as Plotly from "plotly.js"
+import { Point } from "./point"
+import { Bezier } from "./bezier"
 
 /**
  * Draws the bezier curve into a plot.
@@ -32,6 +30,7 @@ import * as Plotly from "plotly.js"
  */
 export let drawBezierCurve = (controlPoints: Point[], plot: string) => {
     const bezier = new Bezier(controlPoints);
+    // @ts-expect-error
     const xiValues = math.range(0, 1, 0.001).toArray();
     let xValues = [];
     let yValues = [];
@@ -45,5 +44,7 @@ export let drawBezierCurve = (controlPoints: Point[], plot: string) => {
         y: yValues
     };
     const data = [trace1];
+
+    // @ts-expect-error
     Plotly.newPlot(plot, data);
 };
