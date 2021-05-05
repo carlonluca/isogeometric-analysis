@@ -1,0 +1,21 @@
+<html>
+
+<body>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+    <script src="https://unpkg.com/mathjs@9.3.2/lib/browser/math.js"></script>
+    <script src="https://requirejs.org/docs/release/2.3.6/comments/require.js"></script>
+    <script src="dist/bundle.js"></script>
+    <script>
+        window.onload = () => {
+            require(["drawBezierCurve1"], function(d) {
+                d.drawBezierCurve1("myCanvas")
+            })
+        }
+    </script>
+
+    <div style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);border:1px solid #000000;" id="myCanvas" width="500" height="500">
+    </div>
+
+</body>
+
+</html>

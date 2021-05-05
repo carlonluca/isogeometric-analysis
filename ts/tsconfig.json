@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "module": "amd",
+        "sourceMap": true,
+        "outDir": "js",
+        "rootDir": "src",
+        "target": "es2015",
+        "esModuleInterop": true,
+        "moduleResolution": "classic",
+        "outFile": "./dist/bundle.js"
+    }
+}
