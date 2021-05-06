@@ -21,13 +21,13 @@
 
 import { Point } from "./point"
 import { Bezier } from "./bezier"
-import { bernstein } from "./bernstein";
+import { bernstein } from "./bernstein"
 
 /**
  * Draws the bezier curve into a plot.
- * 
- * @param controlPoints 
- * @param plot 
+ *
+ * @param controlPoints
+ * @param plot
  */
 export let drawBezierCurve = (controlPoints: Point[], plot: string, bernsteinPlot: string = null) => {
     const bezier = new Bezier(controlPoints);
@@ -45,9 +45,38 @@ export let drawBezierCurve = (controlPoints: Point[], plot: string, bernsteinPlo
         y: yValues
     };
     const data = [trace1];
-
+    var layout = {
+        title: {
+            text: "Bezier Curve",
+            font: {
+                family: "Ubuntu",
+                size: 24,
+            },
+            xref: "paper",
+        },
+        xaxis: {
+            title: {
+                text: "x",
+                font: {
+                    family: "Ubuntu",
+                    size: 18,
+                    color: "#7f7f7f",
+                },
+            },
+        },
+        yaxis: {
+            title: {
+                text: "y",
+                font: {
+                    family: "Ubuntu",
+                    size: 18,
+                    color: "#7f7f7f",
+                },
+            },
+        },
+    };
     // @ts-expect-error
-    Plotly.newPlot(plot, data);
+    Plotly.newPlot(plot, data, layout);
 
     if (bernsteinPlot)
         drawBernsteinPolynomials(controlPoints.length, bernsteinPlot)
@@ -59,17 +88,49 @@ export let drawBernsteinPolynomials = (n: number, plot: string) => {
     const data = []
 
     for (let i = 0; i <= n; i++) {
-        const etaValues = []
+        const upsiValues = []
         xiValues.map((xi: number) => {
-            etaValues.push(bernstein(i, n, xi))
+            upsiValues.push(bernstein(i, n, xi))
         })
         const trace = {
             x: xiValues,
-            y: etaValues
+            y: upsiValues,
+            name: "B<sub>" + i + "</sub>"
         }
         data.push(trace)
     }
 
+    var layout = {
+        title: {
+            text: "Bernstein Polynomials",
+            font: {
+                family: "Ubuntu",
+                size: 24,
+            },
+            xref: "paper",
+        },
+        xaxis: {
+            title: {
+                text: "\u03BE",
+                font: {
+                    family: "Ubuntu",
+                    size: 18,
+                    color: "#7f7f7f",
+                },
+            },
+        },
+        yaxis: {
+            title: {
+                text: "\uD835\uDF10",
+                font: {
+                    family: "Ubuntu",
+                    size: 18,
+                    color: "#7f7f7f",
+                },
+            },
+        },
+    };
+
     // @ts-expect-error
-    Plotly.newPlot(plot, data);
+    Plotly.newPlot(plot, data, layout);
 }
