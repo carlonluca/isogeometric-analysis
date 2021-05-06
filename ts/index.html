@@ -8,13 +8,14 @@
     <script>
         window.onload = () => {
             require(["drawBezierCurve1"], function(d) {
-                d.drawBezierCurve1("myCanvas")
+                d.drawBezierCurve1("bezierCanvas", "bernsteinCanvas")
             })
         }
     </script>
 
-    <div style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);border:1px solid #000000;" id="myCanvas" width="500" height="500">
-    </div>
+    <div style="display: block;border:1px solid #000000;width: 50%;margin: auto;" id="bezierCanvas"></div>
+    <br/>
+    <div style="display: block;border:1px solid #000000;width: 50%;margin: auto;" id="bernsteinCanvas"></div>
 
 </body>
 

@@ -21,6 +21,7 @@
 
 import { Point } from "./point"
 import { Bezier } from "./bezier"
+import { bernstein } from "./bernstein";
 
 /**
  * Draws the bezier curve into a plot.
@@ -28,13 +29,13 @@ import { Bezier } from "./bezier"
  * @param controlPoints 
  * @param plot 
  */
-export let drawBezierCurve = (controlPoints: Point[], plot: string) => {
+export let drawBezierCurve = (controlPoints: Point[], plot: string, bernsteinPlot: string = null) => {
     const bezier = new Bezier(controlPoints);
     // @ts-expect-error
     const xiValues = math.range(0, 1, 0.001).toArray();
     let xValues = [];
     let yValues = [];
-    xiValues.map((xi) => {
+    xiValues.map((xi: number) => {
         let p = bezier.evaluate(xi);
         xValues.push(p.x);
         yValues.push(p.y);
@@ -47,4 +48,28 @@ export let drawBezierCurve = (controlPoints: Point[], plot: string) => {
 
     // @ts-expect-error
     Plotly.newPlot(plot, data);
-};
+
+    if (bernsteinPlot)
+        drawBernsteinPolynomials(controlPoints.length, bernsteinPlot)
+}
+
+export let drawBernsteinPolynomials = (n: number, plot: string) => {
+    // @ts-expect-error
+    const xiValues = math.range(0, 1, 0.001).toArray()
+    const data = []
+
+    for (let i = 0; i <= n; i++) {
+        const etaValues = []
+        xiValues.map((xi: number) => {
+            etaValues.push(bernstein(i, n, xi))
+        })
+        const trace = {
+            x: xiValues,
+            y: etaValues
+        }
+        data.push(trace)
+    }
+
+    // @ts-expect-error
+    Plotly.newPlot(plot, data);
+}

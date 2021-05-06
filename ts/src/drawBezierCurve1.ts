@@ -22,7 +22,7 @@
 import { Point } from "./point"
 import { drawBezierCurve } from "./drawBezierCurve"
 
-export let drawBezierCurve1 = (plot: string) => {
+export let drawBezierCurve1 = (plot: string, bernsteinPlot: string) => {
     let controlPoints = [];
     controlPoints.push(new Point(0, 0));
     controlPoints.push(new Point(1, 1));
@@ -30,5 +30,5 @@ export let drawBezierCurve1 = (plot: string) => {
     controlPoints.push(new Point(3, 0.5));
     controlPoints.push(new Point(0.5, 1.5));
     controlPoints.push(new Point(1.5, 0));
-    drawBezierCurve(controlPoints, plot);
+    drawBezierCurve(controlPoints, plot, bernsteinPlot);
 };
