@@ -29,7 +29,7 @@ import { bernstein } from "./bernstein"
  * @param controlPoints
  * @param plot
  */
-export let drawBezierCurve = (controlPoints: Point[], plot: string, bernsteinPlot: string = null) => {
+export let drawBezierCurve = (controlPoints: Point[], drawControlPoints: boolean, plot: string, bernsteinPlot: string = null) => {
     const bezier = new Bezier(controlPoints);
     // @ts-expect-error
     const xiValues = math.range(0, 1, 0.001).toArray();
@@ -42,9 +42,40 @@ export let drawBezierCurve = (controlPoints: Point[], plot: string, bernsteinPlo
     });
     const trace1 = {
         x: xValues,
-        y: yValues
+        y: yValues,
+        name: "Bezier curve"
     };
-    const data = [trace1];
+    const data = [ trace1 ]
+
+    if (drawControlPoints) {
+        const cpXValues = []
+        const cpYValues = []
+        for (let cp of controlPoints) {
+            cpXValues.push(cp.x)
+            cpYValues.push(cp.y)
+        }
+        const trace2 = {
+            x: cpXValues,
+            y: cpYValues,
+            name: "Control points",
+            mode: 'lines+markers',
+            marker: {
+                color: "transparent",
+                size: 8,
+                line: {
+                    color: "black",
+                    width: 1
+                }
+            },
+            line: {
+                color: "red",
+                width: 1,
+                dash: "dot"
+            }
+        }
+        data.push(trace2)
+    }
+    
     var layout = {
         title: {
             text: "Bezier Curve",
