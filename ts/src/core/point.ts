@@ -23,11 +23,8 @@
  * Class representing a point on a surface.
  */
 export class Point {
-    x: number;
-    y: number;
-
-    constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
-    }
+    /**
+     * Ctor.
+     */
+    constructor(public x: number, public y: number, public z: number = 0) {}
 }

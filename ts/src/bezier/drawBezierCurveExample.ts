@@ -30,5 +30,16 @@ export let drawBezierCurve1 = (plot: string, drawControlPoints: boolean, bernste
     controlPoints.push(new Point(3, 0.5));
     controlPoints.push(new Point(0.5, 1.5));
     controlPoints.push(new Point(1.5, 0));
-    drawBezierCurve(controlPoints, drawControlPoints,  plot, bernsteinPlot);
+    drawBezierCurve(controlPoints, false, drawControlPoints,  plot, bernsteinPlot);
+};
+
+export let drawBezierCurve2 = (plot: string, drawControlPoints: boolean, bernsteinPlot: string) => {
+    let controlPoints = [];
+    controlPoints.push(new Point(0, 0, 0));
+    controlPoints.push(new Point(1, 1, 1));
+    controlPoints.push(new Point(2, 0.5, 0));
+    controlPoints.push(new Point(3, 0.5, 0));
+    controlPoints.push(new Point(0.5, 1.5, 0));
+    controlPoints.push(new Point(1.5, 0, 1));
+    drawBezierCurve(controlPoints, true, drawControlPoints, plot, bernsteinPlot);
 };

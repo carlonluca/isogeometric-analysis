@@ -20,7 +20,7 @@
  */
 
 import { Point } from "../core/point"
-import { Bezier } from "./bezier"
+import { BezierCurve } from "./bezier"
 import { bernstein } from "./bernstein"
 
 /**
@@ -29,36 +29,50 @@ import { bernstein } from "./bernstein"
  * @param controlPoints
  * @param plot
  */
-export let drawBezierCurve = (controlPoints: Point[], drawControlPoints: boolean, plot: string, bernsteinPlot: string = null) => {
-    const bezier = new Bezier(controlPoints);
+export let drawBezierCurve = (controlPoints: Point[], threed: boolean, drawControlPoints: boolean, plot: string, bernsteinPlot: string = null) => {
+    const bezier = new BezierCurve(controlPoints)
     // @ts-expect-error
-    const xiValues = math.range(0, 1, 0.001).toArray();
-    let xValues = [];
-    let yValues = [];
+    const xiValues = math.range(0, 1, 0.001).toArray()
+    let xValues = []
+    let yValues = []
+    let zValues = []
     xiValues.map((xi: number) => {
-        let p = bezier.evaluate(xi);
-        xValues.push(p.x);
-        yValues.push(p.y);
-    });
+        let p = bezier.evaluate(xi)
+        xValues.push(p.x)
+        yValues.push(p.y)
+        zValues.push(p.z)
+    })
+    const plotType = threed ? "scatter3d" : "scatter"
     const trace1 = {
         x: xValues,
         y: yValues,
-        name: "Bezier curve"
-    };
+        z: zValues,
+        type: plotType,
+        name: "Bezier curve",
+        mode: "lines",
+        line: {
+            color: "orange",
+            width: 4
+        }
+    }
     const data = [ trace1 ]
 
     if (drawControlPoints) {
         const cpXValues = []
         const cpYValues = []
+        const cpZValues = []
         for (let cp of controlPoints) {
             cpXValues.push(cp.x)
             cpYValues.push(cp.y)
+            cpZValues.push(cp.z)
         }
         const trace2 = {
             x: cpXValues,
             y: cpYValues,
+            z: cpZValues,
             name: "Control points",
             mode: 'lines+markers',
+            type: plotType,
             marker: {
                 color: "transparent",
                 size: 8,

@@ -22,7 +22,7 @@
 import { bernstein } from "./bernstein"
 import { Point } from "../core/point"
 
-export class Bezier {
+export class BezierCurve {
     controlPoints: Point[] = []
 
     /**
@@ -48,8 +48,9 @@ export class Bezier {
         for (let i = 0; i < n; i++) {
             x = x + bernstein(i, n - 1, xi)*this.controlPoints[i].x
             y = y + bernstein(i, n - 1, xi)*this.controlPoints[i].y
+            z = z + bernstein(i, n - 1, xi)*this.controlPoints[i].z
         }
 
-        return new Point(x, y)
+        return new Point(x, y, z)
     }
 }
