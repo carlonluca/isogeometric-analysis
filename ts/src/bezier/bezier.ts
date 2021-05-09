@@ -22,17 +22,16 @@
 import { bernstein } from "./bernstein"
 import { Point } from "../core/point"
 
+/**
+ * Class representing a Bezier curve in the 2D or 3D space.
+ */
 export class BezierCurve {
-    controlPoints: Point[] = []
-
     /**
      * Ctor.
      * 
      * @param controlPoints 
      */
-    constructor(controlPoints: Point[]) {
-        this.controlPoints = controlPoints
-    }
+    constructor(public controlPoints: Point[]) {}
 
     /**
      * Evaluates the value of the Bezier curve in the parametric space.
@@ -49,6 +48,43 @@ export class BezierCurve {
             x = x + bernstein(i, n - 1, xi)*this.controlPoints[i].x
             y = y + bernstein(i, n - 1, xi)*this.controlPoints[i].y
             z = z + bernstein(i, n - 1, xi)*this.controlPoints[i].z
+        }
+
+        return new Point(x, y, z)
+    }
+}
+
+/**
+ * Class representing a surface.
+ */
+export class BezierSurf {
+    /**
+     * Ctor.
+     * 
+     * @param controlPoints 
+     */
+    constructor(public controlPoints: Point[][]) {}
+
+    /**
+     * Evaluates the surface in (xi, eta).
+     * 
+     * @param xi 
+     * @param eta 
+     * @returns 
+     */
+    public evaluate(xi: number, eta: number): Point {
+        let x = 0
+        let y = 0
+        let z = 0
+        let n = this.controlPoints.length
+        let m = this.controlPoints[0].length
+
+        for (let i = 0; i < n; i++) {
+            for (let j = 0; j < m; j++) {
+                x += bernstein(i, n - 1, xi)*bernstein(j, m - 1, eta)*this.controlPoints[i][j].x
+                y += bernstein(i, n - 1, xi)*bernstein(j, m - 1, eta)*this.controlPoints[i][j].y
+                z += bernstein(i, n - 1, xi)*bernstein(j, m - 1, eta)*this.controlPoints[i][j].z
+            }
         }
 
         return new Point(x, y, z)
