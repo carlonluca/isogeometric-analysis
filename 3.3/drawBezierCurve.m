@@ -22,7 +22,7 @@
 % Draws a Bezier curve in the 2d or 3d space from its control points. The function also
 % draws the basis functions below.
 
-function b = drawBezierCurve(P, curveWidth=2, curveColor=[1, 0, 0], basisColor=[])
+function b = drawBezierCurve(P, curveWidth=2, curveColor=[0, 0, 0], basisColor=[])
     % Determine the dimension.
     d = length(P(1, :));
 
@@ -93,5 +93,5 @@ function b = drawBezierCurve(P, curveWidth=2, curveColor=[1, 0, 0], basisColor=[
     box on;
     title('Basis functions');
     xlabel('\xi');
-    ylabel('\eta');
+    ylabel('\upsilon');
 endfunction
