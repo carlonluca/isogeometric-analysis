@@ -38,7 +38,7 @@ Lagrande polynomials can be useful for the definition of nodal shape functions:
 
 See [this blog post](https://thebugfreeblog.blogspot.com/2021/04/igafem.html) for more info.
 
-## Curves and Surfaces with Implicit and Parametric Forms
+## [Curves and Surfaces with Implicit and Parametric Forms](3.1)
 
 Examples for drawing implicit and parametric equations:
 
@@ -46,7 +46,7 @@ Examples for drawing implicit and parametric equations:
 
 ![sphere_implicit](3.1/sphere_implicit.svg.png)
 
-## Bezier Curves and Surfaces
+## [Bezier Curves and Surfaces](3.3)
 
 Implementation of Bezier curves and surfaces:
 
@@ -60,7 +60,7 @@ Implementation of Bezier curves and surfaces:
 
 See [this blog post](https://thebugfreeblog.blogspot.com/2021/05/isogeometric-analysis-bezier-curves-and.html) for more info.
 
-## B-spline Curves and Surfaces
+## [B-spline Curves and Surfaces](3.4)
 
 Implementation of B-spline curves and surfaces:
 
@@ -78,7 +78,7 @@ Implementation of B-spline curves and surfaces:
 
 ![surf](3.4/bspline_surf_ring.svg.png)
 
-## NURBS Curves and Surfaces
+## [NURBS Curves and Surfaces](3.5)
 
 Implementation of NURBS curves and surfaces:
 
@@ -94,7 +94,7 @@ Implementation of NURBS curves and surfaces:
 
 ## Isogeometric Analysis with Knot Insertion
 
-Chapter 4.5 includes algorithms for knot insertion, to refine the approximation:
+[Chapter 4.5](4.5) includes algorithms for knot insertion, to refine the approximation:
 
 ![eq](4.5/eq_knot_insertion_1.png)
 
@@ -106,7 +106,7 @@ Chapter 4.5 includes algorithms for knot insertion, to refine the approximation:
 
 In chapter 4.6 I created weights and Gauss points to speed up numerical quadrature during the IGA process.
 
-In chapter 4.7 there are more examples of solving 2D problems with IGA, (e.g.):
+In [chapter 4.7](4.7) there are more examples of solving 2D problems with IGA, (e.g.):
 
 ![eq](4.7/eq_iga_1.png)
 
