@@ -1,0 +1,30 @@
+<html>
+
+<body>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+    <script src="https://unpkg.com/mathjs@9.3.2/lib/browser/math.js"></script>
+    <script src="https://requirejs.org/docs/release/2.3.6/comments/require.js"></script>
+    <script src="dist/bundle.js"></script>
+    <script>
+        window.onload = () => {
+            require(["bspline/drawBsplineCurveExample"], function(d) {
+                d.drawBsplineCurve1("bsplineCanvas1", true)
+                d.drawBsplineCurve2("bsplineCanvas2", true, "basisCanvas")
+            })
+            //require(["bezier/drawBezierSurfExample"], function(d) {
+            //    d.drawBezierSurfExample("bezierCanvas3", true)
+            //})
+        }
+    </script>
+
+    <div style="display: block;border:1px solid #000000;width: 50%;margin: auto"><div style="width: 95%; margin: auto" id="bsplineCanvas1"></div></div>
+    <br/>
+    <div style="display: block;border:1px solid #000000;width: 50%;margin: auto"><div style="width: 95%; margin: auto" id="bsplineCanvas2"></div></div>
+    <br/>
+    <div style="display: block;border:1px solid #000000;width: 50%;margin: auto"><div style="width: 95%; margin: auto" id="basisCanvas"></div></div>
+    <br/>
+    <div style="display: block;border:1px solid #000000;width: 50%;margin: auto"><div style="width: 95%; margin: auto" id="bsplineCanvas3"></div></div>
+
+</body>
+
+</html>
