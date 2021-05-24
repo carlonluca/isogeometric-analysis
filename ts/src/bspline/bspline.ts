@@ -197,9 +197,9 @@ export class BsplineSurf {
                 let Nxi = BsplineCurve.computeBasis(this.Xi, i, this.p, xi)
                 let Neta = BsplineCurve.computeBasis(this.Eta, j, this.q, eta)
                 let prod = Nxi*Neta
-                x = x + prod*this.controlPoints[i][j][0]
-                y = y + prod*this.controlPoints[i][j][1]
-                z = z + prod*this.controlPoints[i][j][2]
+                x = x + prod*this.controlPoints[i][j].x
+                y = y + prod*this.controlPoints[i][j].y
+                z = z + prod*this.controlPoints[i][j].z
             }
         }
 
