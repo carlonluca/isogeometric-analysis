@@ -20,7 +20,6 @@
  */
 
 import { Point } from "../core/point"
-import { Range } from "../core/range"
 
 /**
  * Class representing a B-spline curve in the 2D or 3D space.
@@ -50,7 +49,7 @@ export class BsplineCurve {
         let z = 0
         let n = this.controlPoints.length - 1
         let span = BsplineCurve.findSpan(this.knotVector, xi, this.p, n)
-        let N = this.computeAllNonvanishingBasis(span, xi)
+        let N = BsplineCurve.computeAllNonvanishingBasis(this.knotVector, span, this.p, xi)
         for (let i = 0; i <= this.p; i++) {
             x = x + N[i]*this.controlPoints[span - this.p + i].x
             y = y + N[i]*this.controlPoints[span - this.p + i].y
@@ -69,9 +68,7 @@ export class BsplineCurve {
      * @param Xi 
      * @returns 
      */
-    public computeAllNonvanishingBasis(i: number, xi: number): number[] {
-        let Xi = this.knotVector
-        let p = this.p
+    public static computeAllNonvanishingBasis(Xi: number[], i: number, p: number, xi: number): number[] {
         let N = Array(p + 1).fill(0)
         let right = Array(p + 1).fill(0)
         let left = Array(p + 1).fill(0)
@@ -95,13 +92,11 @@ export class BsplineCurve {
         return N
     }
 
-    public computeBasis(i: number, xi: number): number {
-        let p = this.p
-        let n = this.knotVector.length - 1
+    public static computeBasis(Xi: number[], i: number, p: number, xi: number): number {
+        let n = Xi.length - 1
 
         // Check to see if we're evaluating the first or the last basis function at
         // the beginning or at the end of the knot vector.
-        let Xi = this.knotVector
         if ((i == 0 && xi == Xi[0]) || (i == n - p - 1 && xi == Xi[n]))
             return 1
         
@@ -145,17 +140,6 @@ export class BsplineCurve {
     }
 
     /**
-     * Alias for computeAllNonvanishingBasis.
-     * 
-     * @param i 
-     * @param xi 
-     * @returns 
-     */
-    public N(i: number, xi: number): number[] {
-        return this.computeAllNonvanishingBasis(i, xi)
-    }
-
-    /**
      * Finds the span in which xi lies.
      * 
      * @param Xi 
@@ -179,5 +163,46 @@ export class BsplineCurve {
         }
 
         return i
+    }
+}
+
+/**
+ * Represents a b-spline surface.
+ */
+export class BsplineSurf {
+    /**
+     * Ctor.
+     * 
+     * @param controlPoints 
+     * @param Xi 
+     * @param Eta 
+     * @param p 
+     * @param q 
+     */
+    constructor(
+        public controlPoints: Point[][],
+        public Xi: number[],
+        public Eta: number[],
+        public p: number,
+        public q: number) {}
+
+    public evaluate(xi: number, eta: number): Point {
+        let n = this.controlPoints.length - 1
+        let m = this.controlPoints[0].length - 1
+        let x = 0
+        let y = 0
+        let z = 0
+        for (let i = 0; i <= n; i++) {
+            for (let j = 0; j <= m; j++) {
+                let Nxi = BsplineCurve.computeBasis(this.Xi, i, this.p, xi)
+                let Neta = BsplineCurve.computeBasis(this.Eta, j, this.q, eta)
+                let prod = Nxi*Neta
+                x = x + prod*this.controlPoints[i][j][0]
+                y = y + prod*this.controlPoints[i][j][1]
+                z = z + prod*this.controlPoints[i][j][2]
+            }
+        }
+
+        return new Point(x, y, z)
     }
 }

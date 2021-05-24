@@ -142,7 +142,7 @@ export function drawBsplineBasisFuncs(bspline: BsplineCurve, plot: string) {
     for (let i = 0; i <= n; i++) {
         const upsiValues = []
         xiValues.map((xi: number) => {
-            upsiValues.push(bspline.computeBasis(i, xi))
+            upsiValues.push(BsplineCurve.computeBasis(bspline.knotVector, i, bspline.p, xi))
         })
         const trace = {
             x: xiValues,
