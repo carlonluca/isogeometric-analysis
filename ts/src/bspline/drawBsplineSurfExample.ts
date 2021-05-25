@@ -21,28 +21,24 @@
 
 import { Point } from "../core/point"
 import { drawBsplineSurf } from "./drawBsplineSurf"
-import { exampleSurf1ControlPoints } from "../examples/exampleSurf1"
+import { exampleSurf1ControlPoints } from "../examples/exampleSurfs"
 
 export function drawBsplineSurfExample1(plot: string, drawControlPoints: boolean) {
-    let controlPoints: Point[][] = exampleSurf1ControlPoints.slice(0)
-
     let p = 1
     let q = 1
 
     let Xi = [0, 0, 0.5, 1, 1]
     let Eta = [0, 0, 0.3, 0.6, 1, 1]
 
-    drawBsplineSurf(controlPoints, Xi, Eta, p, q, drawControlPoints, plot)
+    drawBsplineSurf(exampleSurf1ControlPoints, Xi, Eta, p, q, drawControlPoints, plot)
 }
 
 export function drawBsplineSurfExample2(plot: string, drawControlPoints: boolean) {
-    let controlPoints: Point[][] = exampleSurf1ControlPoints.slice(0)
-
     let p = 1
     let q = 2
 
     let Xi = [0, 0, 0.5, 1, 1]
     let Eta = [0, 0, 0, 0.5, 1, 1, 1]
 
-    drawBsplineSurf(controlPoints, Xi, Eta, p, q, drawControlPoints, plot)
+    drawBsplineSurf(exampleSurf1ControlPoints, Xi, Eta, p, q, drawControlPoints, plot)
 }

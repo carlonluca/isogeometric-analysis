@@ -19,12 +19,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Point } from "../core/point"
 import { drawBezierSurf } from "./drawBezierSurf"
-import { exampleSurf1ControlPoints } from "../examples/exampleSurf1"
+import { exampleSurf1ControlPoints } from "../examples/exampleSurfs"
 
 export let drawBezierSurfExample = (plot: string, drawControlPoints: boolean) => {
-    let controlPoints: Point[][] = exampleSurf1ControlPoints
-    
-    drawBezierSurf(controlPoints, drawControlPoints, plot)
+    drawBezierSurf(exampleSurf1ControlPoints, drawControlPoints, plot)
 }
