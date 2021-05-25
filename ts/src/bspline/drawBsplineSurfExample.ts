@@ -41,8 +41,11 @@ export function drawBsplineSurfExample(plot: string, drawControlPoints: boolean)
     ]
     ]
 
-    let Eta = [0, 0, 0, 0.3, 0.6, 1, 1, 1]
-    let Xi = [0, 0, 0.5, 1, 1]
+    let p = 1
+    let q = 2
 
-    drawBsplineSurf(controlPoints, Xi, Eta, 1, 2, drawControlPoints, plot)
+    let Xi = [0, 0, 0.5, 1, 1]
+    let Eta = [0, 0, 0, 0.5, 1, 1, 1]
+
+    drawBsplineSurf(controlPoints, Xi, Eta, p, q, drawControlPoints, plot)
 }

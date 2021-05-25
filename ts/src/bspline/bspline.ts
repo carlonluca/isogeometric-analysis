@@ -186,6 +186,13 @@ export class BsplineSurf {
         public p: number,
         public q: number) {}
 
+    /**
+     * Evaluates the surf in (xi, eta).
+     * 
+     * @param xi 
+     * @param eta 
+     * @returns 
+     */
     public evaluate(xi: number, eta: number): Point {
         let n = this.controlPoints.length - 1
         let m = this.controlPoints[0].length - 1
