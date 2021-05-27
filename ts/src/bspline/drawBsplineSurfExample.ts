@@ -19,7 +19,6 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Point } from "../core/point"
 import { drawBsplineSurf } from "./drawBsplineSurf"
 import { exampleSurf1ControlPoints } from "../examples/exampleSurfs"
 

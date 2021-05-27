@@ -1,3 +1,24 @@
+/**
+ * Project: Approximation and Finite Elements in Isogeometric Problems
+ * Author:  Luca Carlon
+ * Date:    2021.05.27
+ *
+ * Copyright (c) 2021 Luca Carlon. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
 import { Size } from "./size"
 
 /**
@@ -66,7 +87,7 @@ export class Matrix2 {
      * @param m 
      */
     public add(m: Matrix2): Matrix2 {
-        if (m.size() != this.size())
+        if (m.size().equals(this.size()))
             throw new Error("Cannot add matrices of different sizes")
         for (let i = 0; i < this.rows(); i++)
             for (let j = 0; j < this.cols(); j++)
@@ -110,7 +131,7 @@ export class Matrix2 {
      * @returns 
      */
     public static add(m1: Matrix2, m2: Matrix2) {
-        if (m1.size() != m2.size())
+        if (m1.size().equals(m2.size()))
             throw new Error("Cannot add matrices of different sizes")
         let newData: number[][] = m1.data().map(function(arr) {
             return arr.slice();
