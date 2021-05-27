@@ -19,12 +19,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Matrix2 } from "./matrix"
+
 /**
  * Class representing a point on a surface.
  */
-export class Point {
+export class Point extends Matrix2 {
     /**
      * Ctor.
      */
-    constructor(public x: number, public y: number, public z: number = 0) {}
+    constructor(public x: number, public y: number, public z: number = 0) {
+        super([[ x, y, z ]])
+    }
 }
