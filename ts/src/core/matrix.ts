@@ -19,12 +19,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { IEquatable } from "./iequatable"
 import { Size } from "./size"
 
 /**
  * Class representing a matrix.
  */
-export class Matrix2 {
+export class Matrix2 implements IEquatable<Matrix2> {
     private m_data: number[][]
 
     /**
@@ -93,6 +94,26 @@ export class Matrix2 {
             for (let j = 0; j < this.cols(); j++)
                 this.m_data[i][j] += m.value(i, j)
         return this
+    }
+
+    /**
+     * IEquatable interface.
+     * 
+     * @param m 
+     * @returns 
+     */
+    public equals(m: Matrix2): boolean {
+        if (this.m_data.length != m.m_data.length)
+            return false
+        if (this.m_data.length <= 0)
+            return true
+        if (this.m_data[0].length != m.m_data[0].length)
+            return false
+        for (let i = 0; i < this.m_data.length; i++)
+            for (let j = 0; j < this.m_data[i].length; j++)
+                if (this.m_data[i][j] != m.m_data[i][j])
+                    return false
+        return true
     }
 
     /**

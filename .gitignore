@@ -6,5 +6,6 @@ octave-workspace
 
 node_modules
 dist
+js_test
 
 .vscode
