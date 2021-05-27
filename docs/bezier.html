@@ -1,0 +1,30 @@
+<html>
+
+<body>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+    <script src="https://unpkg.com/mathjs@9.3.2/lib/browser/math.js"></script>
+    <script src="https://requirejs.org/docs/release/2.3.6/comments/require.js"></script>
+    <script src="dist/bundle.js"></script>
+    <script>
+        window.onload = () => {
+            require(["bezier/drawBezierCurveExample"], function(d) {
+                d.drawBezierCurve1("bezierCanvas1", true)
+                d.drawBezierCurve2("bezierCanvas2", true, "bernsteinCanvas")
+            })
+            require(["bezier/drawBezierSurfExample"], function(d) {
+                d.drawBezierSurfExample("bezierCanvas3", true)
+            })
+        }
+    </script>
+
+    <div style="display: block;border:1px solid #000000;width: 50%;margin: auto"><div style="width: 95%; margin: auto" id="bezierCanvas1"></div></div>
+    <br/>
+    <div style="display: block;border:1px solid #000000;width: 50%;margin: auto"><div style="width: 95%; margin: auto" id="bezierCanvas2"></div></div>
+    <br/>
+    <div style="display: block;border:1px solid #000000;width: 50%;margin: auto"><div style="width: 95%; margin: auto" id="bernsteinCanvas"></div></div>
+    <br/>
+    <div style="display: block;border:1px solid #000000;width: 50%;margin: auto"><div style="width: 95%; margin: auto" id="bezierCanvas3"></div></div>
+
+</body>
+
+</html>
