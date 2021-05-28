@@ -122,11 +122,11 @@ export class Matrix2 implements IEquatable<Matrix2> {
      * @param size 
      * @returns 
      */
-    public static identity(size: number) {
-        let values: number[][] = []
+    public static identity(size: number): Matrix2 {
+        let values = Matrix2.createEmptyMatrixOfSize(size, size)
         for (let i = 0; i < size; i++)
             for (let j = 0; j < size; j++)
-                values[i][j] = i == j ? 1 : 0
+                values[i][j] = (i === j ? 1 : 0)
         return new Matrix2(values)
     }
 
@@ -136,8 +136,8 @@ export class Matrix2 implements IEquatable<Matrix2> {
      * @param size 
      * @returns 
      */
-    public static zero(size: number) {
-        let values: number[][] = []
+    public static zero(size: number): Matrix2 {
+        let values = Matrix2.createEmptyMatrixOfSize(size, size)
         for (let i = 0; i < size; i++)
             for (let j = 0; j < size; j++)
                 values[i][j] = 0
@@ -158,5 +158,21 @@ export class Matrix2 implements IEquatable<Matrix2> {
             return arr.slice();
         })
         return new Matrix2(newData).add(m2)
+    }
+
+    // Private portion
+
+    /**
+     * Creates empty structure.
+     * 
+     * @param rows 
+     * @param cols 
+     * @returns 
+     */
+    private static createEmptyMatrixOfSize(rows: number, cols: number): number[][] {
+        let values: number[][] = new Array(rows)
+        for (let i = 0; i < rows; i++)
+            values[i] = new Array(cols)
+        return values
     }
 }
