@@ -1,5 +1,5 @@
 # Node docker image on which this would be run
-image: 16-alpine
+image: node:16-alpine
 
 stages:
   - test
