@@ -34,6 +34,17 @@ var assert = require("assert")
         [5, 8, 9],
         [16, 16, 17]
     ])))
+    assert(m1.equals(new Matrix2([
+        [5, 6, 7],
+        [1, 2, 3],
+        [9, 8, 7]
+    ])))
+    assert(m2.equals(new Matrix2([
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+    ])))
+    assert(m3.equals(Matrix2.identity(3)))
     sum.print()
 }
 

@@ -130,6 +130,17 @@ export class Matrix2 implements IEquatable<Matrix2> {
     }
 
     /**
+     * Clones this matrix.
+     * 
+     * @returns 
+     */
+    public clone(): Matrix2 {
+        return new Matrix2(this.m_data.map(function(arr) {
+            return arr.slice();
+        }))
+    }
+
+    /**
      * Create identity matrix of size size.
      * 
      * @param size 
@@ -167,10 +178,7 @@ export class Matrix2 implements IEquatable<Matrix2> {
     public static add(m1: Matrix2, m2: Matrix2) {
         if (m1.size().equals(m2.size()))
             throw new Error("Cannot add matrices of different sizes")
-        let newData: number[][] = m1.data().map(function(arr) {
-            return arr.slice();
-        })
-        return new Matrix2(newData).add(m2)
+        return m1.clone().add(m2)
     }
 
     /**
@@ -181,10 +189,7 @@ export class Matrix2 implements IEquatable<Matrix2> {
      * @returns 
      */
     public static mult(m: Matrix2, scalar: number) {
-        let newData: number[][] = m.data().map(function(arr) {
-            return arr.slice();
-        })
-        return new Matrix2(newData).mult(scalar)
+        return m.clone().mult(scalar)
     }
 
     // Private portion
