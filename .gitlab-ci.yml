@@ -9,8 +9,7 @@ Test:
   stage: test
   script:
     - cd ts
+    - apk update
+    - apk add tsc
     - tsc -p tsconfig.test.json
     - node js_test/test/matrix_test.js
-  artifacts:
-    reports:
-      cobertura: server/coverage/cobertura-coverage.xml
