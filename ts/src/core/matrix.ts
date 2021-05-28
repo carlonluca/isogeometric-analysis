@@ -97,6 +97,19 @@ export class Matrix2 implements IEquatable<Matrix2> {
     }
 
     /**
+     * Multiplies by a scalar.
+     * 
+     * @param scalar 
+     * @returns 
+     */
+    public mult(scalar: number): Matrix2 {
+        for (let i = 0; i < this.rows(); i++)
+            for (let j = 0; j < this.cols(); j++)
+                this.m_data[i][j] *= scalar
+        return this
+    }
+
+    /**
      * IEquatable interface.
      * 
      * @param m 
@@ -158,6 +171,20 @@ export class Matrix2 implements IEquatable<Matrix2> {
             return arr.slice();
         })
         return new Matrix2(newData).add(m2)
+    }
+
+    /**
+     * Multiplies by a scalar.
+     * 
+     * @param m 
+     * @param scalar 
+     * @returns 
+     */
+    public static mult(m: Matrix2, scalar: number) {
+        let newData: number[][] = m.data().map(function(arr) {
+            return arr.slice();
+        })
+        return new Matrix2(newData).mult(scalar)
     }
 
     // Private portion

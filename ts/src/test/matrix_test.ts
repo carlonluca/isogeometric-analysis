@@ -36,3 +36,27 @@ var assert = require("assert")
     ])))
     sum.print()
 }
+
+// Test mult by scalar 1
+{
+    let m1 = new Matrix2([
+        [5, 6, 7],
+        [1, 2, 3],
+        [9, 8, 7]
+    ])
+    assert(m1.mult(9).equals(new Matrix2([
+        [5*9, 6*9, 7*9],
+        [1*9, 2*9, 3*9],
+        [9*9, 8*9, 7*9]
+    ])))
+}
+
+// Test mult by a scalar 2
+{
+    let m1 = new Matrix2([
+        [5, 6, 7],
+        [1, 2, 3],
+        [9, 8, 7]
+    ])
+    assert(m1.mult(0).equals(Matrix2.zero(3)))
+}
