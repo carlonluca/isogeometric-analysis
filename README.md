@@ -1,11 +1,12 @@
-# Isogeometric Analysis and Finite Element Method with Octave
+# Isogeometric Analysis and Finite Element Method with Octave and TypeScript
 
 ## More Details on the Project
 
 * Link to dissertation: https://bugfreeblog.page.link/isogeometric-analysis-dissertation.
 * Link to presentation: https://bugfreeblog.page.link/isogeometric-analysis-presentation.
 * FEM: [blog post](https://thebugfreeblog.blogspot.com/2021/04/igafem.html).
-* Bezier curves and surfaces: [blog post](https://thebugfreeblog.blogspot.com/2021/05/isogeometric-analysis-bezier-curves-and.html).
+* Bezier curves and surfaces: [blog post](https://thebugfreeblog.blogspot.com/2021/05/isogeometric-analysis-bezier-curves-and.html), [typescript demo](https://carlonluca.github.io/isogeometric-analysis/bezier.html).
+* B-spline curves and surfaces: [typescript demo](https://carlonluca.github.io/isogeometric-analysis/bspline.html).
 
 ## Intro
 
