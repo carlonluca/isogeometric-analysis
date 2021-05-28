@@ -5,7 +5,7 @@ octave-workspace
 *.lyx~
 
 node_modules
-dist
-js_test
+ts/dist
+ts/js_test
 
 .vscode
