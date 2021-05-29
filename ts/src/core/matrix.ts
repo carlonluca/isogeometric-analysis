@@ -131,6 +131,29 @@ export class Matrix2 implements IEquatable<Matrix2> {
     }
 
     /**
+     * Transposes this matrix.
+     */
+    public transpose(): Matrix2 {
+        let newMatrix = this.transposed()
+        this.m_data = newMatrix.m_data
+        return this
+    }
+
+    /**
+     * Returns a new matrix that is the transposed of this matrix.
+     * 
+     * @returns 
+     */
+    public transposed(): Matrix2 {
+        let oldData = this.m_data
+        let newData = Matrix2.createEmptyMatrixOfSize(this.cols(), this.rows())
+        for (let i = 0; i < this.rows(); i++)
+            for (let j = 0; j < this.cols(); j++)
+                newData[j][i] = oldData[i][j]
+        return new Matrix2(newData)
+    }
+
+    /**
      * IEquatable interface.
      * 
      * @param m 

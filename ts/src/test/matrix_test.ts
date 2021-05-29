@@ -1,4 +1,5 @@
 import { Matrix2 } from "../core/matrix"
+import { Size } from "../core/size"
 // @ts-expect-error
 var assert = require("assert")
 
@@ -123,4 +124,17 @@ var assert = require("assert")
         [12, 15, 18]
     ])))
     assert(m1.multMat(m4).equals(Matrix2.zero(m1.rows(), m2.cols())))
+}
+
+// Test mult by matrix 2
+{
+    let m = new Matrix2([
+        [1],
+        [2],
+        [3]
+    ])
+    assert(m.transposed().size().equals(new Size(3, 1)))
+
+    m.transpose()
+    assert(m.equals(new Matrix2([[1, 2, 3]])))
 }
