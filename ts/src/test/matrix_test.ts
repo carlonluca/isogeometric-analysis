@@ -1,4 +1,5 @@
 import { Matrix2 } from "../core/matrix"
+import { Point } from "../core/point"
 import { Size } from "../core/size"
 // @ts-expect-error
 var assert = require("assert")
@@ -137,4 +138,23 @@ var assert = require("assert")
 
     m.transpose()
     assert(m.equals(new Matrix2([[1, 2, 3]])))
+}
+
+// Test rect extraction
+{
+    let m1 = new Matrix2([
+        [5, 6, 7],
+        [1, 2, 3],
+        [9, 8, 7],
+        [1, 1, 1]
+    ])
+    let m2 = new Matrix2([
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+    ])
+    assert(m1.rect(new Point(1, 1), new Point(2, 2)).equals(new Matrix2([
+        [2, 3],
+        [8, 7]
+    ])))
 }

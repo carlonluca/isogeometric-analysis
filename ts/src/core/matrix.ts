@@ -20,6 +20,7 @@
  */
 
 import { IEquatable } from "./iequatable"
+import { Point } from "./point"
 import { Size } from "./size"
 
 /**
@@ -46,6 +47,43 @@ export class Matrix2 implements IEquatable<Matrix2> {
      * @returns 
      */
     public data(): number[][] { return this.m_data }
+
+    /**
+     * Returns the i-th row.
+     * 
+     * @param i 
+     */
+    public row(i: number): Matrix2 { return new Matrix2([this.m_data[i]]) }
+
+    /**
+     * Returns a subrect of this matrix.
+     * 
+     * @param topLeft 
+     * @param bottomRight 
+     * @returns 
+     */
+    public rect(topLeft: Point, bottomRight: Point): Matrix2 {
+        let cols = bottomRight.x - topLeft.x + 1
+        let rows = bottomRight.y - topLeft.y + 1
+        let retData = Matrix2.createEmptyMatrixOfSize(rows, cols)
+        for (let j = topLeft.x; j <= bottomRight.x; j++)
+            for (let i = topLeft.y; i <= bottomRight.y; i++)
+                retData[i - topLeft.y][j - topLeft.x] = this.m_data[i][j]
+        return new Matrix2(retData)
+    }
+
+    /**
+     * Returns the j-th column.
+     * 
+     * @param j 
+     * @returns 
+     */
+    public col(j: number): Matrix2 {
+        let ret = []
+        for (let i = 0; i < this.rows(); i++)
+            ret.push(this.m_data[i][j])
+        return new Matrix2([ret])
+    }
 
     /**
      * Number of rows.
