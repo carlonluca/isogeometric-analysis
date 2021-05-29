@@ -27,8 +27,8 @@ var assert = require("assert")
         [7, 8, 9]
     ])
     let m3 = Matrix2.identity(3)
-    let m4 = Matrix2.zero(3)
-    let sum = Matrix2.zero(3).add(m1).add(m2).add(m3).add(m4)
+    let m4 = Matrix2.zeroSquare(3)
+    let sum = Matrix2.zeroSquare(3).add(m1).add(m2).add(m3).add(m4)
     assert(sum.equals(new Matrix2([
         [7, 8, 10],
         [5, 8, 9],
@@ -69,5 +69,58 @@ var assert = require("assert")
         [1, 2, 3],
         [9, 8, 7]
     ])
-    assert(m1.mult(0).equals(Matrix2.zero(3)))
+    assert(m1.mult(0).equals(Matrix2.zeroSquare(3)))
+}
+
+// Test mult by matrix 1
+{
+    let m1 = new Matrix2([
+        [5, 6, 7],
+        [1, 2, 3],
+        [9, 8, 7]
+    ])
+    let m2 = new Matrix2([
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+    ])
+    let m3 = Matrix2.identity(3)
+    let m4 = Matrix2.zeroSquare(3)
+    assert(m1.multMat(m1).equals(new Matrix2([
+        [94, 98, 102],
+        [34, 34, 34],
+        [116, 126, 136]
+    ])))
+    assert(m1.multMat(m2).equals(new Matrix2([
+        [78, 96, 114],
+        [30, 36, 42],
+        [90, 114, 138]
+    ])))
+    assert(m1.multMat(m3).equals(m1))
+    assert(m2.multMat(m3).equals(m2))
+    assert(m1.multMat(m4).equals(m4))
+}
+
+// Test mult by matrix 2
+{
+    let m1 = new Matrix2([
+        [5, 6, 7],
+        [1, 2, 3],
+        [9, 8, 7],
+        [1, 1, 1]
+    ])
+    let m2 = new Matrix2([
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+    ])
+    let m4 = Matrix2.zeroSquare(3)
+    try { m1.multMat(m1); assert(false) } catch (e) { assert(true) }
+    assert(m1.multMat(m2).equals(new Matrix2([
+        [78, 96, 114],
+        [30, 36, 42],
+        [90, 114, 138],
+        [12, 15, 18]
+    ])))
+    assert(m1.multMat(m4).equals(Matrix2.zero(m1.rows(), m2.cols())))
 }

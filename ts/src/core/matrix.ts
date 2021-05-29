@@ -110,6 +110,27 @@ export class Matrix2 implements IEquatable<Matrix2> {
     }
 
     /**
+     * Multiplication by a matrix. Returns a new matrix with the result.
+     * 
+     * @param m 
+     */
+    public multMat(m: Matrix2): Matrix2 {
+        if (this.cols() != m.rows())
+            throw new Error("Invalid mat sizes: " + this.size() + "·" + m.size())
+        let res = Matrix2.zero(this.rows(), m.cols())
+        for (let i = 0; i < this.rows(); i++) {
+            for (let j = 0; j < m.cols(); j++) {
+                let e = 0
+                for (let p = 0; p < this.cols(); p++)
+                    e += this.value(i, p)*m.value(p, j)
+                res.m_data[i][j] = e
+            }
+        }
+
+        return res
+    }
+
+    /**
      * IEquatable interface.
      * 
      * @param m 
@@ -160,10 +181,20 @@ export class Matrix2 implements IEquatable<Matrix2> {
      * @param size 
      * @returns 
      */
-    public static zero(size: number): Matrix2 {
-        let values = Matrix2.createEmptyMatrixOfSize(size, size)
-        for (let i = 0; i < size; i++)
-            for (let j = 0; j < size; j++)
+    public static zeroSquare(size: number): Matrix2 {
+        return this.zero(size, size)
+    }
+
+    /**
+     * Returns a null matrix of a given size.
+     * 
+     * @param size 
+     * @returns 
+     */
+    public static zero(rows: number, cols: number): Matrix2 {
+        let values = Matrix2.createEmptyMatrixOfSize(rows, cols)
+        for (let i = 0; i < rows; i++)
+            for (let j = 0; j < cols; j++)
                 values[i][j] = 0
         return new Matrix2(values)
     }
