@@ -116,6 +116,15 @@ export class Matrix2 implements IEquatable<Matrix2> {
     public value(row: number, col: number) { return this.m_data[row][col] }
 
     /**
+     * Sets the value of an element of the matrix.
+     * 
+     * @param row 
+     * @param col 
+     * @param val 
+     */
+    public setValue(row: number, col: number, val: number) { this.m_data[row][col] = val }
+
+    /**
      * Logs the matrix.
      */
     public print() { console.table(this.m_data) }

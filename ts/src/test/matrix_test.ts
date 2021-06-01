@@ -158,3 +158,20 @@ var assert = require("assert")
         [8, 7]
     ])))
 }
+
+// Test setValue
+{
+    let m1 = new Matrix2([
+        [5, 6, 7],
+        [1, 2, 3],
+        [9, 8, 7],
+        [1, 1, 1]
+    ])
+    m1.setValue(1, 2, 199)
+    assert(m1.equals(new Matrix2([
+        [5, 6, 7],
+        [1, 2, 199],
+        [9, 8, 7],
+        [1, 1, 1]
+    ])))
+}
