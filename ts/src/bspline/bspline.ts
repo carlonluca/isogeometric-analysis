@@ -52,9 +52,9 @@ export class BsplineCurve {
         let span = BsplineCurve.findSpan(this.knotVector, xi, this.p, n)
         let N = BsplineCurve.computeAllNonvanishingBasis(this.knotVector, span, this.p, xi)
         for (let i = 0; i <= this.p; i++) {
-            x = x + N[i]*this.controlPoints[span - this.p + i].x
-            y = y + N[i]*this.controlPoints[span - this.p + i].y
-            z = z + N[i]*this.controlPoints[span - this.p + i].z
+            x = x + N.value(0, i)*this.controlPoints[span - this.p + i].x
+            y = y + N.value(0, i)*this.controlPoints[span - this.p + i].y
+            z = z + N.value(0, i)*this.controlPoints[span - this.p + i].z
         }
 
         return new Point(x, y, z)
