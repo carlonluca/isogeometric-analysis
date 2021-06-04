@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Matrix2 } from "../core/matrix"
 import { Point } from "../core/point"
 
 /**
@@ -68,7 +69,7 @@ export class BsplineCurve {
      * @param Xi 
      * @returns 
      */
-    public static computeAllNonvanishingBasis(Xi: number[], i: number, p: number, xi: number): number[] {
+    public static computeAllNonvanishingBasis(Xi: number[], i: number, p: number, xi: number): Matrix2 {
         let N = Array(p + 1).fill(0)
         let right = Array(p + 1).fill(0)
         let left = Array(p + 1).fill(0)
@@ -89,7 +90,7 @@ export class BsplineCurve {
             N[j] = saved
         }
     
-        return N
+        return new Matrix2([N])
     }
 
     public static computeBasis(Xi: number[], i: number, p: number, xi: number): number {
@@ -194,6 +195,17 @@ export class BsplineSurf {
      * @returns 
      */
     public evaluate(xi: number, eta: number): Point {
+        return this.evaluate2(xi, eta)
+    }
+
+    /**
+     * Evaluation in the summation form.
+     * 
+     * @param xi 
+     * @param eta 
+     * @returns 
+     */
+    public evaluate1(xi: number, eta: number): Point {
         let n = this.controlPoints.length - 1
         let m = this.controlPoints[0].length - 1
         let x = 0
@@ -211,5 +223,51 @@ export class BsplineSurf {
         }
 
         return new Point(x, y, z)
+    }
+
+    /**
+     * Evaluation in matrix form.
+     * 
+     * @param xi 
+     * @param eta 
+     * @returns 
+     */
+    public evaluate2(xi: number, eta: number): Point {
+        let n = this.controlPoints.length - 1
+        let m = this.controlPoints[0].length - 1
+        let xiSpan  = BsplineCurve.findSpan(this.Xi, xi, this.p, n)
+        let etaSpan = BsplineCurve.findSpan(this.Eta, eta, this.q, m)
+        let Nxi  = BsplineCurve.computeAllNonvanishingBasis(this.Xi, xiSpan, this.p, xi)
+        let Neta = BsplineCurve.computeAllNonvanishingBasis(this.Eta, etaSpan, this.q, eta)
+        let Px = this.matFromPoints("x")
+        let Py = this.matFromPoints("y")
+        let Pz = this.matFromPoints("z")
+        let sx = Nxi.multMat(Px.rect(new Point(etaSpan - this.q, xiSpan - this.p), new Point(etaSpan, xiSpan)))
+            .multMat(Neta.transposed())
+        let sy = Nxi.multMat(Py.rect(new Point(etaSpan - this.q, xiSpan - this.p), new Point(etaSpan, xiSpan)))
+            .multMat(Neta.transposed())
+        let sz = Nxi.multMat(Pz.rect(new Point(etaSpan - this.q, xiSpan - this.p), new Point(etaSpan, xiSpan)))
+            .multMat(Neta.transposed())
+        return new Point(sx.value(0, 0), sy.value(0, 0), sz.value(0, 0))
+    }
+
+    /**
+     * Builds a matrix from a matrix of points.
+     * 
+     * @param d 
+     * @returns 
+     */
+    private matFromPoints(d: string): Matrix2 {
+        let d1 = this.controlPoints.length
+        let d2 = this.controlPoints[0].length
+        let d3 = d
+        let m = Matrix2.zero(d1, d2)
+        for (let i = 0; i < d1; i++) {
+            for (let j = 0; j < d2; j++) {
+                m.setValue(i, j, this.controlPoints[i][j][d3])
+            }
+        }
+
+        return m
     }
 }
