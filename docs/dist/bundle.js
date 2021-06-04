@@ -187,6 +187,40 @@ define("core/matrix", ["require", "exports", "core/size"], function (require, ex
          */
         data() { return this.m_data; }
         /**
+         * Returns the i-th row.
+         *
+         * @param i
+         */
+        row(i) { return new Matrix2([this.m_data[i]]); }
+        /**
+         * Returns a subrect of this matrix.
+         *
+         * @param topLeft
+         * @param bottomRight
+         * @returns
+         */
+        rect(topLeft, bottomRight) {
+            let cols = bottomRight.x - topLeft.x + 1;
+            let rows = bottomRight.y - topLeft.y + 1;
+            let retData = Matrix2.createEmptyMatrixOfSize(rows, cols);
+            for (let j = topLeft.x; j <= bottomRight.x; j++)
+                for (let i = topLeft.y; i <= bottomRight.y; i++)
+                    retData[i - topLeft.y][j - topLeft.x] = this.m_data[i][j];
+            return new Matrix2(retData);
+        }
+        /**
+         * Returns the j-th column.
+         *
+         * @param j
+         * @returns
+         */
+        col(j) {
+            let ret = [];
+            for (let i = 0; i < this.rows(); i++)
+                ret.push(this.m_data[i][j]);
+            return new Matrix2([ret]);
+        }
+        /**
          * Number of rows.
          *
          * @returns
@@ -213,6 +247,14 @@ define("core/matrix", ["require", "exports", "core/size"], function (require, ex
          */
         value(row, col) { return this.m_data[row][col]; }
         /**
+         * Sets the value of an element of the matrix.
+         *
+         * @param row
+         * @param col
+         * @param val
+         */
+        setValue(row, col, val) { this.m_data[row][col] = val; }
+        /**
          * Logs the matrix.
          */
         print() { console.table(this.m_data); }
@@ -228,6 +270,58 @@ define("core/matrix", ["require", "exports", "core/size"], function (require, ex
                 for (let j = 0; j < this.cols(); j++)
                     this.m_data[i][j] += m.value(i, j);
             return this;
+        }
+        /**
+         * Multiplies by a scalar.
+         *
+         * @param scalar
+         * @returns
+         */
+        mult(scalar) {
+            for (let i = 0; i < this.rows(); i++)
+                for (let j = 0; j < this.cols(); j++)
+                    this.m_data[i][j] *= scalar;
+            return this;
+        }
+        /**
+         * Multiplication by a matrix. Returns a new matrix with the result.
+         *
+         * @param m
+         */
+        multMat(m) {
+            if (this.cols() != m.rows())
+                throw new Error("Invalid mat sizes: " + this.size() + "·" + m.size());
+            let res = Matrix2.zero(this.rows(), m.cols());
+            for (let i = 0; i < this.rows(); i++) {
+                for (let j = 0; j < m.cols(); j++) {
+                    let e = 0;
+                    for (let p = 0; p < this.cols(); p++)
+                        e += this.value(i, p) * m.value(p, j);
+                    res.m_data[i][j] = e;
+                }
+            }
+            return res;
+        }
+        /**
+         * Transposes this matrix.
+         */
+        transpose() {
+            let newMatrix = this.transposed();
+            this.m_data = newMatrix.m_data;
+            return this;
+        }
+        /**
+         * Returns a new matrix that is the transposed of this matrix.
+         *
+         * @returns
+         */
+        transposed() {
+            let oldData = this.m_data;
+            let newData = Matrix2.createEmptyMatrixOfSize(this.cols(), this.rows());
+            for (let i = 0; i < this.rows(); i++)
+                for (let j = 0; j < this.cols(); j++)
+                    newData[j][i] = oldData[i][j];
+            return new Matrix2(newData);
         }
         /**
          * IEquatable interface.
@@ -249,16 +343,26 @@ define("core/matrix", ["require", "exports", "core/size"], function (require, ex
             return true;
         }
         /**
+         * Clones this matrix.
+         *
+         * @returns
+         */
+        clone() {
+            return new Matrix2(this.m_data.map(function (arr) {
+                return arr.slice();
+            }));
+        }
+        /**
          * Create identity matrix of size size.
          *
          * @param size
          * @returns
          */
         static identity(size) {
-            let values = [];
+            let values = Matrix2.createEmptyMatrixOfSize(size, size);
             for (let i = 0; i < size; i++)
                 for (let j = 0; j < size; j++)
-                    values[i][j] = i == j ? 1 : 0;
+                    values[i][j] = (i === j ? 1 : 0);
             return new Matrix2(values);
         }
         /**
@@ -267,10 +371,19 @@ define("core/matrix", ["require", "exports", "core/size"], function (require, ex
          * @param size
          * @returns
          */
-        static zero(size) {
-            let values = [];
-            for (let i = 0; i < size; i++)
-                for (let j = 0; j < size; j++)
+        static zeroSquare(size) {
+            return this.zero(size, size);
+        }
+        /**
+         * Returns a null matrix of a given size.
+         *
+         * @param size
+         * @returns
+         */
+        static zero(rows, cols) {
+            let values = Matrix2.createEmptyMatrixOfSize(rows, cols);
+            for (let i = 0; i < rows; i++)
+                for (let j = 0; j < cols; j++)
                     values[i][j] = 0;
             return new Matrix2(values);
         }
@@ -284,10 +397,31 @@ define("core/matrix", ["require", "exports", "core/size"], function (require, ex
         static add(m1, m2) {
             if (m1.size().equals(m2.size()))
                 throw new Error("Cannot add matrices of different sizes");
-            let newData = m1.data().map(function (arr) {
-                return arr.slice();
-            });
-            return new Matrix2(newData).add(m2);
+            return m1.clone().add(m2);
+        }
+        /**
+         * Multiplies by a scalar.
+         *
+         * @param m
+         * @param scalar
+         * @returns
+         */
+        static mult(m, scalar) {
+            return m.clone().mult(scalar);
+        }
+        // Private portion
+        /**
+         * Creates empty structure.
+         *
+         * @param rows
+         * @param cols
+         * @returns
+         */
+        static createEmptyMatrixOfSize(rows, cols) {
+            let values = new Array(rows);
+            for (let i = 0; i < rows; i++)
+                values[i] = new Array(cols);
+            return values;
         }
     }
     exports.Matrix2 = Matrix2;
@@ -930,7 +1064,7 @@ define("bezier/drawBezierSurfExample", ["require", "exports", "bezier/drawBezier
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("bspline/bspline", ["require", "exports", "core/point"], function (require, exports, point_4) {
+define("bspline/bspline", ["require", "exports", "core/matrix", "core/point"], function (require, exports, matrix_2, point_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.BsplineSurf = exports.BsplineCurve = void 0;
@@ -996,7 +1130,7 @@ define("bspline/bspline", ["require", "exports", "core/point"], function (requir
                 }
                 N[j] = saved;
             }
-            return N;
+            return new matrix_2.Matrix2([N]);
         }
         static computeBasis(Xi, i, p, xi) {
             let n = Xi.length - 1;
@@ -1093,6 +1227,16 @@ define("bspline/bspline", ["require", "exports", "core/point"], function (requir
          * @returns
          */
         evaluate(xi, eta) {
+            return this.evaluate2(xi, eta);
+        }
+        /**
+         * Evaluation in the summation form.
+         *
+         * @param xi
+         * @param eta
+         * @returns
+         */
+        evaluate1(xi, eta) {
             let n = this.controlPoints.length - 1;
             let m = this.controlPoints[0].length - 1;
             let x = 0;
@@ -1109,6 +1253,49 @@ define("bspline/bspline", ["require", "exports", "core/point"], function (requir
                 }
             }
             return new point_4.Point(x, y, z);
+        }
+        /**
+         * Evaluation in matrix form.
+         *
+         * @param xi
+         * @param eta
+         * @returns
+         */
+        evaluate2(xi, eta) {
+            let n = this.controlPoints.length - 1;
+            let m = this.controlPoints[0].length - 1;
+            let xiSpan = BsplineCurve.findSpan(this.Xi, xi, this.p, n);
+            let etaSpan = BsplineCurve.findSpan(this.Eta, eta, this.q, m);
+            let Nxi = BsplineCurve.computeAllNonvanishingBasis(this.Xi, xiSpan, this.p, xi);
+            let Neta = BsplineCurve.computeAllNonvanishingBasis(this.Eta, etaSpan, this.q, eta);
+            let Px = this.matFromPoints("x");
+            let Py = this.matFromPoints("y");
+            let Pz = this.matFromPoints("z");
+            let sx = Nxi.multMat(Px.rect(new point_4.Point(etaSpan - this.q, xiSpan - this.p), new point_4.Point(etaSpan, xiSpan)))
+                .multMat(Neta.transposed());
+            let sy = Nxi.multMat(Py.rect(new point_4.Point(etaSpan - this.q, xiSpan - this.p), new point_4.Point(etaSpan, xiSpan)))
+                .multMat(Neta.transposed());
+            let sz = Nxi.multMat(Pz.rect(new point_4.Point(etaSpan - this.q, xiSpan - this.p), new point_4.Point(etaSpan, xiSpan)))
+                .multMat(Neta.transposed());
+            return new point_4.Point(sx.value(0, 0), sy.value(0, 0), sz.value(0, 0));
+        }
+        /**
+         * Builds a matrix from a matrix of points.
+         *
+         * @param d
+         * @returns
+         */
+        matFromPoints(d) {
+            let d1 = this.controlPoints.length;
+            let d2 = this.controlPoints[0].length;
+            let d3 = d;
+            let m = matrix_2.Matrix2.zero(d1, d2);
+            for (let i = 0; i < d1; i++) {
+                for (let j = 0; j < d2; j++) {
+                    m.setValue(i, j, this.controlPoints[i][j][d3]);
+                }
+            }
+            return m;
         }
     }
     exports.BsplineSurf = BsplineSurf;
@@ -1605,18 +1792,178 @@ define("core/range", ["require", "exports"], function (require, exports) {
     }
     exports.Range = Range;
 });
-define("test/matrix_test", ["require", "exports", "core/matrix"], function (require, exports, matrix_2) {
+define("test/matrix_test", ["require", "exports", "core/matrix", "core/point", "core/size"], function (require, exports, matrix_3, point_6, size_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     // @ts-expect-error
     var assert = require("assert");
-    let m1 = new matrix_2.Matrix2([[1, 2, 3]]);
-    m1.print();
-    let m2 = new matrix_2.Matrix2([[1, 1, 1]]);
-    m2.print();
-    let m3 = matrix_2.Matrix2.add(m1, m2);
-    m3.print();
-    assert(!m3.equals(m2));
-    assert(m3.equals(new matrix_2.Matrix2([[2, 3, 4]])));
+    // Test sum 1
+    {
+        let m1 = new matrix_3.Matrix2([[1, 2, 3]]);
+        m1.print();
+        let m2 = new matrix_3.Matrix2([[1, 1, 1]]);
+        m2.print();
+        let m3 = matrix_3.Matrix2.add(m1, m2);
+        m3.print();
+        assert(!m3.equals(m2));
+        assert(m3.equals(new matrix_3.Matrix2([[2, 3, 4]])));
+    }
+    // Test sum 2
+    {
+        let m1 = new matrix_3.Matrix2([
+            [5, 6, 7],
+            [1, 2, 3],
+            [9, 8, 7]
+        ]);
+        let m2 = new matrix_3.Matrix2([
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9]
+        ]);
+        let m3 = matrix_3.Matrix2.identity(3);
+        let m4 = matrix_3.Matrix2.zeroSquare(3);
+        let sum = matrix_3.Matrix2.zeroSquare(3).add(m1).add(m2).add(m3).add(m4);
+        assert(sum.equals(new matrix_3.Matrix2([
+            [7, 8, 10],
+            [5, 8, 9],
+            [16, 16, 17]
+        ])));
+        assert(m1.equals(new matrix_3.Matrix2([
+            [5, 6, 7],
+            [1, 2, 3],
+            [9, 8, 7]
+        ])));
+        assert(m2.equals(new matrix_3.Matrix2([
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9]
+        ])));
+        assert(m3.equals(matrix_3.Matrix2.identity(3)));
+        sum.print();
+    }
+    // Test mult by scalar 1
+    {
+        let m1 = new matrix_3.Matrix2([
+            [5, 6, 7],
+            [1, 2, 3],
+            [9, 8, 7]
+        ]);
+        assert(m1.mult(9).equals(new matrix_3.Matrix2([
+            [5 * 9, 6 * 9, 7 * 9],
+            [1 * 9, 2 * 9, 3 * 9],
+            [9 * 9, 8 * 9, 7 * 9]
+        ])));
+    }
+    // Test mult by a scalar 2
+    {
+        let m1 = new matrix_3.Matrix2([
+            [5, 6, 7],
+            [1, 2, 3],
+            [9, 8, 7]
+        ]);
+        assert(m1.mult(0).equals(matrix_3.Matrix2.zeroSquare(3)));
+    }
+    // Test mult by matrix 1
+    {
+        let m1 = new matrix_3.Matrix2([
+            [5, 6, 7],
+            [1, 2, 3],
+            [9, 8, 7]
+        ]);
+        let m2 = new matrix_3.Matrix2([
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9]
+        ]);
+        let m3 = matrix_3.Matrix2.identity(3);
+        let m4 = matrix_3.Matrix2.zeroSquare(3);
+        assert(m1.multMat(m1).equals(new matrix_3.Matrix2([
+            [94, 98, 102],
+            [34, 34, 34],
+            [116, 126, 136]
+        ])));
+        assert(m1.multMat(m2).equals(new matrix_3.Matrix2([
+            [78, 96, 114],
+            [30, 36, 42],
+            [90, 114, 138]
+        ])));
+        assert(m1.multMat(m3).equals(m1));
+        assert(m2.multMat(m3).equals(m2));
+        assert(m1.multMat(m4).equals(m4));
+    }
+    // Test mult by matrix 2
+    {
+        let m1 = new matrix_3.Matrix2([
+            [5, 6, 7],
+            [1, 2, 3],
+            [9, 8, 7],
+            [1, 1, 1]
+        ]);
+        let m2 = new matrix_3.Matrix2([
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9]
+        ]);
+        let m4 = matrix_3.Matrix2.zeroSquare(3);
+        try {
+            m1.multMat(m1);
+            assert(false);
+        }
+        catch (e) {
+            assert(true);
+        }
+        assert(m1.multMat(m2).equals(new matrix_3.Matrix2([
+            [78, 96, 114],
+            [30, 36, 42],
+            [90, 114, 138],
+            [12, 15, 18]
+        ])));
+        assert(m1.multMat(m4).equals(matrix_3.Matrix2.zero(m1.rows(), m2.cols())));
+    }
+    // Test mult by matrix 2
+    {
+        let m = new matrix_3.Matrix2([
+            [1],
+            [2],
+            [3]
+        ]);
+        assert(m.transposed().size().equals(new size_2.Size(3, 1)));
+        m.transpose();
+        assert(m.equals(new matrix_3.Matrix2([[1, 2, 3]])));
+    }
+    // Test rect extraction
+    {
+        let m1 = new matrix_3.Matrix2([
+            [5, 6, 7],
+            [1, 2, 3],
+            [9, 8, 7],
+            [1, 1, 1]
+        ]);
+        let m2 = new matrix_3.Matrix2([
+            [1, 2, 3],
+            [4, 5, 6],
+            [7, 8, 9]
+        ]);
+        assert(m1.rect(new point_6.Point(1, 1), new point_6.Point(2, 2)).equals(new matrix_3.Matrix2([
+            [2, 3],
+            [8, 7]
+        ])));
+    }
+    // Test setValue
+    {
+        let m1 = new matrix_3.Matrix2([
+            [5, 6, 7],
+            [1, 2, 3],
+            [9, 8, 7],
+            [1, 1, 1]
+        ]);
+        m1.setValue(1, 2, 199);
+        assert(m1.equals(new matrix_3.Matrix2([
+            [5, 6, 7],
+            [1, 2, 199],
+            [9, 8, 7],
+            [1, 1, 1]
+        ])));
+    }
 });
 //# sourceMappingURL=bundle.js.map
