@@ -19,8 +19,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Matrix2 } from "../core/matrix"
+import { Matrix2, RowVector } from "../core/matrix"
 import { Point } from "../core/point"
+import { Range } from "../core/range"
 import { Size } from "../core/size"
 // @ts-expect-error
 var assert = require("assert")
@@ -178,6 +179,12 @@ var assert = require("assert")
         [2, 3],
         [8, 7]
     ])))
+}
+
+// Test range extraction
+{
+    let m1 = new RowVector([5, 6, 7, 1, 2, 3, 9, 8, 7, 1, 1, 1])
+    assert(m1.range(new Range(2, 4)).equals(new RowVector([7, 1, 2])))
 }
 
 // Test setValue

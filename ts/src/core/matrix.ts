@@ -22,12 +22,13 @@
 import { IEquatable } from "./iequatable"
 import { Point } from "./point"
 import { Size } from "./size"
+import { Range } from "./range"
 
 /**
  * Class representing a matrix.
  */
 export class Matrix2 implements IEquatable<Matrix2> {
-    private m_data: number[][]
+    protected m_data: number[][]
 
     /**
      * Ctor.
@@ -53,7 +54,7 @@ export class Matrix2 implements IEquatable<Matrix2> {
      * 
      * @param i 
      */
-    public row(i: number): Matrix2 { return new Matrix2([this.m_data[i]]) }
+    public row(i: number): RowVector { return new RowVector(this.m_data[i]) }
 
     /**
      * Returns a subrect of this matrix.
@@ -262,10 +263,33 @@ export class Matrix2 implements IEquatable<Matrix2> {
      * @returns 
      */
     public static zero(rows: number, cols: number): Matrix2 {
+        return this.uniform(rows, cols, 0)
+    }
+
+    /**
+     * All elements are set to 1.
+     * 
+     * @param rows 
+     * @param cols 
+     * @returns 
+     */
+    public static one(rows: number, cols: number): Matrix2 {
+        return this.uniform(rows, cols, 1)
+    }
+
+    /**
+     * Builds a matrix where all elements are set to the same provided value.
+     * 
+     * @param rows 
+     * @param cols 
+     * @param value 
+     * @returns 
+     */
+    public static uniform(rows: number, cols: number, value: number): Matrix2 {
         let values = Matrix2.createEmptyMatrixOfSize(rows, cols)
         for (let i = 0; i < rows; i++)
             for (let j = 0; j < cols; j++)
-                values[i][j] = 0
+                values[i][j] = value
         return new Matrix2(values)
     }
 
@@ -307,5 +331,61 @@ export class Matrix2 implements IEquatable<Matrix2> {
         for (let i = 0; i < rows; i++)
             values[i] = new Array(cols)
         return values
+    }
+}
+
+/**
+ * Represents a vector.
+ */
+export class RowVector extends Matrix2 {
+    /**
+     * Ctor.
+     * 
+     * @param values 
+     */
+    constructor(values: number[]) {
+        super([ values ])
+    }
+
+    /**
+     * Returns the length of the vector.
+     * 
+     * @returns 
+     */
+    public length(): number { return this.cols() }
+
+    /**
+     * Returns an array.
+     * 
+     * @returns 
+     */
+    public toArray(): number[] { return this.m_data[0] }
+
+    /**
+     * Returns the value at index.
+     * 
+     * @param index 
+     * @returns 
+     */
+    public value(index: number): number { return this.m_data[0][index] }
+
+    /**
+     * Returns a subrange of the vector, including the extrema.
+     * 
+     * @param aRange 
+     * @returns 
+     */
+    public range(aRange: Range): RowVector {
+        return new RowVector(this.m_data[0].slice(aRange.a, aRange.b + 1))
+    }
+
+    /**
+     * Vector of ones.
+     * 
+     * @param length 
+     * @returns 
+     */
+    public static one(length: number): RowVector {
+        return Matrix2.one(1, length).row(0)
     }
 }
