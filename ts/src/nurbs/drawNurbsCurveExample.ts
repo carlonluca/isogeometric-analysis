@@ -23,7 +23,7 @@ import { RowVector } from "../core/matrix";
 import { Point } from "../core/point"
 import { drawNurbsCurve } from "./drawNurbsCurve"
 
-export let drawNurbsCurveExample1 = (plot: string, drawControlPoints: boolean, bernsteinPlot: string) => {
+export let drawNurbsCurveExample1 = (plot: string, drawControlPoints: boolean, basisPlot: string) => {
     let controlPoints = []
     controlPoints.push(new Point(0, 0))
     controlPoints.push(new Point(1, 1))
@@ -33,10 +33,10 @@ export let drawNurbsCurveExample1 = (plot: string, drawControlPoints: boolean, b
     controlPoints.push(new Point(1.5, 0))
     let knotVector = [0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1]
     let w = RowVector.one(controlPoints.length)
-    drawNurbsCurve(controlPoints, knotVector, w.toArray(), 2, false, drawControlPoints, plot, bernsteinPlot)
-};
+    drawNurbsCurve(controlPoints, knotVector, w.toArray(), 2, false, drawControlPoints, plot, basisPlot)
+}
 
-export let drawNurbsCurveExample2 = (plot: string, drawControlPoints: boolean, bernsteinPlot: string) => {
+export let drawNurbsCurveExample2 = (plot: string, drawControlPoints: boolean, basisPlot: string) => {
     let controlPoints = []
     controlPoints.push(new Point(0, 0, 0))
     controlPoints.push(new Point(1, 1, 1))
@@ -46,5 +46,22 @@ export let drawNurbsCurveExample2 = (plot: string, drawControlPoints: boolean, b
     controlPoints.push(new Point(1.5, 0, 1))
     let knotVector = [0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1]
     let w = RowVector.one(controlPoints.length)
-    drawNurbsCurve(controlPoints, knotVector, w.toArray(), 2, true, drawControlPoints, plot, bernsteinPlot)
-};
+    drawNurbsCurve(controlPoints, knotVector, w.toArray(), 2, true, drawControlPoints, plot, basisPlot)
+}
+
+export let drawNurbsCurveExampleCircle = (plot: string, drawControlPoints: boolean, basisPlot: string) => {
+    let controlPoints = [
+        new Point(1, 0),
+        new Point(1, 1),
+        new Point(0, 1),
+        new Point(-1 ,1),
+        new Point(-1, 0),
+        new Point(-1, -1),
+        new Point(0, -1),
+        new Point(1, -1),
+        new Point(1, 0)
+    ]
+    let knotVector = [0, 0, 0, 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, 1, 1, 1]
+    let w = [1, 1/Math.sqrt(2), 1, 1/Math.sqrt(2), 1, 1/Math.sqrt(2), 1, 1/Math.sqrt(2), 1]
+    drawNurbsCurve(controlPoints, knotVector, w, 2, false, drawControlPoints, plot, basisPlot)
+}
