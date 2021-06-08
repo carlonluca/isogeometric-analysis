@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Matrix2, RowVector } from "../core/matrix"
+import { RowVector } from "../core/matrix"
 import { Point } from "../core/point"
 import { BsplineCurve } from "../bspline/bspline"
 import { Range } from "../core/range"
@@ -29,49 +29,68 @@ import { Range } from "../core/range"
  */
 export class NurbsCurve {
     /**
-    * Ctor.
-    * 
-    * @param controlPoints 
-    * @param knotVector
-    * @param p
-    */
+     * Ctor.
+     *
+     * @param controlPoints
+     * @param knotVector
+     * @param p
+     */
     constructor(
         public controlPoints: Point[],
         public knotVector: number[],
         public weights: number[],
-        public p: number) { }
-    
+        public p: number
+    ) { }
+
     /**
      * Computes the curve in xi.
-     * 
-     * @param xi 
+     *
+     * @param xi
      */
     public evaluate(xi: number): Point {
         let x = 0
         let y = 0
         let z = 0
-        
+        let n = this.controlPoints.length - 1
+        let Xi = new RowVector(this.knotVector)
+        let w = new RowVector(this.weights)
+        for (let i = 0; i <= n; i++) {
+            let N = NurbsCurve.computeBasis(Xi, w, i, this.p, xi)
+            x = x + N * this.controlPoints[i].x
+            y = y + N * this.controlPoints[i].y
+            z = z + N * this.controlPoints[i].z
+        }
 
         return new Point(x, y, z)
     }
 
     /**
      * Computes the i-th NURBS basis function.
-     * 
-     * @param Xi 
-     * @param w 
-     * @param i 
-     * @param p 
-     * @param xi 
-     * @returns 
+     *
+     * @param Xi
+     * @param w
+     * @param i
+     * @param p
+     * @param xi
+     * @returns
      */
     public static computeBasis(Xi: RowVector, w: RowVector, i: number, p: number, xi: number): number {
         let n = Xi.length() - 1
         let xiSpan = BsplineCurve.findSpan(Xi.toArray(), xi, p, n)
         if (i < xiSpan - p || i > xiSpan)
             return 0
-        let N = BsplineCurve.computeAllNonvanishingBasis(Xi.toArray(), xiSpan, p, xi)
-        let R = N.value(0, p - (xiSpan - i))*w.value(i)/N.multMat(w.range(new Range(xiSpan - p, xiSpan)).transposed()).value(0, 0)
+        let N = BsplineCurve.computeAllNonvanishingBasis(
+            Xi.toArray(),
+            xiSpan,
+            p,
+            xi
+        )
+        let R =
+            (N.value(0, p - (xiSpan - i)) * w.value(i)) /
+            N.multMat(w.range(new Range(xiSpan - p, xiSpan)).transposed()).value(
+                0,
+                0
+            )
         return R
     }
 }
