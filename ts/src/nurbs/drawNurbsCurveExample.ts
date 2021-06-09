@@ -63,5 +63,5 @@ export let drawNurbsCurveExampleCircle = (plot: string, drawControlPoints: boole
     ]
     let knotVector = [0, 0, 0, 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, 1, 1, 1]
     let w = [1, 1/Math.sqrt(2), 1, 1/Math.sqrt(2), 1, 1/Math.sqrt(2), 1, 1/Math.sqrt(2), 1]
-    drawNurbsCurve(controlPoints, knotVector, w, 2, false, drawControlPoints, plot, basisPlot)
+    drawNurbsCurve(controlPoints, knotVector, w, 2, false, drawControlPoints, plot, basisPlot, true)
 }

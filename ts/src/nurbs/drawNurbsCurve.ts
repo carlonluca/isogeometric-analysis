@@ -37,7 +37,8 @@ export let drawNurbsCurve = (
     threed: boolean,
     drawControlPoints: boolean,
     plot: string,
-    bernsteinPlot: string = null) => {
+    basisPlot: string = null,
+    sameScale: boolean = false) => {
     const nurbs = new NurbsCurve(controlPoints, knotVector, weights, p)
     // @ts-expect-error
     const xiValues = math.range(0, 1, 0.001).toArray()
@@ -126,13 +127,15 @@ export let drawNurbsCurve = (
                     color: "#7f7f7f",
                 },
             },
+            scaleanchor: sameScale ? "x" : undefined,
+            scaleratio: sameScale ? 1 : undefined
         },
     };
     // @ts-expect-error
     Plotly.newPlot(plot, data, layout);
 
-    if (bernsteinPlot)
-        drawNurbsBasisFuncs(nurbs, bernsteinPlot)
+    if (basisPlot)
+        drawNurbsBasisFuncs(nurbs, basisPlot)
 }
 
 export function drawNurbsBasisFuncs(nurbs: NurbsCurve, plot: string) {
