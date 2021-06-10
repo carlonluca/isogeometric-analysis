@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { RowVector } from "./matrix";
+import { Matrix2, RowVector } from "./matrix";
 
 /**
  * Class representing a point on a surface.
@@ -46,6 +46,26 @@ export class Point extends RowVector {
             w
         )
     }
+
+    /**
+     * Builds a matrix from a matrix of points.
+     * 
+     * @param d 
+     * @returns 
+     */
+     public static matFromPoints(a: Point[][], d: string): Matrix2 {
+        let d1 = a.length
+        let d2 = a[0].length
+        let d3 = d
+        let m = Matrix2.zero(d1, d2)
+        for (let i = 0; i < d1; i++) {
+            for (let j = 0; j < d2; j++) {
+                m.setValue(i, j, a[i][j][d3])
+            }
+        }
+
+        return m
+    }
 }
 
 /**
@@ -57,5 +77,25 @@ export class HomPoint extends RowVector {
      */
     constructor(public x: number, public y: number, public z: number, public w: number) {
         super([x, y, z, w]);
+    }
+
+    /**
+     * Builds a matrix from a matrix of points.
+     * 
+     * @param d 
+     * @returns 
+     */
+     public static matFromPoints(a: HomPoint[][], d: string): Matrix2 {
+        let d1 = a.length
+        let d2 = a[0].length
+        let d3 = d
+        let m = Matrix2.zero(d1, d2)
+        for (let i = 0; i < d1; i++) {
+            for (let j = 0; j < d2; j++) {
+                m.setValue(i, j, a[i][j][d3])
+            }
+        }
+
+        return m
     }
 }
