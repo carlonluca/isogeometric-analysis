@@ -19,16 +19,43 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Matrix2 } from "./matrix"
+import { RowVector } from "./matrix";
 
 /**
  * Class representing a point on a surface.
  */
-export class Point extends Matrix2 {
+export class Point extends RowVector {
     /**
      * Ctor.
      */
     constructor(public x: number, public y: number, public z: number = 0) {
-        super([[ x, y, z ]])
+        super([x, y, z]);
+    }
+
+    /**
+     * Converts this point to homogenous coords.
+     * 
+     * @param l 
+     * @returns 
+     */
+    public toHomogeneous(w: number): HomPoint {
+        return new HomPoint(
+            this.x*w,
+            this.y*w,
+            this.z*w,
+            w
+        )
+    }
+}
+
+/**
+ * Class representing a point in homogenous coords.
+ */
+export class HomPoint extends RowVector {
+    /**
+     * Ctor.
+     */
+    constructor(public x: number, public y: number, public z: number, public w: number) {
+        super([x, y, z, w]);
     }
 }
