@@ -43,13 +43,15 @@ export let drawNurbsSurf = (
     p: number,
     q: number,
     drawControlPoints: boolean,
-    plot: string) => {
-    const scaleZ = 3
+    plot: string,
+    sameScale: boolean = false,
+    maxXi = 1,
+    maxEta = 1) => {
     const nurbs = new NurbsSurf(controlPoints, Xi.toArray(), Eta.toArray(), w, p, q)
     // @ts-expect-error
-    const xiValues = math.range(0, 1, 0.005).toArray()
+    const xiValues = math.range(0, maxXi, 0.005*maxXi).toArray()
     // @ts-expect-error
-    const etaValues = math.range(0, 1, 0.005).toArray()
+    const etaValues = math.range(0, maxEta, 0.005*maxEta).toArray()
     let xValues = []
     let yValues = []
     let zValues = []
@@ -58,7 +60,7 @@ export let drawNurbsSurf = (
             let p = nurbs.evaluate(xi, eta)
             xValues.push(p.x)
             yValues.push(p.y)
-            zValues.push(p.z / scaleZ)
+            zValues.push(p.z)
         })
     })
     let min = zValues.reduce(function (a, b) {
@@ -92,7 +94,7 @@ export let drawNurbsSurf = (
             for (let controlPoint of cpxs) {
                 cpXValues.push(controlPoint.x)
                 cpYValues.push(controlPoint.y)
-                cpZValues.push(controlPoint.z / scaleZ)
+                cpZValues.push(controlPoint.z)
             }
 
             const trace = {
@@ -118,7 +120,7 @@ export let drawNurbsSurf = (
             for (let i = 0; i < controlPoints.length; i++) {
                 cpXValues.push(controlPoints[i][j].x)
                 cpYValues.push(controlPoints[i][j].y)
-                cpZValues.push(controlPoints[i][j].z / scaleZ)
+                cpZValues.push(controlPoints[i][j].z)
 
                 const trace = {
                     x: cpXValues,
@@ -156,26 +158,44 @@ export let drawNurbsSurf = (
         },
         height: 700,
         showlegend: false,
-        xaxis: {
-            title: {
-                text: "x",
-                font: {
-                    family: "Ubuntu",
-                    size: 18,
-                    color: "#7f7f7f",
+        scene: {
+            aspectmode: "manual",
+            aspectratio: {
+                x: 1,
+                y: 1,
+                z: 1
+            },
+            xaxis: {
+                title: {
+                    text: "x",
+                    font: {
+                        family: "Ubuntu",
+                        size: 18,
+                        color: "#7f7f7f",
+                    }
+                }
+            },
+            yaxis: {
+                title: {
+                    text: "y",
+                    font: {
+                        family: "Ubuntu",
+                        size: 18,
+                        color: "#7f7f7f"
+                    },
+                }
+            },
+            zaxis: {
+                title: {
+                    text: "z",
+                    font: {
+                        family: "Ubuntu",
+                        size: 18,
+                        color: "#7f7f7f"
+                    }
                 }
             }
-        },
-        yaxis: {
-            title: {
-                text: "y",
-                font: {
-                    family: "Ubuntu",
-                    size: 18,
-                    color: "#7f7f7f",
-                },
-            },
-        },
+        }
     };
     // @ts-expect-error
     Plotly.newPlot(plot, data, layout)

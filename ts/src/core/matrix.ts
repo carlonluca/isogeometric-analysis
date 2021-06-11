@@ -202,6 +202,20 @@ export class Matrix2 implements IEquatable<Matrix2> {
     }
 
     /**
+     * Assigns a column.
+     * 
+     * @param col 
+     * @param v 
+     */
+    public assignCol(col: number, v: RowVector): Matrix2 {
+        if (v.length() != this.cols())
+            throw new Error("Invalid vector size")
+        for (let i = 0; i < v.length(); i++)
+            this.m_data[i][col] = v.value(i)
+        return this
+    }
+
+    /**
      * IEquatable interface.
      * 
      * @param m 
