@@ -159,21 +159,11 @@ export let drawNurbsSurf = (
         height: 700,
         showlegend: false,
         scene: {
-            aspectmode: "manual",
+            aspectmode: "data",
             aspectratio: {
                 x: 1,
                 y: 1,
                 z: 1
-            },
-            xaxis: {
-                title: {
-                    text: "x",
-                    font: {
-                        family: "Ubuntu",
-                        size: 18,
-                        color: "#7f7f7f",
-                    }
-                }
             },
             yaxis: {
                 title: {
