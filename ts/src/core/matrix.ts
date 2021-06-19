@@ -64,12 +64,12 @@ export class Matrix2 implements IEquatable<Matrix2> {
      * @returns 
      */
     public rect(topLeft: Point, bottomRight: Point): Matrix2 {
-        let cols = bottomRight.x - topLeft.x + 1
-        let rows = bottomRight.y - topLeft.y + 1
+        let cols = bottomRight.x() - topLeft.x() + 1
+        let rows = bottomRight.y() - topLeft.y() + 1
         let retData = Matrix2.createEmptyMatrixOfSize(rows, cols)
-        for (let j = topLeft.x; j <= bottomRight.x; j++)
-            for (let i = topLeft.y; i <= bottomRight.y; i++)
-                retData[i - topLeft.y][j - topLeft.x] = this.m_data[i][j]
+        for (let j = topLeft.x(); j <= bottomRight.x(); j++)
+            for (let i = topLeft.y(); i <= bottomRight.y(); i++)
+                retData[i - topLeft.y()][j - topLeft.x()] = this.m_data[i][j]
         return new Matrix2(retData)
     }
 
@@ -140,7 +140,7 @@ export class Matrix2 implements IEquatable<Matrix2> {
             throw new Error("Cannot add matrices of different sizes")
         for (let i = 0; i < this.rows(); i++)
             for (let j = 0; j < this.cols(); j++)
-                this.m_data[i][j] += m.value(i, j)
+                this.m_data[i][j] += m.m_data[i][j]
         return this
     }
 
@@ -384,6 +384,14 @@ export class RowVector extends Matrix2 {
     public value(index: number): number { return this.m_data[0][index] }
 
     /**
+     * Sets the value.
+     *
+     * @param index
+     * @param value
+     */
+    public setValue(index: number, value: number) { this.m_data[0][index] = value }
+
+    /**
      * Returns a subrange of the vector, including the extrema.
      * 
      * @param aRange 
@@ -401,5 +409,15 @@ export class RowVector extends Matrix2 {
      */
     public static one(length: number): RowVector {
         return Matrix2.one(1, length).row(0)
+    }
+
+    /**
+     * Returns a null vector of a given size.
+     * 
+     * @param size 
+     * @returns 
+     */
+    public static zero(length: number): RowVector {
+        return Matrix2.zero(1, length).row(0)
     }
 }

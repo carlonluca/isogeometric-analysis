@@ -56,12 +56,57 @@ export class NurbsCurve {
         let w = new RowVector(this.weights)
         for (let i = 0; i <= n; i++) {
             let N = NurbsCurve.computeBasis(Xi, w, i, this.p, xi)
-            x = x + N * this.controlPoints[i].x
-            y = y + N * this.controlPoints[i].y
-            z = z + N * this.controlPoints[i].z
+            x = x + N * this.controlPoints[i].x()
+            y = y + N * this.controlPoints[i].y()
+            z = z + N * this.controlPoints[i].z()
         }
 
         return new Point(x, y, z)
+    }
+
+    /**
+     * Implements knot insertion on this NURBS.
+     * 
+     * @param barxi value of the new knot to insert.
+     * @param index where the new knot is to be inserted.
+     * @param s initial multiplicity.
+     * @param r multiplicity of the knot to add.
+     */
+    public insertKnot(barxi: number, index: number, s: number, r: number): NurbsCurve {
+        let Xi = new RowVector(this.knotVector)
+        let n = Xi.length() - this.p - 2
+        let barXi = RowVector.zero(Xi.length() + r)
+        let barN = n + r - s
+
+        // Prepare the new knot vector.
+        for (let i = 0; i <= index; i++)
+            barXi.setValue(i, Xi.value(i))
+        for (let i = index + 1; i <= index + r; i++)
+            barXi.setValue(i, barxi)
+        for (let i = index + r + 1; i < barXi.length(); i++)
+            barXi.setValue(i, Xi.value(index + 1 + i - index - r - 1))
+        
+        let Pw = NurbsCurve.toWeightedControlPoints(this.controlPoints, new RowVector(this.weights))
+        let barPw: HomPoint[] = new Array(barN)
+        for (let i = 0; i <= barN; i++) {
+            if (i <= index - this.p)
+                barPw[i] = Pw[i].clone()
+            else if (i <= index && i >= index - this.p + 1) {
+                let alpha = (barxi - Xi.value(i))/(Xi.value(i + this.p) - Xi.value(i))
+                let _Pw1 = Pw[i].clone().mult(alpha)
+                let _Pw2 = Pw[i - 1].clone().mult(1 - alpha)
+                barPw[i] = HomPoint.fromVector(_Pw1.add(_Pw2).row(0))
+            }
+            else
+                barPw[i] = Pw[i - 1]
+        }
+
+        let [barP, barW] = NurbsCurve.fromWeightedControlPoints(barPw)
+        this.controlPoints = barP
+        this.knotVector = barXi.toArray()
+        this.weights = barW.toArray()
+
+        return this
     }
 
     /**
@@ -92,6 +137,40 @@ export class NurbsCurve {
                 0
             )
         return R
+    }
+
+    /**
+     * To weighted control points.
+     * 
+     * @param P 
+     * @param w 
+     * @returns 
+     */
+    public static toWeightedControlPoints(P: Point[], w: RowVector): HomPoint[] {
+        let Pw: HomPoint[] = new Array(P.length)
+        for (let i = 0; i < P.length; i++)
+            Pw[i] = P[i].toHomogeneous(w.value(i))
+        return Pw
+    }
+
+    /**
+     * Converts weighted points to points and weights.
+     * 
+     * @param Pw 
+     * @returns 
+     */
+    public static fromWeightedControlPoints(Pw: HomPoint[]): [Point[], RowVector] {
+        let P: Point[] = new Array(Pw.length)
+        let wData: number[] = new Array(Pw.length)
+        for (let i = 0; i < Pw.length; i++) {
+            wData[i] = Pw[i].w()
+            P[i] = Point.fromVector(Pw[i].clone().mult(1/Pw[i].w()).row(0))
+        }
+
+        return [
+            P,
+            new RowVector(wData)
+        ]
     }
 }
 
@@ -132,13 +211,7 @@ export class NurbsSurf {
         let Neta = BsplineCurve.computeAllNonvanishingBasis(this.Eta, etaSpan, this.q, eta)
 
         // Convert to homogeneous coords.
-        let Pw: HomPoint[][] = new Array(this.controlPoints.length)
-        for (let i = 0; i < this.controlPoints.length; i++) {
-            Pw[i] = new Array(this.controlPoints[i].length)
-            for (let j = 0; j < this.controlPoints[i].length; j++) {
-                Pw[i][j] = this.controlPoints[i][j].toHomogeneous(this.weights.value(i, j))
-            }
-        }
+        let Pw = NurbsSurf.toWeightedControlPoints(this.controlPoints, this.weights)
 
         let P_x = HomPoint.matFromPoints(Pw, "x")
         let P_y = HomPoint.matFromPoints(Pw, "y")
@@ -155,5 +228,23 @@ export class NurbsSurf {
             .multMat(Neta.transposed()).value(0, 0)
         
         return new Point(sx/sw, sy/sw, sz/sw)
+    }
+
+    /**
+     * Converts a matrix of control points to a matrix of weighted control points.
+     * 
+     * @param P 
+     * @param w 
+     */
+     public static toWeightedControlPoints(P: Point[][], w: Matrix2): HomPoint[][] {
+        let Pw: HomPoint[][] = new Array(P.length)
+        for (let i = 0; i < P.length; i++) {
+            Pw[i] = new Array(P[i].length)
+            for (let j = 0; j < P[i].length; j++) {
+                Pw[i][j] = P[i][j].toHomogeneous(w.value(i, j))
+            }
+        }
+
+        return Pw
     }
 }

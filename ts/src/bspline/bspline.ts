@@ -52,9 +52,9 @@ export class BsplineCurve {
         let span = BsplineCurve.findSpan(this.knotVector, xi, this.p, n)
         let N = BsplineCurve.computeAllNonvanishingBasis(this.knotVector, span, this.p, xi)
         for (let i = 0; i <= this.p; i++) {
-            x = x + N.value(0, i)*this.controlPoints[span - this.p + i].x
-            y = y + N.value(0, i)*this.controlPoints[span - this.p + i].y
-            z = z + N.value(0, i)*this.controlPoints[span - this.p + i].z
+            x = x + N.value(0, i)*this.controlPoints[span - this.p + i].x()
+            y = y + N.value(0, i)*this.controlPoints[span - this.p + i].y()
+            z = z + N.value(0, i)*this.controlPoints[span - this.p + i].z()
         }
 
         return new Point(x, y, z)
@@ -216,9 +216,9 @@ export class BsplineSurf {
                 let Nxi = BsplineCurve.computeBasis(this.Xi, i, this.p, xi)
                 let Neta = BsplineCurve.computeBasis(this.Eta, j, this.q, eta)
                 let prod = Nxi*Neta
-                x = x + prod*this.controlPoints[i][j].x
-                y = y + prod*this.controlPoints[i][j].y
-                z = z + prod*this.controlPoints[i][j].z
+                x = x + prod*this.controlPoints[i][j].x()
+                y = y + prod*this.controlPoints[i][j].y()
+                z = z + prod*this.controlPoints[i][j].z()
             }
         }
 

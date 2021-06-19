@@ -45,9 +45,9 @@ export class BezierCurve {
         let z = 0
         let n = this.controlPoints.length
         for (let i = 0; i < n; i++) {
-            x = x + bernstein(i, n - 1, xi)*this.controlPoints[i].x
-            y = y + bernstein(i, n - 1, xi)*this.controlPoints[i].y
-            z = z + bernstein(i, n - 1, xi)*this.controlPoints[i].z
+            x = x + bernstein(i, n - 1, xi)*this.controlPoints[i].x()
+            y = y + bernstein(i, n - 1, xi)*this.controlPoints[i].y()
+            z = z + bernstein(i, n - 1, xi)*this.controlPoints[i].z()
         }
 
         return new Point(x, y, z)
@@ -81,9 +81,9 @@ export class BezierSurf {
 
         for (let i = 0; i < n; i++) {
             for (let j = 0; j < m; j++) {
-                x += bernstein(i, n - 1, xi)*bernstein(j, m - 1, eta)*this.controlPoints[i][j].x
-                y += bernstein(i, n - 1, xi)*bernstein(j, m - 1, eta)*this.controlPoints[i][j].y
-                z += bernstein(i, n - 1, xi)*bernstein(j, m - 1, eta)*this.controlPoints[i][j].z
+                x += bernstein(i, n - 1, xi)*bernstein(j, m - 1, eta)*this.controlPoints[i][j].x()
+                y += bernstein(i, n - 1, xi)*bernstein(j, m - 1, eta)*this.controlPoints[i][j].y()
+                z += bernstein(i, n - 1, xi)*bernstein(j, m - 1, eta)*this.controlPoints[i][j].z()
             }
         }
 

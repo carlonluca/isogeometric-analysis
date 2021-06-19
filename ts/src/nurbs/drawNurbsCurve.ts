@@ -38,7 +38,8 @@ export let drawNurbsCurve = (
     drawControlPoints: boolean,
     plot: string,
     basisPlot: string = null,
-    sameScale: boolean = false) => {
+    sameScale: boolean = false,
+    title: string = "NURBS curve") => {
     const nurbs = new NurbsCurve(controlPoints, knotVector, weights, p)
     // @ts-expect-error
     const xiValues = math.range(0, 1, 0.001).toArray()
@@ -47,9 +48,9 @@ export let drawNurbsCurve = (
     let zValues = []
     xiValues.map((xi: number) => {
         let p = nurbs.evaluate(xi)
-        xValues.push(p.x)
-        yValues.push(p.y)
-        zValues.push(p.z)
+        xValues.push(p.x())
+        yValues.push(p.y())
+        zValues.push(p.z())
     })
     const plotType = threed ? "scatter3d" : "scatter"
     const trace1 = {
@@ -71,9 +72,9 @@ export let drawNurbsCurve = (
         const cpYValues = []
         const cpZValues = []
         for (let cp of controlPoints) {
-            cpXValues.push(cp.x)
-            cpYValues.push(cp.y)
-            cpZValues.push(cp.z)
+            cpXValues.push(cp.x())
+            cpYValues.push(cp.y())
+            cpZValues.push(cp.z())
         }
         const trace2 = {
             x: cpXValues,
@@ -101,7 +102,7 @@ export let drawNurbsCurve = (
 
     var layout = {
         title: {
-            text: "NURBS curve",
+            text: title,
             font: {
                 family: "Ubuntu",
                 size: 24,

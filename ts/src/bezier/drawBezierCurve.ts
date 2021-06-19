@@ -38,9 +38,9 @@ export let drawBezierCurve = (controlPoints: Point[], threed: boolean, drawContr
     let zValues = []
     xiValues.map((xi: number) => {
         let p = bezier.evaluate(xi)
-        xValues.push(p.x)
-        yValues.push(p.y)
-        zValues.push(p.z)
+        xValues.push(p.x())
+        yValues.push(p.y())
+        zValues.push(p.z())
     })
     const plotType = threed ? "scatter3d" : "scatter"
     const trace1 = {
@@ -62,9 +62,9 @@ export let drawBezierCurve = (controlPoints: Point[], threed: boolean, drawContr
         const cpYValues = []
         const cpZValues = []
         for (let cp of controlPoints) {
-            cpXValues.push(cp.x)
-            cpYValues.push(cp.y)
-            cpZValues.push(cp.z)
+            cpXValues.push(cp.x())
+            cpYValues.push(cp.y())
+            cpZValues.push(cp.z())
         }
         const trace2 = {
             x: cpXValues,

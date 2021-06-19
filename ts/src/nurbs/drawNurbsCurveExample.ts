@@ -21,6 +21,7 @@
 
 import { RowVector } from "../core/matrix";
 import { Point } from "../core/point"
+import { NurbsCirle } from "../examples/nurbsCircle";
 import { drawNurbsCurve } from "./drawNurbsCurve"
 
 export let drawNurbsCurveExample1 = (plot: string, drawControlPoints: boolean, basisPlot: string) => {
@@ -50,18 +51,17 @@ export let drawNurbsCurveExample2 = (plot: string, drawControlPoints: boolean, b
 }
 
 export let drawNurbsCurveExampleCircle = (plot: string, drawControlPoints: boolean, basisPlot: string) => {
-    let controlPoints = [
-        new Point(1, 0),
-        new Point(1, 1),
-        new Point(0, 1),
-        new Point(-1 ,1),
-        new Point(-1, 0),
-        new Point(-1, -1),
-        new Point(0, -1),
-        new Point(1, -1),
-        new Point(1, 0)
-    ]
-    let knotVector = [0, 0, 0, 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, 1, 1, 1]
-    let w = [1, 1/Math.sqrt(2), 1, 1/Math.sqrt(2), 1, 1/Math.sqrt(2), 1, 1/Math.sqrt(2), 1]
-    drawNurbsCurve(controlPoints, knotVector, w, 2, false, drawControlPoints, plot, basisPlot, true)
+    let circle = new NurbsCirle()
+    drawNurbsCurve(circle.controlPoints, circle.knotVector, circle.weights, 2, false, drawControlPoints, plot, basisPlot, true)
+}
+
+export function drawNurbsKnotInsertionExample(plot1: string, plot2: string, plot3: string, plot4: string) {
+    let circle = new NurbsCirle()
+    drawNurbsCurve(circle.controlPoints, circle.knotVector, circle.weights, 2, false, true, plot1, null, true, "Knot Insertion 1")
+    circle.insertKnot(0.6, 6, 0, 1)
+    drawNurbsCurve(circle.controlPoints, circle.knotVector, circle.weights, 2, false, true, plot2, null, true, "Knot Insertion 2")
+    circle.insertKnot(0.3, 4, 0, 1)
+    drawNurbsCurve(circle.controlPoints, circle.knotVector, circle.weights, 2, false, true, plot3, null, true, "Knot Insertion 3")
+    circle.insertKnot(0.2, 2, 0, 1)
+    drawNurbsCurve(circle.controlPoints, circle.knotVector, circle.weights, 2, false, true, plot4, null, true, "Knot Insertion 4")
 }

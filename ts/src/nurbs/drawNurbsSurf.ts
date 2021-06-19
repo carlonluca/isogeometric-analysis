@@ -58,9 +58,9 @@ export let drawNurbsSurf = (
     xiValues.map((xi: number) => {
         etaValues.map((eta: number) => {
             let p = nurbs.evaluate(xi, eta)
-            xValues.push(p.x)
-            yValues.push(p.y)
-            zValues.push(p.z)
+            xValues.push(p.x())
+            yValues.push(p.y())
+            zValues.push(p.z())
         })
     })
     let min = zValues.reduce(function (a, b) {
@@ -92,9 +92,9 @@ export let drawNurbsSurf = (
             const cpYValues = []
             const cpZValues = []
             for (let controlPoint of cpxs) {
-                cpXValues.push(controlPoint.x)
-                cpYValues.push(controlPoint.y)
-                cpZValues.push(controlPoint.z)
+                cpXValues.push(controlPoint.x())
+                cpYValues.push(controlPoint.y())
+                cpZValues.push(controlPoint.z())
             }
 
             const trace = {
@@ -118,9 +118,9 @@ export let drawNurbsSurf = (
             const cpYValues = []
             const cpZValues = []
             for (let i = 0; i < controlPoints.length; i++) {
-                cpXValues.push(controlPoints[i][j].x)
-                cpYValues.push(controlPoints[i][j].y)
-                cpZValues.push(controlPoints[i][j].z)
+                cpXValues.push(controlPoints[i][j].x())
+                cpYValues.push(controlPoints[i][j].y())
+                cpZValues.push(controlPoints[i][j].z())
 
                 const trace = {
                     x: cpXValues,

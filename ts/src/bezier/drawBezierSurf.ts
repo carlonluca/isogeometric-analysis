@@ -41,9 +41,9 @@ export let drawBezierSurf = (controlPoints: Point[][], drawControlPoints: boolea
     xiValues.map((xi: number) => {
         etaValues.map((eta: number) => {
             let p = bezier.evaluate(xi, eta)
-            xValues.push(p.x)
-            yValues.push(p.y)
-            zValues.push(p.z/scaleZ)
+            xValues.push(p.x())
+            yValues.push(p.y())
+            zValues.push(p.z()/scaleZ)
         })
     })
     let min = zValues.reduce(function(a, b) {
@@ -75,9 +75,9 @@ export let drawBezierSurf = (controlPoints: Point[][], drawControlPoints: boolea
             const cpYValues = []
             const cpZValues = []
             for (let controlPoint of cpxs) {
-                cpXValues.push(controlPoint.x)
-                cpYValues.push(controlPoint.y)
-                cpZValues.push(controlPoint.z/scaleZ)
+                cpXValues.push(controlPoint.x())
+                cpYValues.push(controlPoint.y())
+                cpZValues.push(controlPoint.z()/scaleZ)
             }
 
             const trace = {
@@ -101,9 +101,9 @@ export let drawBezierSurf = (controlPoints: Point[][], drawControlPoints: boolea
             const cpYValues = []
             const cpZValues = []
             for (let i = 0; i < controlPoints.length; i++) {
-                cpXValues.push(controlPoints[i][j].x)
-                cpYValues.push(controlPoints[i][j].y)
-                cpZValues.push(controlPoints[i][j].z/scaleZ)
+                cpXValues.push(controlPoints[i][j].x())
+                cpYValues.push(controlPoints[i][j].y())
+                cpZValues.push(controlPoints[i][j].z()/scaleZ)
 
                 const trace = {
                     x: cpXValues,

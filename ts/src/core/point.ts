@@ -28,7 +28,7 @@ export class Point extends RowVector {
     /**
      * Ctor.
      */
-    constructor(public x: number, public y: number, public z: number = 0) {
+    constructor(x: number, y: number, z: number = 0) {
         super([x, y, z]);
     }
 
@@ -40,12 +40,25 @@ export class Point extends RowVector {
      */
     public toHomogeneous(w: number): HomPoint {
         return new HomPoint(
-            this.x*w,
-            this.y*w,
-            this.z*w,
+            this.x()*w,
+            this.y()*w,
+            this.z()*w,
             w
         )
     }
+
+    /**
+     * Clones this object.
+     * 
+     * @returns 
+     */
+    public clone(): Point {
+        return new Point(this.x(), this.y(), this.z())
+    }
+
+    public x(): number { return this.value(0) }
+    public y(): number { return this.value(1) }
+    public z(): number { return this.value(2) }
 
     /**
      * Builds a matrix from a matrix of points.
@@ -60,11 +73,21 @@ export class Point extends RowVector {
         let m = Matrix2.zero(d1, d2)
         for (let i = 0; i < d1; i++) {
             for (let j = 0; j < d2; j++) {
-                m.setValue(i, j, a[i][j][d3])
+                m.setValue(i, j, a[i][j][d3]())
             }
         }
 
         return m
+    }
+
+    /**
+     * Builds a point from a vector.
+     * 
+     * @param v 
+     * @returns 
+     */
+    public static fromVector(v: RowVector) {
+        return new Point(v.value(0), v.value(1), v.value(2))
     }
 }
 
@@ -75,9 +98,23 @@ export class HomPoint extends RowVector {
     /**
      * Ctor.
      */
-    constructor(public x: number, public y: number, public z: number, public w: number) {
+    constructor(x: number, y: number, z: number, w: number) {
         super([x, y, z, w]);
     }
+
+    /**
+     * Clones this object.
+     * 
+     * @returns 
+     */
+     public clone(): HomPoint {
+        return new HomPoint(this.x(), this.y(), this.z(), this.w())
+    }
+
+    public x(): number { return this.value(0) }
+    public y(): number { return this.value(1) }
+    public z(): number { return this.value(2) }
+    public w(): number { return this.value(3) }
 
     /**
      * Builds a matrix from a matrix of points.
@@ -92,10 +129,20 @@ export class HomPoint extends RowVector {
         let m = Matrix2.zero(d1, d2)
         for (let i = 0; i < d1; i++) {
             for (let j = 0; j < d2; j++) {
-                m.setValue(i, j, a[i][j][d3])
+                m.setValue(i, j, a[i][j][d3]())
             }
         }
 
         return m
+    }
+
+    /**
+     * Builds a point from a vector.
+     * 
+     * @param v 
+     * @returns 
+     */
+    public static fromVector(v: RowVector) {
+        return new HomPoint(v.value(0), v.value(1), v.value(2), v.value(3))
     }
 }
