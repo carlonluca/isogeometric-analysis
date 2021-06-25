@@ -85,14 +85,14 @@ export class NurbsCurve {
             barXi.setValue(i, barxi)
         for (let i = index + r + 1; i < barXi.length(); i++)
             barXi.setValue(i, Xi.value(index + 1 + i - index - r - 1))
-        
+
         let Pw = NurbsCurve.toWeightedControlPoints(this.controlPoints, new RowVector(this.weights))
         let barPw: HomPoint[] = new Array(barN)
         for (let i = 0; i <= barN; i++) {
             if (i <= index - this.p)
                 barPw[i] = Pw[i].clone()
             else if (i <= index && i >= index - this.p + 1) {
-                let alpha = (barxi - Xi.value(i))/(Xi.value(i + this.p) - Xi.value(i))
+                let alpha = (barxi - Xi.value(i)) / (Xi.value(i + this.p) - Xi.value(i))
                 let _Pw1 = Pw[i].clone().mult(alpha)
                 let _Pw2 = Pw[i - 1].clone().mult(1 - alpha)
                 barPw[i] = HomPoint.fromVector(_Pw1.add(_Pw2).row(0))
@@ -131,7 +131,7 @@ export class NurbsCurve {
             xi
         )
         let R =
-            (N.value(0, p - (xiSpan - i)) * w.value(i)) /
+            (N.value(p - (xiSpan - i)) * w.value(i)) /
             N.multMat(w.range(new Range(xiSpan - p, xiSpan)).transposed()).value(
                 0,
                 0
@@ -164,7 +164,7 @@ export class NurbsCurve {
         let wData: number[] = new Array(Pw.length)
         for (let i = 0; i < Pw.length; i++) {
             wData[i] = Pw[i].w()
-            P[i] = Point.fromVector(Pw[i].clone().mult(1/Pw[i].w()).row(0))
+            P[i] = Point.fromVector(Pw[i].clone().mult(1 / Pw[i].w()).row(0))
         }
 
         return [
@@ -187,14 +187,14 @@ export class NurbsSurf {
      * @param p 
      * @param q 
      */
-     constructor(
+    constructor(
         public controlPoints: Point[][],
         public Xi: number[],
         public Eta: number[],
         public weights: Matrix2,
         public p: number,
-        public q: number) {}
-    
+        public q: number) { }
+
     /**
      * Evaluates the NURBS surface in (xi, eta).
      * 
@@ -226,8 +226,8 @@ export class NurbsSurf {
             .multMat(Neta.transposed()).value(0, 0)
         let sw = Nxi.multMat(P_w.rect(new Point(etaSpan - this.q, xiSpan - this.p), new Point(etaSpan, xiSpan)))
             .multMat(Neta.transposed()).value(0, 0)
-        
-        return new Point(sx/sw, sy/sw, sz/sw)
+
+        return new Point(sx / sw, sy / sw, sz / sw)
     }
 
     /**
@@ -236,7 +236,7 @@ export class NurbsSurf {
      * @param P 
      * @param w 
      */
-     public static toWeightedControlPoints(P: Point[][], w: Matrix2): HomPoint[][] {
+    public static toWeightedControlPoints(P: Point[][], w: Matrix2): HomPoint[][] {
         let Pw: HomPoint[][] = new Array(P.length)
         for (let i = 0; i < P.length; i++) {
             Pw[i] = new Array(P[i].length)

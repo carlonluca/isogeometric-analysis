@@ -114,7 +114,7 @@ export class Matrix2 implements IEquatable<Matrix2> {
      * @param col 
      * @returns 
      */
-    public value(row: number, col: number) { return this.m_data[row][col] }
+    public value(r: number, c: number): number { return this.m_data[r][c] }
 
     /**
      * Sets the value of an element of the matrix.
@@ -170,7 +170,7 @@ export class Matrix2 implements IEquatable<Matrix2> {
             for (let j = 0; j < m.cols(); j++) {
                 let e = 0
                 for (let p = 0; p < this.cols(); p++)
-                    e += this.value(i, p)*m.value(p, j)
+                    e += this.m_data[i][p]*m.m_data[p][j]
                 res.m_data[i][j] = e
             }
         }
@@ -381,7 +381,7 @@ export class RowVector extends Matrix2 {
      * @param index 
      * @returns 
      */
-    public value(index: number): number { return this.m_data[0][index] }
+    public value(index: number): number { return super.value(0, index) }
 
     /**
      * Sets the value.

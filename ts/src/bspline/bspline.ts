@@ -19,8 +19,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Matrix2 } from "../core/matrix"
+import { RowVector } from "../core/matrix"
 import { Point } from "../core/point"
+import { Range } from "../core/range"
 
 /**
  * Class representing a B-spline curve in the 2D or 3D space.
@@ -45,19 +46,44 @@ export class BsplineCurve {
      * @returns 
      */
     public evaluate(xi: number): Point {
+        return this.evaluate2(xi)
+    }
+
+    public evaluate1(xi: number): Point {
         let x = 0
         let y = 0
         let z = 0
         let n = this.controlPoints.length - 1
-        let span = BsplineCurve.findSpan(this.knotVector, xi, this.p, n)
-        let N = BsplineCurve.computeAllNonvanishingBasis(this.knotVector, span, this.p, xi)
-        for (let i = 0; i <= this.p; i++) {
-            x = x + N.value(0, i)*this.controlPoints[span - this.p + i].x()
-            y = y + N.value(0, i)*this.controlPoints[span - this.p + i].y()
-            z = z + N.value(0, i)*this.controlPoints[span - this.p + i].z()
+        let Xi = new RowVector(this.knotVector)
+        for (let i = 0; i <= n; i++) {
+            let N = BsplineCurve.computeBasis(Xi.toArray(), i, this.p, xi)
+            x = x + N * this.controlPoints[i].x()
+            y = y + N * this.controlPoints[i].y()
+            z = z + N * this.controlPoints[i].z()
         }
 
         return new Point(x, y, z)
+    }
+
+    public evaluate2(xi: number): Point {
+        let Xi = this.knotVector
+        let P = this.controlPoints
+        let n = P.length - 1
+        let xiSpan = BsplineCurve.findSpan(Xi, xi, this.p, n)
+        let Nxi = BsplineCurve.computeAllNonvanishingBasis(Xi, xiSpan, this.p, xi)
+
+        let P_x = Point.matFromPoints([P], "x").row(0)
+        let P_y = Point.matFromPoints([P], "y").row(0)
+        let P_z = Point.matFromPoints([P], "z").row(0)
+
+        let sx = Nxi.multMat(P_x.range(new Range(xiSpan - this.p, xiSpan))
+            .transpose()).value(0, 0)
+        let sy = Nxi.multMat(P_y.range(new Range(xiSpan - this.p, xiSpan))
+            .transpose()).value(0, 0)
+        let sz = Nxi.multMat(P_z.range(new Range(xiSpan - this.p, xiSpan))
+            .transpose()).value(0, 0)
+        
+        return new Point(sx, sy, sz)
     }
 
     /**
@@ -67,9 +93,9 @@ export class BsplineCurve {
      * @param p 
      * @param xi 
      * @param Xi 
-     * @returns 
+     * @returns a vector containing all the nonvanishing basis functions [N_(i-p), ..., N_(i)].
      */
-    public static computeAllNonvanishingBasis(Xi: number[], i: number, p: number, xi: number): Matrix2 {
+    public static computeAllNonvanishingBasis(Xi: number[], i: number, p: number, xi: number): RowVector {
         let N = Array(p + 1).fill(0)
         let right = Array(p + 1).fill(0)
         let left = Array(p + 1).fill(0)
@@ -90,7 +116,7 @@ export class BsplineCurve {
             N[j] = saved
         }
     
-        return new Matrix2([N])
+        return new RowVector(N)
     }
 
     public static computeBasis(Xi: number[], i: number, p: number, xi: number): number {
@@ -147,7 +173,7 @@ export class BsplineCurve {
      * @param xi 
      * @param p 
      * @param n 
-     * @returns 
+     * @returns i such that xi is in [Xi_i, Xi_(i+1)].
      */
     public static findSpan(Xi: number[], xi: number, p: number, n: number): number {
         if (xi == Xi[n + 1])
