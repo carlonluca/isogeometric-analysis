@@ -49,6 +49,12 @@ export class BsplineCurve {
         return this.evaluate2(xi)
     }
 
+    /**
+     * Evaluation of b-spline curve.
+     * 
+     * @param xi 
+     * @returns 
+     */
     public evaluate1(xi: number): Point {
         let x = 0
         let y = 0
@@ -65,6 +71,12 @@ export class BsplineCurve {
         return new Point(x, y, z)
     }
 
+    /**
+     * Evaluation of b-spline curve in matrix form.
+     * 
+     * @param xi 
+     * @returns 
+     */
     public evaluate2(xi: number): Point {
         let Xi = this.knotVector
         let P = this.controlPoints
