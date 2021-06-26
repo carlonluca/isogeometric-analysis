@@ -277,7 +277,7 @@ define("core/matrix", ["require", "exports", "core/size"], function (require, ex
          * @param col
          * @returns
          */
-        value(row, col) { return this.m_data[row][col]; }
+        value(r, c) { return this.m_data[r][c]; }
         /**
          * Sets the value of an element of the matrix.
          *
@@ -304,6 +304,15 @@ define("core/matrix", ["require", "exports", "core/size"], function (require, ex
             return this;
         }
         /**
+         * Subtracts a matrix.
+         *
+         * @param m
+         * @returns
+         */
+        sub(m) {
+            return this.add(m.clone().mult(-1));
+        }
+        /**
          * Multiplies by a scalar.
          *
          * @param scalar
@@ -328,7 +337,7 @@ define("core/matrix", ["require", "exports", "core/size"], function (require, ex
                 for (let j = 0; j < m.cols(); j++) {
                     let e = 0;
                     for (let p = 0; p < this.cols(); p++)
-                        e += this.value(i, p) * m.value(p, j);
+                        e += this.m_data[i][p] * m.m_data[p][j];
                     res.m_data[i][j] = e;
                 }
             }
@@ -521,7 +530,7 @@ define("core/matrix", ["require", "exports", "core/size"], function (require, ex
          * @param index
          * @returns
          */
-        value(index) { return this.m_data[0][index]; }
+        value(index) { return super.value(0, index); }
         /**
          * Sets the value.
          *
@@ -537,6 +546,17 @@ define("core/matrix", ["require", "exports", "core/size"], function (require, ex
          */
         range(aRange) {
             return new RowVector(this.m_data[0].slice(aRange.a, aRange.b + 1));
+        }
+        /**
+         * Returns the norm (or length or magnitude) of the vector.
+         *
+         * @returns
+         */
+        norm() {
+            let res = 0;
+            for (let i = 0; i < this.length(); i++)
+                res += Math.pow(this.m_data[0][i], 2);
+            return Math.sqrt(res);
         }
         /**
          * Vector of ones.
@@ -966,6 +986,276 @@ define("bezier/drawBezierCurve", ["require", "exports", "bezier/bezier", "bezier
 /**
  * Project: Approximation and Finite Elements in Isogeometric Problems
  * Author:  Luca Carlon
+ * Date:    2021.05.14
+ *
+ * Copyright (c) 2021 Luca Carlon. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+define("bspline/bspline", ["require", "exports", "core/matrix", "core/point", "core/range"], function (require, exports, matrix_2, point_2, range_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.BsplineSurf = exports.BsplineCurve = void 0;
+    /**
+     * Class representing a B-spline curve in the 2D or 3D space.
+     */
+    class BsplineCurve {
+        /**
+         * Ctor.
+         *
+         * @param controlPoints
+         * @param knotVector
+         * @param p
+         */
+        constructor(controlPoints, knotVector, p) {
+            this.controlPoints = controlPoints;
+            this.knotVector = knotVector;
+            this.p = p;
+        }
+        /**
+         * Evaluates the value of the B-spline curve in the parametric space.
+         *
+         * @param xi
+         * @returns
+         */
+        evaluate(xi) {
+            return this.evaluate2(xi);
+        }
+        /**
+         * Evaluation of b-spline curve.
+         *
+         * @param xi
+         * @returns
+         */
+        evaluate1(xi) {
+            let x = 0;
+            let y = 0;
+            let z = 0;
+            let n = this.controlPoints.length - 1;
+            let Xi = new matrix_2.RowVector(this.knotVector);
+            for (let i = 0; i <= n; i++) {
+                let N = BsplineCurve.computeBasis(Xi.toArray(), i, this.p, xi);
+                x = x + N * this.controlPoints[i].x();
+                y = y + N * this.controlPoints[i].y();
+                z = z + N * this.controlPoints[i].z();
+            }
+            return new point_2.Point(x, y, z);
+        }
+        /**
+         * Evaluation of b-spline curve in matrix form.
+         *
+         * @param xi
+         * @returns
+         */
+        evaluate2(xi) {
+            let Xi = this.knotVector;
+            let P = this.controlPoints;
+            let n = P.length - 1;
+            let xiSpan = BsplineCurve.findSpan(Xi, xi, this.p, n);
+            let Nxi = BsplineCurve.computeAllNonvanishingBasis(Xi, xiSpan, this.p, xi);
+            let P_x = point_2.Point.matFromPoints([P], "x").row(0);
+            let P_y = point_2.Point.matFromPoints([P], "y").row(0);
+            let P_z = point_2.Point.matFromPoints([P], "z").row(0);
+            let sx = Nxi.multMat(P_x.range(new range_1.Range(xiSpan - this.p, xiSpan))
+                .transpose()).value(0, 0);
+            let sy = Nxi.multMat(P_y.range(new range_1.Range(xiSpan - this.p, xiSpan))
+                .transpose()).value(0, 0);
+            let sz = Nxi.multMat(P_z.range(new range_1.Range(xiSpan - this.p, xiSpan))
+                .transpose()).value(0, 0);
+            return new point_2.Point(sx, sy, sz);
+        }
+        /**
+         * Computes all non-vanishing bspline basis functions in xi.
+         *
+         * @param i
+         * @param p
+         * @param xi
+         * @param Xi
+         * @returns a vector containing all the nonvanishing basis functions [N_(i-p), ..., N_(i)].
+         */
+        static computeAllNonvanishingBasis(Xi, i, p, xi) {
+            let N = Array(p + 1).fill(0);
+            let right = Array(p + 1).fill(0);
+            let left = Array(p + 1).fill(0);
+            N[0] = 1;
+            for (let j = 1; j <= p; j++) {
+                left[j] = xi - Xi[i + 1 - j];
+                right[j] = Xi[i + j] - xi;
+                let saved = 0;
+                let temp = 0;
+                for (let r = 0; r < j; r++) {
+                    temp = N[r] / (right[r + 1] + left[j - r]);
+                    N[r] = saved + right[r + 1] * temp;
+                    saved = left[j - r] * temp;
+                }
+                N[j] = saved;
+            }
+            return new matrix_2.RowVector(N);
+        }
+        static computeBasis(Xi, i, p, xi) {
+            let n = Xi.length - 1;
+            // Check to see if we're evaluating the first or the last basis function at
+            // the beginning or at the end of the knot vector.
+            if ((i == 0 && xi == Xi[0]) || (i == n - p - 1 && xi == Xi[n]))
+                return 1;
+            // When xi is out of the domain it is set to zero.
+            if (xi < Xi[i] || xi >= Xi[i + p + 1])
+                return 0;
+            // Preallocation and computation of the temparary values of the functions to
+            // be used according to the triangular table.        
+            let N = Array(p + 1).fill(0);
+            for (let j = 0; j <= p; j++) {
+                if (xi >= Xi[i + j] && xi < Xi[i + j + 1])
+                    N[j] = 1;
+                else
+                    N[j] = 0;
+            }
+            // Computation of the rest of the triangular table.
+            let saved;
+            for (let k = 1; k <= p; k++) {
+                if (N[0] == 0)
+                    saved = 0;
+                else
+                    saved = ((xi - Xi[i]) * N[0]) / (Xi[i + k] - Xi[i]);
+                for (let j = 0; j <= p - k - 1 + 1; j++) {
+                    let Xileft = Xi[i + j + 1];
+                    let Xiright = Xi[i + j + k + 1];
+                    if (N[j + 1] == 0) {
+                        N[j] = saved;
+                        saved = 0;
+                    }
+                    else {
+                        let temp = N[j + 1] / (Xiright - Xileft);
+                        N[j] = saved + (Xiright - xi) * temp;
+                        saved = (xi - Xileft) * temp;
+                    }
+                }
+            }
+            return N[0];
+        }
+        /**
+         * Finds the span in which xi lies.
+         *
+         * @param Xi
+         * @param xi
+         * @param p
+         * @param n
+         * @returns i such that xi is in [Xi_i, Xi_(i+1)].
+         */
+        static findSpan(Xi, xi, p, n) {
+            if (xi == Xi[n + 1])
+                return n;
+            let low = p;
+            let high = n + 1;
+            let i = Math.floor((low + high) / 2);
+            while (xi < Xi[i] || xi >= Xi[i + 1]) {
+                if (xi < Xi[i])
+                    high = i;
+                else
+                    low = i;
+                i = Math.floor((low + high) / 2);
+            }
+            return i;
+        }
+    }
+    exports.BsplineCurve = BsplineCurve;
+    /**
+     * Represents a b-spline surface.
+     */
+    class BsplineSurf {
+        /**
+         * Ctor.
+         *
+         * @param controlPoints
+         * @param Xi
+         * @param Eta
+         * @param p
+         * @param q
+         */
+        constructor(controlPoints, Xi, Eta, p, q) {
+            this.controlPoints = controlPoints;
+            this.Xi = Xi;
+            this.Eta = Eta;
+            this.p = p;
+            this.q = q;
+        }
+        /**
+         * Evaluates the surf in (xi, eta).
+         *
+         * @param xi
+         * @param eta
+         * @returns
+         */
+        evaluate(xi, eta) {
+            return this.evaluate2(xi, eta);
+        }
+        /**
+         * Evaluation in the summation form.
+         *
+         * @param xi
+         * @param eta
+         * @returns
+         */
+        evaluate1(xi, eta) {
+            let n = this.controlPoints.length - 1;
+            let m = this.controlPoints[0].length - 1;
+            let x = 0;
+            let y = 0;
+            let z = 0;
+            for (let i = 0; i <= n; i++) {
+                for (let j = 0; j <= m; j++) {
+                    let Nxi = BsplineCurve.computeBasis(this.Xi, i, this.p, xi);
+                    let Neta = BsplineCurve.computeBasis(this.Eta, j, this.q, eta);
+                    let prod = Nxi * Neta;
+                    x = x + prod * this.controlPoints[i][j].x();
+                    y = y + prod * this.controlPoints[i][j].y();
+                    z = z + prod * this.controlPoints[i][j].z();
+                }
+            }
+            return new point_2.Point(x, y, z);
+        }
+        /**
+         * Evaluation in matrix form.
+         *
+         * @param xi
+         * @param eta
+         * @returns
+         */
+        evaluate2(xi, eta) {
+            let n = this.controlPoints.length - 1;
+            let m = this.controlPoints[0].length - 1;
+            let xiSpan = BsplineCurve.findSpan(this.Xi, xi, this.p, n);
+            let etaSpan = BsplineCurve.findSpan(this.Eta, eta, this.q, m);
+            let Nxi = BsplineCurve.computeAllNonvanishingBasis(this.Xi, xiSpan, this.p, xi);
+            let Neta = BsplineCurve.computeAllNonvanishingBasis(this.Eta, etaSpan, this.q, eta);
+            let Px = point_2.Point.matFromPoints(this.controlPoints, "x");
+            let Py = point_2.Point.matFromPoints(this.controlPoints, "y");
+            let Pz = point_2.Point.matFromPoints(this.controlPoints, "z");
+            let sx = Nxi.multMat(Px.rect(new point_2.Point(etaSpan - this.q, xiSpan - this.p), new point_2.Point(etaSpan, xiSpan)))
+                .multMat(Neta.transposed());
+            let sy = Nxi.multMat(Py.rect(new point_2.Point(etaSpan - this.q, xiSpan - this.p), new point_2.Point(etaSpan, xiSpan)))
+                .multMat(Neta.transposed());
+            let sz = Nxi.multMat(Pz.rect(new point_2.Point(etaSpan - this.q, xiSpan - this.p), new point_2.Point(etaSpan, xiSpan)))
+                .multMat(Neta.transposed());
+            return new point_2.Point(sx.value(0, 0), sy.value(0, 0), sz.value(0, 0));
+        }
+    }
+    exports.BsplineSurf = BsplineSurf;
+});
+/**
+ * Project: Approximation and Finite Elements in Isogeometric Problems
+ * Author:  Luca Carlon
  * Date:    2021.05.25
  *
  * Copyright (c) 2021 Luca Carlon. All rights reserved.
@@ -983,26 +1273,38 @@ define("bezier/drawBezierCurve", ["require", "exports", "bezier/bezier", "bezier
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("examples/exampleCurves", ["require", "exports", "core/point"], function (require, exports, point_2) {
+define("examples/exampleCurves", ["require", "exports", "bspline/bspline", "core/point"], function (require, exports, bspline_1, point_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.exampleCurve3D1 = exports.exampleCurve2D1 = void 0;
+    exports.bsplineCurveSample1 = exports.exampleCurve3D1 = exports.exampleCurve2D1 = void 0;
     exports.exampleCurve2D1 = [
-        new point_2.Point(0, 0),
-        new point_2.Point(1, 1),
-        new point_2.Point(2, 0.5),
-        new point_2.Point(3, 0.5),
-        new point_2.Point(0.5, 1.5),
-        new point_2.Point(1.5, 0)
+        new point_3.Point(0, 0),
+        new point_3.Point(1, 1),
+        new point_3.Point(2, 0.5),
+        new point_3.Point(3, 0.5),
+        new point_3.Point(0.5, 1.5),
+        new point_3.Point(1.5, 0)
     ];
     exports.exampleCurve3D1 = [
-        new point_2.Point(0, 0, 0),
-        new point_2.Point(1, 1, 1),
-        new point_2.Point(2, 0.5, 0),
-        new point_2.Point(3, 0.5, 0),
-        new point_2.Point(0.5, 1.5, 0),
-        new point_2.Point(1.5, 0, 1)
+        new point_3.Point(0, 0, 0),
+        new point_3.Point(1, 1, 1),
+        new point_3.Point(2, 0.5, 0),
+        new point_3.Point(3, 0.5, 0),
+        new point_3.Point(0.5, 1.5, 0),
+        new point_3.Point(1.5, 0, 1)
     ];
+    function bsplineCurveSample1() {
+        let controlPoints = [];
+        controlPoints.push(new point_3.Point(0, 0));
+        controlPoints.push(new point_3.Point(1, 1));
+        controlPoints.push(new point_3.Point(2, 0.5));
+        controlPoints.push(new point_3.Point(3, 0.5));
+        controlPoints.push(new point_3.Point(0.5, 1.5));
+        controlPoints.push(new point_3.Point(1.5, 0));
+        let knotVector = [0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1];
+        return new bspline_1.BsplineCurve(controlPoints, knotVector, 2);
+    }
+    exports.bsplineCurveSample1 = bsplineCurveSample1;
 });
 /**
  * Project: Approximation and Finite Elements in Isogeometric Problems
@@ -1221,25 +1523,25 @@ define("bezier/drawBezierSurf", ["require", "exports", "bezier/bezier"], functio
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("examples/exampleSurfs", ["require", "exports", "core/point"], function (require, exports, point_3) {
+define("examples/exampleSurfs", ["require", "exports", "core/point"], function (require, exports, point_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.exampleSurf1ControlPoints = void 0;
     exports.exampleSurf1ControlPoints = [[
-            new point_3.Point(-3, 0, 2),
-            new point_3.Point(-2, 0, 6),
-            new point_3.Point(-1, 0, 7),
-            new point_3.Point(0, 0, 2),
+            new point_4.Point(-3, 0, 2),
+            new point_4.Point(-2, 0, 6),
+            new point_4.Point(-1, 0, 7),
+            new point_4.Point(0, 0, 2),
         ], [
-            new point_3.Point(-3, 1, 2),
-            new point_3.Point(-2, 1, 4),
-            new point_3.Point(-1, 1, 5),
-            new point_3.Point(0, 1, 2.5),
+            new point_4.Point(-3, 1, 2),
+            new point_4.Point(-2, 1, 4),
+            new point_4.Point(-1, 1, 5),
+            new point_4.Point(0, 1, 2.5),
         ], [
-            new point_3.Point(-3, 3, 0),
-            new point_3.Point(-2, 3, 2.5),
-            new point_3.Point(-1, 3, 4.5),
-            new point_3.Point(0, 3, 6.5),
+            new point_4.Point(-3, 3, 0),
+            new point_4.Point(-2, 3, 2.5),
+            new point_4.Point(-1, 3, 4.5),
+            new point_4.Point(0, 3, 6.5),
         ],
     ];
 });
@@ -1292,245 +1594,7 @@ define("bezier/drawBezierSurfExample", ["require", "exports", "bezier/drawBezier
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("bspline/bspline", ["require", "exports", "core/matrix", "core/point"], function (require, exports, matrix_2, point_4) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.BsplineSurf = exports.BsplineCurve = void 0;
-    /**
-     * Class representing a B-spline curve in the 2D or 3D space.
-     */
-    class BsplineCurve {
-        /**
-         * Ctor.
-         *
-         * @param controlPoints
-         * @param knotVector
-         * @param p
-         */
-        constructor(controlPoints, knotVector, p) {
-            this.controlPoints = controlPoints;
-            this.knotVector = knotVector;
-            this.p = p;
-        }
-        /**
-         * Evaluates the value of the B-spline curve in the parametric space.
-         *
-         * @param xi
-         * @returns
-         */
-        evaluate(xi) {
-            let x = 0;
-            let y = 0;
-            let z = 0;
-            let n = this.controlPoints.length - 1;
-            let span = BsplineCurve.findSpan(this.knotVector, xi, this.p, n);
-            let N = BsplineCurve.computeAllNonvanishingBasis(this.knotVector, span, this.p, xi);
-            for (let i = 0; i <= this.p; i++) {
-                x = x + N.value(0, i) * this.controlPoints[span - this.p + i].x();
-                y = y + N.value(0, i) * this.controlPoints[span - this.p + i].y();
-                z = z + N.value(0, i) * this.controlPoints[span - this.p + i].z();
-            }
-            return new point_4.Point(x, y, z);
-        }
-        /**
-         * Computes all non-vanishing bspline basis functions in xi.
-         *
-         * @param i
-         * @param p
-         * @param xi
-         * @param Xi
-         * @returns
-         */
-        static computeAllNonvanishingBasis(Xi, i, p, xi) {
-            let N = Array(p + 1).fill(0);
-            let right = Array(p + 1).fill(0);
-            let left = Array(p + 1).fill(0);
-            N[0] = 1;
-            for (let j = 1; j <= p; j++) {
-                left[j] = xi - Xi[i + 1 - j];
-                right[j] = Xi[i + j] - xi;
-                let saved = 0;
-                let temp = 0;
-                for (let r = 0; r < j; r++) {
-                    temp = N[r] / (right[r + 1] + left[j - r]);
-                    N[r] = saved + right[r + 1] * temp;
-                    saved = left[j - r] * temp;
-                }
-                N[j] = saved;
-            }
-            return new matrix_2.Matrix2([N]);
-        }
-        static computeBasis(Xi, i, p, xi) {
-            let n = Xi.length - 1;
-            // Check to see if we're evaluating the first or the last basis function at
-            // the beginning or at the end of the knot vector.
-            if ((i == 0 && xi == Xi[0]) || (i == n - p - 1 && xi == Xi[n]))
-                return 1;
-            // When xi is out of the domain it is set to zero.
-            if (xi < Xi[i] || xi >= Xi[i + p + 1])
-                return 0;
-            // Preallocation and computation of the temparary values of the functions to
-            // be used according to the triangular table.        
-            let N = Array(p + 1).fill(0);
-            for (let j = 0; j <= p; j++) {
-                if (xi >= Xi[i + j] && xi < Xi[i + j + 1])
-                    N[j] = 1;
-                else
-                    N[j] = 0;
-            }
-            // Computation of the rest of the triangular table.
-            let saved;
-            for (let k = 1; k <= p; k++) {
-                if (N[0] == 0)
-                    saved = 0;
-                else
-                    saved = ((xi - Xi[i]) * N[0]) / (Xi[i + k] - Xi[i]);
-                for (let j = 0; j <= p - k - 1 + 1; j++) {
-                    let Xileft = Xi[i + j + 1];
-                    let Xiright = Xi[i + j + k + 1];
-                    if (N[j + 1] == 0) {
-                        N[j] = saved;
-                        saved = 0;
-                    }
-                    else {
-                        let temp = N[j + 1] / (Xiright - Xileft);
-                        N[j] = saved + (Xiright - xi) * temp;
-                        saved = (xi - Xileft) * temp;
-                    }
-                }
-            }
-            return N[0];
-        }
-        /**
-         * Finds the span in which xi lies.
-         *
-         * @param Xi
-         * @param xi
-         * @param p
-         * @param n
-         * @returns
-         */
-        static findSpan(Xi, xi, p, n) {
-            if (xi == Xi[n + 1])
-                return n;
-            let low = p;
-            let high = n + 1;
-            let i = Math.floor((low + high) / 2);
-            while (xi < Xi[i] || xi >= Xi[i + 1]) {
-                if (xi < Xi[i])
-                    high = i;
-                else
-                    low = i;
-                i = Math.floor((low + high) / 2);
-            }
-            return i;
-        }
-    }
-    exports.BsplineCurve = BsplineCurve;
-    /**
-     * Represents a b-spline surface.
-     */
-    class BsplineSurf {
-        /**
-         * Ctor.
-         *
-         * @param controlPoints
-         * @param Xi
-         * @param Eta
-         * @param p
-         * @param q
-         */
-        constructor(controlPoints, Xi, Eta, p, q) {
-            this.controlPoints = controlPoints;
-            this.Xi = Xi;
-            this.Eta = Eta;
-            this.p = p;
-            this.q = q;
-        }
-        /**
-         * Evaluates the surf in (xi, eta).
-         *
-         * @param xi
-         * @param eta
-         * @returns
-         */
-        evaluate(xi, eta) {
-            return this.evaluate2(xi, eta);
-        }
-        /**
-         * Evaluation in the summation form.
-         *
-         * @param xi
-         * @param eta
-         * @returns
-         */
-        evaluate1(xi, eta) {
-            let n = this.controlPoints.length - 1;
-            let m = this.controlPoints[0].length - 1;
-            let x = 0;
-            let y = 0;
-            let z = 0;
-            for (let i = 0; i <= n; i++) {
-                for (let j = 0; j <= m; j++) {
-                    let Nxi = BsplineCurve.computeBasis(this.Xi, i, this.p, xi);
-                    let Neta = BsplineCurve.computeBasis(this.Eta, j, this.q, eta);
-                    let prod = Nxi * Neta;
-                    x = x + prod * this.controlPoints[i][j].x();
-                    y = y + prod * this.controlPoints[i][j].y();
-                    z = z + prod * this.controlPoints[i][j].z();
-                }
-            }
-            return new point_4.Point(x, y, z);
-        }
-        /**
-         * Evaluation in matrix form.
-         *
-         * @param xi
-         * @param eta
-         * @returns
-         */
-        evaluate2(xi, eta) {
-            let n = this.controlPoints.length - 1;
-            let m = this.controlPoints[0].length - 1;
-            let xiSpan = BsplineCurve.findSpan(this.Xi, xi, this.p, n);
-            let etaSpan = BsplineCurve.findSpan(this.Eta, eta, this.q, m);
-            let Nxi = BsplineCurve.computeAllNonvanishingBasis(this.Xi, xiSpan, this.p, xi);
-            let Neta = BsplineCurve.computeAllNonvanishingBasis(this.Eta, etaSpan, this.q, eta);
-            let Px = point_4.Point.matFromPoints(this.controlPoints, "x");
-            let Py = point_4.Point.matFromPoints(this.controlPoints, "y");
-            let Pz = point_4.Point.matFromPoints(this.controlPoints, "z");
-            let sx = Nxi.multMat(Px.rect(new point_4.Point(etaSpan - this.q, xiSpan - this.p), new point_4.Point(etaSpan, xiSpan)))
-                .multMat(Neta.transposed());
-            let sy = Nxi.multMat(Py.rect(new point_4.Point(etaSpan - this.q, xiSpan - this.p), new point_4.Point(etaSpan, xiSpan)))
-                .multMat(Neta.transposed());
-            let sz = Nxi.multMat(Pz.rect(new point_4.Point(etaSpan - this.q, xiSpan - this.p), new point_4.Point(etaSpan, xiSpan)))
-                .multMat(Neta.transposed());
-            return new point_4.Point(sx.value(0, 0), sy.value(0, 0), sz.value(0, 0));
-        }
-    }
-    exports.BsplineSurf = BsplineSurf;
-});
-/**
- * Project: Approximation and Finite Elements in Isogeometric Problems
- * Author:  Luca Carlon
- * Date:    2021.05.14
- *
- * Copyright (c) 2021 Luca Carlon. All rights reserved.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-define("bspline/drawBsplineCurve", ["require", "exports", "bspline/bspline"], function (require, exports, bspline_1) {
+define("bspline/drawBsplineCurve", ["require", "exports", "bspline/bspline"], function (require, exports, bspline_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.drawBsplineBasisFuncs = exports.drawBsplineCurve = void 0;
@@ -1541,7 +1605,7 @@ define("bspline/drawBsplineCurve", ["require", "exports", "bspline/bspline"], fu
     * @param plot
     */
     let drawBsplineCurve = (controlPoints, knotVector, p, threed, drawControlPoints, plot, bernsteinPlot = null) => {
-        const bspline = new bspline_1.BsplineCurve(controlPoints, knotVector, p);
+        const bspline = new bspline_2.BsplineCurve(controlPoints, knotVector, p);
         // @ts-expect-error
         const xiValues = math.range(0, 1, 0.001).toArray();
         let xValues = [];
@@ -1643,7 +1707,7 @@ define("bspline/drawBsplineCurve", ["require", "exports", "bspline/bspline"], fu
         for (let i = 0; i <= n; i++) {
             const upsiValues = [];
             xiValues.map((xi) => {
-                upsiValues.push(bspline_1.BsplineCurve.computeBasis(bspline.knotVector, i, bspline.p, xi));
+                upsiValues.push(bspline_2.BsplineCurve.computeBasis(bspline.knotVector, i, bspline.p, xi));
             });
             const trace = {
                 x: xiValues,
@@ -1707,20 +1771,13 @@ define("bspline/drawBsplineCurve", ["require", "exports", "bspline/bspline"], fu
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("bspline/drawBsplineCurveExample", ["require", "exports", "core/point", "bspline/drawBsplineCurve"], function (require, exports, point_5, drawBsplineCurve_1) {
+define("bspline/drawBsplineCurveExample", ["require", "exports", "core/point", "examples/exampleCurves", "bspline/drawBsplineCurve"], function (require, exports, point_5, exampleCurves_2, drawBsplineCurve_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.drawBsplineCurve2 = exports.drawBsplineCurve1 = void 0;
     let drawBsplineCurve1 = (plot, drawControlPoints, bernsteinPlot) => {
-        let controlPoints = [];
-        controlPoints.push(new point_5.Point(0, 0));
-        controlPoints.push(new point_5.Point(1, 1));
-        controlPoints.push(new point_5.Point(2, 0.5));
-        controlPoints.push(new point_5.Point(3, 0.5));
-        controlPoints.push(new point_5.Point(0.5, 1.5));
-        controlPoints.push(new point_5.Point(1.5, 0));
-        let knotVector = [0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1];
-        drawBsplineCurve_1.drawBsplineCurve(controlPoints, knotVector, 2, false, drawControlPoints, plot, bernsteinPlot);
+        let bspline = exampleCurves_2.bsplineCurveSample1();
+        drawBsplineCurve_1.drawBsplineCurve(bspline.controlPoints, bspline.knotVector, bspline.p, true, drawControlPoints, plot, bernsteinPlot);
     };
     exports.drawBsplineCurve1 = drawBsplineCurve1;
     let drawBsplineCurve2 = (plot, drawControlPoints, bernsteinPlot) => {
@@ -1756,7 +1813,7 @@ define("bspline/drawBsplineCurveExample", ["require", "exports", "core/point", "
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("bspline/drawBsplineSurf", ["require", "exports", "bspline/bspline"], function (require, exports, bspline_2) {
+define("bspline/drawBsplineSurf", ["require", "exports", "bspline/bspline"], function (require, exports, bspline_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.drawBsplineSurf = void 0;
@@ -1768,7 +1825,7 @@ define("bspline/drawBsplineSurf", ["require", "exports", "bspline/bspline"], fun
      */
     let drawBsplineSurf = (controlPoints, Xi, Eta, p, q, drawControlPoints, plot) => {
         const scaleZ = 3;
-        const bspline = new bspline_2.BsplineSurf(controlPoints, Xi, Eta, p, q);
+        const bspline = new bspline_3.BsplineSurf(controlPoints, Xi, Eta, p, q);
         // @ts-expect-error
         const xiValues = math.range(0, 1, 0.005).toArray();
         // @ts-expect-error
@@ -2034,7 +2091,7 @@ define("core/math", ["require", "exports"], function (require, exports) {
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("nurbs/nurbs", ["require", "exports", "core/matrix", "core/point", "bspline/bspline", "core/range"], function (require, exports, matrix_4, point_6, bspline_3, range_1) {
+define("nurbs/nurbs", ["require", "exports", "core/matrix", "core/point", "bspline/bspline", "core/range"], function (require, exports, matrix_4, point_6, bspline_4, range_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.NurbsSurf = exports.NurbsCurve = void 0;
@@ -2127,12 +2184,12 @@ define("nurbs/nurbs", ["require", "exports", "core/matrix", "core/point", "bspli
          */
         static computeBasis(Xi, w, i, p, xi) {
             let n = Xi.length() - 1;
-            let xiSpan = bspline_3.BsplineCurve.findSpan(Xi.toArray(), xi, p, n);
+            let xiSpan = bspline_4.BsplineCurve.findSpan(Xi.toArray(), xi, p, n);
             if (i < xiSpan - p || i > xiSpan)
                 return 0;
-            let N = bspline_3.BsplineCurve.computeAllNonvanishingBasis(Xi.toArray(), xiSpan, p, xi);
-            let R = (N.value(0, p - (xiSpan - i)) * w.value(i)) /
-                N.multMat(w.range(new range_1.Range(xiSpan - p, xiSpan)).transposed()).value(0, 0);
+            let N = bspline_4.BsplineCurve.computeAllNonvanishingBasis(Xi.toArray(), xiSpan, p, xi);
+            let R = (N.value(p - (xiSpan - i)) * w.value(i)) /
+                N.multMat(w.range(new range_2.Range(xiSpan - p, xiSpan)).transposed()).value(0, 0);
             return R;
         }
         /**
@@ -2199,10 +2256,10 @@ define("nurbs/nurbs", ["require", "exports", "core/matrix", "core/point", "bspli
         evaluate(xi, eta) {
             let n = this.controlPoints.length - 1;
             let m = this.controlPoints[0].length - 1;
-            let xiSpan = bspline_3.BsplineCurve.findSpan(this.Xi, xi, this.p, n);
-            let etaSpan = bspline_3.BsplineCurve.findSpan(this.Eta, eta, this.q, m);
-            let Nxi = bspline_3.BsplineCurve.computeAllNonvanishingBasis(this.Xi, xiSpan, this.p, xi);
-            let Neta = bspline_3.BsplineCurve.computeAllNonvanishingBasis(this.Eta, etaSpan, this.q, eta);
+            let xiSpan = bspline_4.BsplineCurve.findSpan(this.Xi, xi, this.p, n);
+            let etaSpan = bspline_4.BsplineCurve.findSpan(this.Eta, eta, this.q, m);
+            let Nxi = bspline_4.BsplineCurve.computeAllNonvanishingBasis(this.Xi, xiSpan, this.p, xi);
+            let Neta = bspline_4.BsplineCurve.computeAllNonvanishingBasis(this.Eta, etaSpan, this.q, eta);
             // Convert to homogeneous coords.
             let Pw = NurbsSurf.toWeightedControlPoints(this.controlPoints, this.weights);
             let P_x = point_6.HomPoint.matFromPoints(Pw, "x");
@@ -2881,6 +2938,39 @@ define("nurbs/drawNurbsSurfExamples", ["require", "exports", "core/matrix", "cor
 /**
  * Project: Approximation and Finite Elements in Isogeometric Problems
  * Author:  Luca Carlon
+ * Date:    2021.06.26
+ *
+ * Copyright (c) 2021 Luca Carlon. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+define("test/bspline_test", ["require", "exports", "examples/exampleCurves"], function (require, exports, exampleCurves_3) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    // @ts-expect-error
+    var assert = require("assert");
+    // Test the two implementations of a b-spline curve.
+    {
+        let bspline = exampleCurves_3.bsplineCurveSample1();
+        let epsilon = 1E-6;
+        for (let xi = 0; xi < 1; xi += 0.05)
+            assert(bspline.evaluate1(xi).sub(bspline.evaluate2(xi)).row(0).norm() < epsilon);
+    }
+});
+/**
+ * Project: Approximation and Finite Elements in Isogeometric Problems
+ * Author:  Luca Carlon
  * Date:    2021.05.27
  *
  * Copyright (c) 2021 Luca Carlon. All rights reserved.
@@ -2898,7 +2988,7 @@ define("nurbs/drawNurbsSurfExamples", ["require", "exports", "core/matrix", "cor
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("test/matrix_test", ["require", "exports", "core/matrix", "core/point", "core/range", "core/size"], function (require, exports, matrix_8, point_10, range_2, size_2) {
+define("test/matrix_test", ["require", "exports", "core/matrix", "core/point", "core/range", "core/size"], function (require, exports, matrix_8, point_10, range_3, size_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     // @ts-expect-error
@@ -3058,7 +3148,7 @@ define("test/matrix_test", ["require", "exports", "core/matrix", "core/point", "
     // Test range extraction
     {
         let m1 = new matrix_8.RowVector([5, 6, 7, 1, 2, 3, 9, 8, 7, 1, 1, 1]);
-        assert(m1.range(new range_2.Range(2, 4)).equals(new matrix_8.RowVector([7, 1, 2])));
+        assert(m1.range(new range_3.Range(2, 4)).equals(new matrix_8.RowVector([7, 1, 2])));
     }
     // Test setValue
     {
