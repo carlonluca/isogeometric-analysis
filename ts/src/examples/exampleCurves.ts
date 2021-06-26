@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { BsplineCurve } from "../bspline/bspline";
 import { Point } from "../core/point";
 
 export let exampleCurve2D1 = [
@@ -38,3 +39,15 @@ export let exampleCurve3D1 = [
     new Point(0.5, 1.5, 0),
     new Point(1.5, 0, 1)
 ]
+
+export function bsplineCurveSample1(): BsplineCurve {
+    let controlPoints = []
+    controlPoints.push(new Point(0, 0))
+    controlPoints.push(new Point(1, 1))
+    controlPoints.push(new Point(2, 0.5))
+    controlPoints.push(new Point(3, 0.5))
+    controlPoints.push(new Point(0.5, 1.5))
+    controlPoints.push(new Point(1.5, 0))
+    let knotVector = [ 0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1 ]
+    return new BsplineCurve(controlPoints, knotVector, 2)
+}

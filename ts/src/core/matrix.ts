@@ -145,6 +145,16 @@ export class Matrix2 implements IEquatable<Matrix2> {
     }
 
     /**
+     * Subtracts a matrix.
+     * 
+     * @param m 
+     * @returns 
+     */
+    public sub(m: Matrix2): Matrix2 {
+        return this.add(m.clone().mult(-1))
+    }
+
+    /**
      * Multiplies by a scalar.
      * 
      * @param scalar 
@@ -399,6 +409,18 @@ export class RowVector extends Matrix2 {
      */
     public range(aRange: Range): RowVector {
         return new RowVector(this.m_data[0].slice(aRange.a, aRange.b + 1))
+    }
+
+    /**
+     * Returns the norm (or length or magnitude) of the vector.
+     * 
+     * @returns 
+     */
+    public norm(): number {
+        let res = 0
+        for (let i = 0; i < this.length(); i++)
+            res += Math.pow(this.m_data[0][i], 2)
+        return Math.sqrt(res)
     }
 
     /**
