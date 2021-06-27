@@ -20,7 +20,9 @@
  */
 
 import { BsplineCurve } from "../bspline/bspline";
+import { RowVector } from "../core/matrix";
 import { Point } from "../core/point";
+import { NurbsCurve } from "../nurbs/nurbs";
 
 export let exampleCurve2D1 = [
     new Point(0, 0),
@@ -50,4 +52,17 @@ export function bsplineCurveSample1(): BsplineCurve {
     controlPoints.push(new Point(1.5, 0))
     let knotVector = [ 0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1 ]
     return new BsplineCurve(controlPoints, knotVector, 2)
+}
+
+export function nurbsCurveSample2D(): NurbsCurve {
+    let controlPoints = []
+    controlPoints.push(new Point(0, 0))
+    controlPoints.push(new Point(1, 1))
+    controlPoints.push(new Point(2, 0.5))
+    controlPoints.push(new Point(3, 0.5))
+    controlPoints.push(new Point(0.5, 1.5))
+    controlPoints.push(new Point(1.5, 0))
+    let knotVector = [0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1]
+    let w = RowVector.one(controlPoints.length)
+    return new NurbsCurve(controlPoints, knotVector, w.toArray(), 2)
 }

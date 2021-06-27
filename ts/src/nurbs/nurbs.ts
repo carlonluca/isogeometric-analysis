@@ -47,7 +47,17 @@ export class NurbsCurve {
      *
      * @param xi
      */
-    public evaluate(xi: number): Point {
+    public evaluate(xi: number): Point { 
+        return this.evaluate2(xi)
+    }
+
+    /**
+     * Evaluates the NURBS curve.
+     * 
+     * @param xi 
+     * @returns 
+     */
+    public evaluate1(xi: number): Point {
         let x = 0
         let y = 0
         let z = 0
@@ -62,6 +72,39 @@ export class NurbsCurve {
         }
 
         return new Point(x, y, z)
+    }
+
+    /**
+     * Evaluates the NURBS curve in matrix form.
+     * 
+     * @param xi 
+     * @returns 
+     */
+    public evaluate2(xi: number): Point {
+        let n = this.controlPoints.length - 1
+        let Xi = this.knotVector
+        let P = this.controlPoints
+        let xiSpan = BsplineCurve.findSpan(Xi, xi, this.p, n)
+        let Nxi = BsplineCurve.computeAllNonvanishingBasis(Xi, xiSpan, this.p, xi)
+
+        // Convert to homogeneous coords.
+        let Pw = NurbsSurf.toWeightedControlPoints([P], new RowVector(this.weights))[0]
+
+        let P_x = HomPoint.matFromPoints([Pw], "x").row(0)
+        let P_y = HomPoint.matFromPoints([Pw], "y").row(0)
+        let P_z = HomPoint.matFromPoints([Pw], "z").row(0)
+        let P_w = HomPoint.matFromPoints([Pw], "w").row(0)
+
+        let sx = Nxi.multMat(P_x.range(new Range(xiSpan - this.p, xiSpan))
+            .transpose()).value(0, 0)
+        let sy = Nxi.multMat(P_y.range(new Range(xiSpan - this.p, xiSpan))
+            .transpose()).value(0, 0)
+        let sz = Nxi.multMat(P_z.range(new Range(xiSpan - this.p, xiSpan))
+            .transpose()).value(0, 0)
+        let sw = Nxi.multMat(P_w.range(new Range(xiSpan - this.p, xiSpan))
+            .transpose()).value(0, 0)
+
+        return new Point(sx / sw, sy / sw, sz / sw)
     }
 
     /**
@@ -130,12 +173,8 @@ export class NurbsCurve {
             p,
             xi
         )
-        let R =
-            (N.value(p - (xiSpan - i)) * w.value(i)) /
-            N.multMat(w.range(new Range(xiSpan - p, xiSpan)).transposed()).value(
-                0,
-                0
-            )
+        let R = (N.value(p - (xiSpan - i)) * w.value(i)) /
+            N.multMat(w.range(new Range(xiSpan - p, xiSpan)).transposed()).value(0, 0)
         return R
     }
 

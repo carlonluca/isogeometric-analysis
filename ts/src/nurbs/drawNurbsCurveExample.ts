@@ -21,20 +21,13 @@
 
 import { RowVector } from "../core/matrix";
 import { Point } from "../core/point"
+import { nurbsCurveSample2D } from "../examples/exampleCurves";
 import { NurbsCirle } from "../examples/nurbsCircle";
 import { drawNurbsCurve } from "./drawNurbsCurve"
 
 export let drawNurbsCurveExample1 = (plot: string, drawControlPoints: boolean, basisPlot: string) => {
-    let controlPoints = []
-    controlPoints.push(new Point(0, 0))
-    controlPoints.push(new Point(1, 1))
-    controlPoints.push(new Point(2, 0.5))
-    controlPoints.push(new Point(3, 0.5))
-    controlPoints.push(new Point(0.5, 1.5))
-    controlPoints.push(new Point(1.5, 0))
-    let knotVector = [0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1]
-    let w = RowVector.one(controlPoints.length)
-    drawNurbsCurve(controlPoints, knotVector, w.toArray(), 2, false, drawControlPoints, plot, basisPlot)
+    let nurbs = nurbsCurveSample2D()
+    drawNurbsCurve(nurbs.controlPoints, nurbs.knotVector, nurbs.weights, 2, false, drawControlPoints, plot, basisPlot)
 }
 
 export let drawNurbsCurveExample2 = (plot: string, drawControlPoints: boolean, basisPlot: string) => {

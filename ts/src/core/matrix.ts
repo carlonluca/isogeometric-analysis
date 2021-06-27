@@ -391,7 +391,11 @@ export class RowVector extends Matrix2 {
      * @param index 
      * @returns 
      */
-    public value(index: number): number { return super.value(0, index) }
+    public value(a: number, b?: number): number {
+        if (b)
+            return super.value(a, b)
+        return super.value(0, a)
+    }
 
     /**
      * Sets the value.
