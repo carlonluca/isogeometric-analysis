@@ -21,6 +21,7 @@
 
 import { nurbsCurveSample2D } from "../examples/exampleCurves"
 import { NurbsCirle } from "../examples/nurbsCircle"
+import { NurbsPlateHole } from "../examples/nurbsPlate"
 import { NurbsCurve } from "../nurbs/nurbs"
 // @ts-expect-error
 var assert = require("assert")
@@ -35,4 +36,12 @@ function testEvaluationNurbs(nurbs: NurbsCurve) {
 {
     testEvaluationNurbs(nurbsCurveSample2D())
     testEvaluationNurbs(new NurbsCirle())
+}
+
+//  Test knot insertion.
+{
+    let n1 = new NurbsPlateHole()
+    let n2 = new NurbsPlateHole()
+    n2.insertKnotsXi(0.1, 1, 0, 1)
+    assert(n1.evaluate(0.5, 0.5) == n2.evaluate(0.5, 0.5))
 }
