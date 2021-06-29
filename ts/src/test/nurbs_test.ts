@@ -42,6 +42,6 @@ function testEvaluationNurbs(nurbs: NurbsCurve) {
 {
     let n1 = new NurbsPlateHole()
     let n2 = new NurbsPlateHole()
-    n2.insertKnotsXi(0.1, 1, 0, 1)
+    n2.insertKnotsXi(0.1, 2, 0, 1)
     assert(n1.evaluate(0.5, 0.5) == n2.evaluate(0.5, 0.5))
 }
