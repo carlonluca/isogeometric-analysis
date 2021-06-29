@@ -21,30 +21,16 @@
 
 import { Matrix2, RowVector } from "../core/matrix";
 import { Point } from "../core/point"
+import { NurbsPlateHole } from "../examples/nurbsPlate";
 import { drawNurbsSurf } from "./drawNurbsSurf"
 
 export let drawNurbsSurfPlateHole = (plot: string, drawControlPoints: boolean, basisPlot: string) => {
-    let P = [[
-        new Point(-1, 0, 0),
-        new Point(-2.5, 0, 0),
-        new Point(-4, 0, 0)
-    ], [
-        new Point(-1, Math.sqrt(2) - 1, 0),
-        new Point(-2.5, 0.75, 0),
-        new Point(-4, 4, 0)
-    ], [
-        new Point(1 - Math.sqrt(2), 1, 0),
-        new Point(-0.75, 2.5, 0),
-        new Point(-4, 4, 0)
-    ], [
-        new Point(0, 1, 0),
-        new Point(0, 2.5, 0),
-        new Point(0, 4, 0)
-    ]]
-    let Xi = new RowVector([0, 0, 0, 0.5, 1, 1, 1])
-    let Eta = new RowVector([0, 0, 0, 1, 1, 1])
-    let w = Matrix2.one(4, 3)
-    drawNurbsSurf(P, Xi, Eta, w, 2, 2, drawControlPoints, plot)
+    let nurbs = new NurbsPlateHole()
+    drawNurbsSurf(
+        nurbs.controlPoints,
+        new RowVector(nurbs.Xi),
+        new RowVector(nurbs.Eta),
+        nurbs.weights, 2, 2, drawControlPoints, plot)
 }
 
 export function drawNurbsSurfToroid(plot: string, drawControlPoints: boolean, basisPlot: string) {
