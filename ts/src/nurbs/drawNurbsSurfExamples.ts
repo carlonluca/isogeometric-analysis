@@ -19,10 +19,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { BsplineCurve } from "../bspline/bspline";
 import { Matrix2, RowVector } from "../core/matrix";
 import { Point } from "../core/point"
 import { NurbsPlateHole } from "../examples/nurbsPlate";
 import { drawNurbsSurf } from "./drawNurbsSurf"
+import { NurbsSurf } from "./nurbs";
 
 export let drawNurbsSurfPlateHole = (plot: string, drawControlPoints: boolean, basisPlot: string) => {
     let nurbs = new NurbsPlateHole()
@@ -153,4 +155,25 @@ export function drawNurbsSurfToroid(plot: string, drawControlPoints: boolean, ba
         .assignCol(7, w2)
         .assignCol(8, w1)
     drawNurbsSurf(P, Xi, Eta, w, p, q, drawControlPoints, plot, true, 4, 4)
+}
+
+export function drawNurbsKnotInsertionExample(plot1: string, plot2: string) {
+    let nurbs = new NurbsPlateHole()
+    drawNurbsSurf(
+        nurbs.controlPoints,
+        new RowVector(nurbs.Xi),
+        new RowVector(nurbs.Eta),
+        nurbs.weights, nurbs.p, nurbs.q, true, plot1, true)
+    
+    for (let i = 0.25; i <= 0.74; i += 0.25) {
+        if (nurbs.Xi[i] != i) {
+            let k = BsplineCurve.findSpan(nurbs.Xi, i, nurbs.p, nurbs.Xi.length - nurbs.p - 2)
+            nurbs.insertKnotsXi(i, k, 0, 1)
+        }
+    }
+    drawNurbsSurf(
+        nurbs.controlPoints,
+        new RowVector(nurbs.Xi),
+        new RowVector(nurbs.Eta),
+        nurbs.weights, nurbs.p, nurbs.q, true, plot2, true)
 }

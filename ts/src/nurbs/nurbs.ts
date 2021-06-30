@@ -282,13 +282,17 @@ export class NurbsSurf {
      */
     public insertKnotsXi(barxi: number, index: number, s: number, r: number): NurbsSurf {
         let Pw = NurbsCurve.toWeightedControlPoints(this.controlPoints, this.weights)
-        let Pwout
+        let kvin = new RowVector(this.Xi)
+        let n = kvin.length() - this.p - 2
+        let barN = n + r - s
+        let alphas = RowVector.zero(barN)
+        let Pwin = new Array(Pw.length)
+
+        let Pwout: HomPoint[][] = new Array(barN + 1)
+        for (let i = 0; i <= barN; i++)
+            Pwout[i] = new Array(this.controlPoints[0].length)
+        let kvout
         for (let j = 0; j < Pw[0].length; j++) {
-            let kvin = new RowVector(this.Xi)
-            let n = kvin.length() - this.p - 2
-            let barN = n + r - s
-            let alphas = RowVector.zero(barN)
-            let Pwin = new Array(Pw.length)
             for (let k = 0; k < Pw.length; k++)
                 Pwin[k] = Pw[k][j]
             for (let k = 0; k < barN; k++) {
@@ -299,12 +303,21 @@ export class NurbsSurf {
                 else
                     alphas.setValue(k, 1)
             }
-            let [kvout, Pwouti] = this.insertKnots(kvin, Pwin, barxi, index, s, r, alphas)
-            console.log(kvout)
-            console.log(Pwouti)
+
+            // TODO: No need to recompute the knot vector.
+            let [kvouti, Pwouti] = this.insertKnots(kvin, Pwin, barxi, index, s, r, alphas)
+            kvout = kvouti
+            for (let k = 0; k < Pwouti.length; k++)
+                Pwout[k][j] = Pwouti[k]
         }
 
-        return null
+        let [P, newW] = NurbsSurf.fromWeightedControlPoints(Pwout)
+
+        this.controlPoints = P
+        this.Xi = kvout
+        this.weights = newW
+
+        return this
     }
 
     /**
@@ -336,6 +349,30 @@ export class NurbsSurf {
         }
 
         return Pw
+    }
+
+    /**
+     * Converts weighted points to points and weights.
+     * 
+     * @param Pw 
+     * @returns 
+     */
+     public static fromWeightedControlPoints(Pw: HomPoint[][]): [Point[][], Matrix2] {
+        let P: Point[][] = new Array(Pw.length)
+        let wData: number[][] = new Array(Pw.length)
+        for (let i = 0; i < Pw.length; i++) {
+            P[i] = new Array(Pw[i].length)
+            wData[i] = new Array(Pw[i].length)
+            for (let j = 0; j < Pw[i].length; j++) {
+                wData[i][j] = Pw[i][j].w()
+                P[i][j] = Point.fromVector(Pw[i][j].clone().mult(1 / Pw[i][j].w()).row(0))
+            }
+        }
+
+        return [
+            P,
+            new Matrix2(wData)
+        ]
     }
 
     // Private portion
