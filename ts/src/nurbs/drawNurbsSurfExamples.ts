@@ -22,6 +22,7 @@
 import { BsplineCurve } from "../bspline/bspline";
 import { Matrix2, RowVector } from "../core/matrix";
 import { Point } from "../core/point"
+import { nurbsCurveSample2D } from "../examples/exampleCurves";
 import { NurbsPlateHole } from "../examples/nurbsPlate";
 import { drawNurbsSurf } from "./drawNurbsSurf"
 
@@ -165,10 +166,12 @@ export function drawNurbsKnotInsertionExample(plot1: string, plot2: string) {
         nurbs.weights, nurbs.p, nurbs.q, true, plot1, true)
     
     for (let i = 0.25; i <= 0.75; i += 0.25) {
-        if (nurbs.Xi[i] != i) {
-            let k = BsplineCurve.findSpan(nurbs.Xi, i, nurbs.p, nurbs.controlPoints.length - 1)
+        let k = BsplineCurve.findSpan(nurbs.Xi, i, nurbs.p, nurbs.controlPoints.length - 1)
+        if (nurbs.Xi[k] != i)
             nurbs.insertKnotsXi(i, k, 0, 1)
-        }
+        k = BsplineCurve.findSpan(nurbs.Eta, i, nurbs.q, nurbs.controlPoints[0].length - 1)
+        if (nurbs.Eta[k] != i)
+            nurbs.insertKnotEta(i, k, 0, 1)
     }
     drawNurbsSurf(
         nurbs.controlPoints,

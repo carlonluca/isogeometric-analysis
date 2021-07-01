@@ -291,18 +291,19 @@ export class NurbsSurf {
         let Pwout: HomPoint[][] = new Array(barN + 1)
         for (let i = 0; i <= barN; i++)
             Pwout[i] = new Array(this.controlPoints[0].length)
+        for (let k = 0; k < barN; k++) {
+            if (k <= index - this.p)
+                alphas.setValue(k, 0)
+            else if (k <= index && k >= index - this.p + 1)
+                alphas.setValue(k, (barxi - this.Xi[k]) / (this.Xi[k + this.p] - this.Xi[k]))
+            else
+                alphas.setValue(k, 1)
+        }
+
         let kvout: RowVector
         for (let j = 0; j < Pw[0].length; j++) {
             for (let k = 0; k < Pw.length; k++)
                 Pwin[k] = Pw[k][j]
-            for (let k = 0; k < barN; k++) {
-                if (k <= index - this.p)
-                    alphas.setValue(k, 0)
-                else if (k <= index && k >= index - this.p + 1)
-                    alphas.setValue(k, (barxi - this.Xi[k]) / (this.Xi[k + this.p] - this.Xi[k]))
-                else
-                    alphas.setValue(k, 1)
-            }
 
             // TODO: No need to recompute the knot vector.
             let [kvouti, Pwouti] = this.insertKnots(kvin, Pwin, barxi, index, s, r, alphas)
@@ -329,8 +330,44 @@ export class NurbsSurf {
      * @param r 
      */
     public insertKnotEta(bareta: number, index: number, s: number, r: number): NurbsSurf {
+        let Pw = NurbsCurve.toWeightedControlPoints(this.controlPoints, this.weights)
+        let kvin = new RowVector(this.Eta)
+        let m = kvin.length() - this.q - 2
+        let barM = m + r - s
+        let alphas = RowVector.zero(barM)
+        let Pwin = new Array(Pw[0].length)
 
-        return null
+        let Pwout: HomPoint[][] = new Array(this.controlPoints.length)
+        for (let i = 0; i <= Pwout.length; i++)
+            Pwout[i] = new Array(barM + 1)
+        for (let k = 0; k < barM; k++) {
+            if (k <= index - this.q)
+                alphas.setValue(k, 0)
+            else if (k <= index && k >= index - this.q + 1)
+                alphas.setValue(k, (bareta - this.Eta[k]) / (this.Eta[k + this.p] - this.Eta[k]))
+            else
+                alphas.setValue(k, 1)
+        }
+
+        let kvout: RowVector
+        for (let i = 0; i < Pw.length; i++) {
+            for (let k = 0; k < Pw[k].length; k++)
+                Pwin[k] = Pw[i][k]
+
+            // TODO: No need to recompute the knot vector.
+            let [kvouti, Pwouti] = this.insertKnots(kvin, Pwin, bareta, index, s, r, alphas)
+            kvout = kvouti
+            for (let k = 0; k < Pwouti.length; k++)
+                Pwout[i][k] = Pwouti[k]
+        }
+
+        let [P, newW] = NurbsSurf.fromWeightedControlPoints(Pwout)
+
+        this.controlPoints = P
+        this.Eta = kvout.toArray()
+        this.weights = newW
+
+        return this
     }
 
     /**
