@@ -24,7 +24,6 @@ import { Matrix2, RowVector } from "../core/matrix";
 import { Point } from "../core/point"
 import { NurbsPlateHole } from "../examples/nurbsPlate";
 import { drawNurbsSurf } from "./drawNurbsSurf"
-import { NurbsSurf } from "./nurbs";
 
 export let drawNurbsSurfPlateHole = (plot: string, drawControlPoints: boolean, basisPlot: string) => {
     let nurbs = new NurbsPlateHole()
