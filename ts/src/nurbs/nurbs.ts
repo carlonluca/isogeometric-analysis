@@ -291,7 +291,7 @@ export class NurbsSurf {
         let Pwout: HomPoint[][] = new Array(barN + 1)
         for (let i = 0; i <= barN; i++)
             Pwout[i] = new Array(this.controlPoints[0].length)
-        let kvout
+        let kvout: RowVector
         for (let j = 0; j < Pw[0].length; j++) {
             for (let k = 0; k < Pw.length; k++)
                 Pwin[k] = Pw[k][j]
@@ -314,7 +314,7 @@ export class NurbsSurf {
         let [P, newW] = NurbsSurf.fromWeightedControlPoints(Pwout)
 
         this.controlPoints = P
-        this.Xi = kvout
+        this.Xi = kvout.toArray()
         this.weights = newW
 
         return this
@@ -407,13 +407,13 @@ export class NurbsSurf {
             if (i <= index - this.p)
                 Pout[i] = Pin[i].clone()
             else if (i <= index && i >= index - this.p + 1) {
-                let alpha = alphas[i]
+                let alpha = alphas.value(i)
                 let _Pw1 = Pin[i].clone().mult(alpha)
                 let _Pw2 = Pin[i - 1].clone().mult(1 - alpha)
                 Pout[i] = HomPoint.fromVector(_Pw1.add(_Pw2).row(0))
             }
             else
-                Pout[i] = Pin[i - 1]
+                Pout[i] = Pin[i - 1].clone()
         }
 
         return [kvout, Pout]

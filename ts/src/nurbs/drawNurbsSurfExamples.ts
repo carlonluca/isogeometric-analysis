@@ -165,9 +165,9 @@ export function drawNurbsKnotInsertionExample(plot1: string, plot2: string) {
         new RowVector(nurbs.Eta),
         nurbs.weights, nurbs.p, nurbs.q, true, plot1, true)
     
-    for (let i = 0.25; i <= 0.74; i += 0.25) {
+    for (let i = 0.25; i <= 0.75; i += 0.25) {
         if (nurbs.Xi[i] != i) {
-            let k = BsplineCurve.findSpan(nurbs.Xi, i, nurbs.p, nurbs.Xi.length - nurbs.p - 2)
+            let k = BsplineCurve.findSpan(nurbs.Xi, i, nurbs.p, nurbs.controlPoints.length - 1)
             nurbs.insertKnotsXi(i, k, 0, 1)
         }
     }
