@@ -19,6 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { approxEqual } from "../core/math"
 import { nurbsCurveSample2D } from "../examples/exampleCurves"
 import { NurbsCirle } from "../examples/nurbsCircle"
 import { NurbsPlateHole } from "../examples/nurbsPlate"
@@ -27,9 +28,8 @@ import { NurbsCurve } from "../nurbs/nurbs"
 var assert = require("assert")
 
 function testEvaluationNurbs(nurbs: NurbsCurve) {
-    let epsilon = 1E-6
     for (let xi = 0; xi < 1; xi += 0.05)
-        assert(nurbs.evaluate1(xi).sub(nurbs.evaluate2(xi)).row(0).norm() < epsilon)
+        assert(approxEqual(nurbs.evaluate1(xi).norm(), nurbs.evaluate2(xi).norm()))
 }
 
 // Test the two implementations of a b-spline curve.
@@ -43,5 +43,8 @@ function testEvaluationNurbs(nurbs: NurbsCurve) {
     let n1 = new NurbsPlateHole()
     let n2 = new NurbsPlateHole()
     n2.insertKnotsXi(0.1, 2, 0, 1)
-    assert(n1.evaluate(0.5, 0.5) == n2.evaluate(0.5, 0.5))
+    //testEvaluationNurbs(n1, n2)
+    for (let xi = 0; xi <= 1; xi += 0.05)
+        for (let eta = 0; eta <= 1; eta += 0.05)
+            assert(approxEqual(n1.evaluate(xi, eta).norm(), n2.evaluate(xi, eta).norm()))
 }
