@@ -53,13 +53,25 @@ function testNurbs(n1: NurbsSurf, n2: NurbsSurf) {
 
 //  Test knot insertion.
 {
-    measure("surf_knot_insertion", () => {
+    measure("surf_knot_insertion_xi", () => {
         let n1 = new NurbsPlateHole()
         let n2 = new NurbsPlateHole()
         for (let i = 0.1; i <= 1; i += 0.9) {
             if (n2.Xi[i] != i) {
                 let k = BsplineCurve.findSpan(n2.Xi, i, n2.p, n2.controlPoints.length - 1)
                 n2.insertKnotsXi(i, k, 0, 1)
+                testNurbs(n1, n2)
+            }
+        }
+    })
+
+    measure("surf_knot_insertion_eta", () => {
+        let n1 = new NurbsPlateHole()
+        let n2 = new NurbsPlateHole()
+        for (let i = 0.1; i <= 1; i += 0.9) {
+            if (n2.Xi[i] != i) {
+                let k = BsplineCurve.findSpan(n2.Xi, i, n2.p, n2.controlPoints.length - 1)
+                n2.insertKnotsEta(i, k, 0, 1)
                 testNurbs(n1, n2)
             }
         }

@@ -46,7 +46,8 @@ export let drawNurbsSurf = (
     plot: string,
     sameScale: boolean = false,
     maxXi = 1,
-    maxEta = 1) => {
+    maxEta = 1,
+    title: string = "NURBS surface") => {
     const nurbs = new NurbsSurf(controlPoints, Xi.toArray(), Eta.toArray(), w, p, q)
     // @ts-expect-error
     const xiValues = math.range(0, maxXi, 0.005*maxXi).toArray()
@@ -150,7 +151,7 @@ export let drawNurbsSurf = (
 
     var layout = {
         title: {
-            text: "NURBS Surface",
+            text: title,
             font: {
                 family: "Ubuntu",
                 size: 24,

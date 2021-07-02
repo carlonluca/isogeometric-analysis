@@ -329,7 +329,7 @@ export class NurbsSurf {
      * @param s 
      * @param r 
      */
-    public insertKnotEta(bareta: number, index: number, s: number, r: number): NurbsSurf {
+    public insertKnotsEta(bareta: number, index: number, s: number, r: number): NurbsSurf {
         let Pw = NurbsCurve.toWeightedControlPoints(this.controlPoints, this.weights)
         let kvin = new RowVector(this.Eta)
         let m = kvin.length() - this.q - 2
@@ -338,20 +338,20 @@ export class NurbsSurf {
         let Pwin = new Array(Pw[0].length)
 
         let Pwout: HomPoint[][] = new Array(this.controlPoints.length)
-        for (let i = 0; i <= Pwout.length; i++)
+        for (let i = 0; i < Pwout.length; i++)
             Pwout[i] = new Array(barM + 1)
         for (let k = 0; k < barM; k++) {
             if (k <= index - this.q)
                 alphas.setValue(k, 0)
             else if (k <= index && k >= index - this.q + 1)
-                alphas.setValue(k, (bareta - this.Eta[k]) / (this.Eta[k + this.p] - this.Eta[k]))
+                alphas.setValue(k, (bareta - this.Eta[k]) / (this.Eta[k + this.q] - this.Eta[k]))
             else
                 alphas.setValue(k, 1)
         }
 
         let kvout: RowVector
         for (let i = 0; i < Pw.length; i++) {
-            for (let k = 0; k < Pw[k].length; k++)
+            for (let k = 0; k < Pw[i].length; k++)
                 Pwin[k] = Pw[i][k]
 
             // TODO: No need to recompute the knot vector.
