@@ -19,10 +19,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { BsplineCurve } from "../bspline/bspline";
 import { Matrix2, RowVector } from "../core/matrix";
 import { Point } from "../core/point"
 import { NurbsPlateHole } from "../examples/nurbsPlate";
+import { NurbsToroid } from "../examples/nurbsToroid";
 import { drawNurbsSurf } from "./drawNurbsSurf"
+import { NurbsSurf } from "./nurbs";
 
 export let drawNurbsSurfPlateHole = (plot: string, drawControlPoints: boolean, basisPlot: string) => {
     let nurbs = new NurbsPlateHole()
@@ -34,123 +37,59 @@ export let drawNurbsSurfPlateHole = (plot: string, drawControlPoints: boolean, b
 }
 
 export function drawNurbsSurfToroid(plot: string, drawControlPoints: boolean, basisPlot: string) {
-    let P = [[
-        new Point(5, 0, -1),
-        new Point(5, 5, -1),
-        new Point(0, 5, -1),
-        new Point(-5, 5, -1),
-        new Point(-5, 0, -1),
-        new Point(-5, -5, -1),
-        new Point(0, -5, -1),
-        new Point(5, -5, -1),
-        new Point(5, 0, -1)
-    ], [
-        new Point(6, 0, -1),
-        new Point(6, 6, -1),
-        new Point(0, 6, -1),
-        new Point(-6, 6, -1),
-        new Point(-6, 0, -1),
-        new Point(-6, -6, -1),
-        new Point(0, -6, -1),
-        new Point(6, -6, -1),
-        new Point(6, 0, -1)
-    ], [
-        new Point(6, 0, 0),
-        new Point(6, 6, 0),
-        new Point(0, 6, 0),
-        new Point(-6, 6, 0),
-        new Point(-6, 0, 0),
-        new Point(-6, -6, 0),
-        new Point(0, -6, 0),
-        new Point(6, -6, 0),
-        new Point(6, 0, 0)
-    ], [
-        new Point(6, 0, 1),
-        new Point(6, 6, 1),
-        new Point(0, 6, 1),
-        new Point(-6, 6, 1),
-        new Point(-6, 0, 1),
-        new Point(-6, -6, 1),
-        new Point(0, -6, 1),
-        new Point(6, -6, 1),
-        new Point(6, 0, 1)
-    ], [
-        new Point(5, 0, 1),
-        new Point(5, 5, 1),
-        new Point(0, 5, 1),
-        new Point(-5, 5, 1),
-        new Point(-5, 0, 1),
-        new Point(-5, -5, 1),
-        new Point(0, -5, 1),
-        new Point(5, -5, 1),
-        new Point(5, 0, 1),
-    ], [
-        new Point(4, 0, 1),
-        new Point(4, 4, 1),
-        new Point(0, 4, 1),
-        new Point(-4, 4, 1),
-        new Point(-4, 0, 1),
-        new Point(-4, -4, 1),
-        new Point(0, -4, 1),
-        new Point(4, -4, 1),
-        new Point(4, 0, 1),
-    ], [
-        new Point(4, 0, 0),
-        new Point(4, 4, 0),
-        new Point(0, 4, 0),
-        new Point(-4, 4, 0),
-        new Point(-4, 0, 0),
-        new Point(-4, -4, 0),
-        new Point(0, -4, 0),
-        new Point(4, -4, 0),
-        new Point(4, 0, 0),
-    ], [
-        new Point(4, 0, -1),
-        new Point(4, 4, -1),
-        new Point(0, 4, -1),
-        new Point(-4, 4, -1),
-        new Point(-4, 0, -1),
-        new Point(-4, -4, -1),
-        new Point(0, -4, -1),
-        new Point(4, -4, -1),
-        new Point(4, 0, -1),
-    ], [
-        new Point(5, 0, -1),
-        new Point(5, 5, -1),
-        new Point(0, 5, -1),
-        new Point(-5, 5, -1),
-        new Point(-5, 0, -1),
-        new Point(-5, -5, -1),
-        new Point(0, -5, -1),
-        new Point(5, -5, -1),
-        new Point(5, 0, -1),
-    ]]
+    let nurbs = new NurbsToroid()
+    drawNurbsSurf(
+        nurbs.controlPoints,
+        new RowVector(nurbs.Xi),
+        new RowVector(nurbs.Eta),
+        nurbs.weights, nurbs.p, nurbs.q, drawControlPoints, plot, true, 4, 4)
+}
 
-    let Pt: Point[][] = new Array(P[0].length)
-    for (let i = 0; i < P[0].length; i++)
-        Pt[i] = new Array(P.length)
-    for (let i = 0; i < P.length; i++)
-        for (let j = 0; j < P[i].length; j++)
-            Pt[j][i] = P[i][j]
+function drawNurbsKnotInsertionExample(nurbs: NurbsSurf, plot1: string, plot2: string, plot3: string, plot4: string, maxXi: number = 1, maxEta: number = 1) {
 
-    P = Pt
+    let refine = (step: number, nurbs: NurbsSurf) => {
+        for (let i = step; i <= 1 - step; i += step) {
+            let k = BsplineCurve.findSpan(nurbs.Xi, i, nurbs.p, nurbs.controlPoints.length - 1)
+            if (nurbs.Xi[k] != i)
+                nurbs.insertKnotsXi(i, k, 0, 1)
+            k = BsplineCurve.findSpan(nurbs.Eta, i, nurbs.q, nurbs.controlPoints[0].length - 1)
+            if (nurbs.Eta[k] != i)
+                nurbs.insertKnotsEta(i, k, 0, 1)
+        }
+    }
 
-    let Xi = new RowVector([0, 0, 0, 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, 1, 1, 1]).mult(4).row(0)
-    let Eta = new RowVector([0, 0, 0, 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, 1, 1, 1]).mult(4).row(0)
-    let p = 2
-    let q = 2
+    drawNurbsSurf(
+        nurbs.controlPoints,
+        new RowVector(nurbs.Xi),
+        new RowVector(nurbs.Eta),
+        nurbs.weights, nurbs.p, nurbs.q, true, plot1, true, maxXi, maxEta, "NURBS knot insertion 1")
+    
+    refine(0.25, nurbs)
+    drawNurbsSurf(
+        nurbs.controlPoints,
+        new RowVector(nurbs.Xi),
+        new RowVector(nurbs.Eta),
+        nurbs.weights, nurbs.p, nurbs.q, true, plot2, true, maxXi, maxEta, "NURBS knot insertion 2")
+    
+    refine(0.125, nurbs)
+    drawNurbsSurf(
+        nurbs.controlPoints,
+        new RowVector(nurbs.Xi),
+        new RowVector(nurbs.Eta),
+        nurbs.weights, nurbs.p, nurbs.q, true, plot3, true, maxXi, maxEta, "NURBS knot insertion 3")
 
-    let w1 = new RowVector([1, 1/Math.sqrt(2), 1, 1/Math.sqrt(2), 1, 1/Math.sqrt(2), 1, 1/Math.sqrt(2), 1])
-    let w2 = new RowVector([1/Math.sqrt(2), 1/2, 1/Math.sqrt(2), 1/2, 1/Math.sqrt(2), 1/2, 1/Math.sqrt(2), 1/2, 1/Math.sqrt(2)])
-    let w = Matrix2.zero(9, 9)
-        .assignCol(0, w1)
-        .assignCol(1, w2)
-        .assignCol(2, w1)
-        .assignCol(3, w2)
-        .assignCol(4, w1)
-        .assignCol(5, w2)
-        .assignCol(6, w1)
-        .assignCol(7, w2)
-        .assignCol(8, w1)
-    drawNurbsSurf(P, Xi, Eta, w, p, q, drawControlPoints, plot, true, 4, 4)
+    refine(0.0625, nurbs)
+    drawNurbsSurf(
+        nurbs.controlPoints,
+        new RowVector(nurbs.Xi),
+        new RowVector(nurbs.Eta),
+        nurbs.weights, nurbs.p, nurbs.q, true, plot4, true, maxXi, maxEta, "NURBS knot insertion 4")
+}
+
+export function drawNURBSKnotInsertionPlateHole(plot1: string, plot2: string, plot3: string, plot4: string) {
+    drawNurbsKnotInsertionExample(new NurbsPlateHole(), plot1, plot2, plot3, plot4)
+}
+
+export function drawNURBSKnotInsertionToroid(plot1: string, plot2: string, plot3: string, plot4: string) {
+    drawNurbsKnotInsertionExample(new NurbsToroid(), plot1, plot2, plot3, plot4, 4, 4)
 }

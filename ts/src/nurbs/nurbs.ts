@@ -47,7 +47,7 @@ export class NurbsCurve {
      *
      * @param xi
      */
-    public evaluate(xi: number): Point { 
+    public evaluate(xi: number): Point {
         return this.evaluate2(xi)
     }
 
@@ -129,7 +129,7 @@ export class NurbsCurve {
         for (let i = index + r + 1; i < barXi.length(); i++)
             barXi.setValue(i, Xi.value(index + 1 + i - index - r - 1))
 
-        let Pw = NurbsCurve.toWeightedControlPoints(this.controlPoints, new RowVector(this.weights))
+        let Pw = NurbsCurve.toWeightedControlPoints([this.controlPoints], new RowVector(this.weights))[0]
         let barPw: HomPoint[] = new Array(barN)
         for (let i = 0; i <= barN; i++) {
             if (i <= index - this.p)
@@ -185,10 +185,13 @@ export class NurbsCurve {
      * @param w 
      * @returns 
      */
-    public static toWeightedControlPoints(P: Point[], w: RowVector): HomPoint[] {
-        let Pw: HomPoint[] = new Array(P.length)
-        for (let i = 0; i < P.length; i++)
-            Pw[i] = P[i].toHomogeneous(w.value(i))
+    public static toWeightedControlPoints(P: Point[][], w: Matrix2): HomPoint[][] {
+        let Pw: HomPoint[][] = new Array(P.length)
+        for (let i = 0; i < P.length; i++) {
+            Pw[i] = new Array(P[i].length)
+            for (let j = 0; j < P[i].length; j++)
+                Pw[i][j] = P[i][j].toHomogeneous(w.value(i, j))
+        }
         return Pw
     }
 
@@ -270,6 +273,104 @@ export class NurbsSurf {
     }
 
     /**
+     * Inserts a knot in the Xi vector.
+     * 
+     * @param barxi 
+     * @param index 
+     * @param s 
+     * @param r 
+     */
+    public insertKnotsXi(barxi: number, index: number, s: number, r: number): NurbsSurf {
+        let Pw = NurbsCurve.toWeightedControlPoints(this.controlPoints, this.weights)
+        let kvin = new RowVector(this.Xi)
+        let n = kvin.length() - this.p - 2
+        let barN = n + r - s
+        let alphas = RowVector.zero(barN)
+        let Pwin = new Array(Pw.length)
+
+        let Pwout: HomPoint[][] = new Array(barN + 1)
+        for (let i = 0; i <= barN; i++)
+            Pwout[i] = new Array(this.controlPoints[0].length)
+        for (let k = 0; k < barN; k++) {
+            if (k <= index - this.p)
+                alphas.setValue(k, 0)
+            else if (k <= index && k >= index - this.p + 1)
+                alphas.setValue(k, (barxi - this.Xi[k]) / (this.Xi[k + this.p] - this.Xi[k]))
+            else
+                alphas.setValue(k, 1)
+        }
+
+        let kvout: RowVector
+        for (let j = 0; j < Pw[0].length; j++) {
+            for (let k = 0; k < Pw.length; k++)
+                Pwin[k] = Pw[k][j]
+
+            // TODO: No need to recompute the knot vector.
+            let [kvouti, Pwouti] = this.insertKnots(kvin, Pwin, barxi, index, s, r, alphas)
+            kvout = kvouti
+            for (let k = 0; k < Pwouti.length; k++)
+                Pwout[k][j] = Pwouti[k]
+        }
+
+        let [P, newW] = NurbsSurf.fromWeightedControlPoints(Pwout)
+
+        this.controlPoints = P
+        this.Xi = kvout.toArray()
+        this.weights = newW
+
+        return this
+    }
+
+    /**
+     * Inserts a knot in the Eta vector.
+     * 
+     * @param bareta 
+     * @param index 
+     * @param s 
+     * @param r 
+     */
+    public insertKnotsEta(bareta: number, index: number, s: number, r: number): NurbsSurf {
+        let Pw = NurbsCurve.toWeightedControlPoints(this.controlPoints, this.weights)
+        let kvin = new RowVector(this.Eta)
+        let m = kvin.length() - this.q - 2
+        let barM = m + r - s
+        let alphas = RowVector.zero(barM)
+        let Pwin = new Array(Pw[0].length)
+
+        let Pwout: HomPoint[][] = new Array(this.controlPoints.length)
+        for (let i = 0; i < Pwout.length; i++)
+            Pwout[i] = new Array(barM + 1)
+        for (let k = 0; k < barM; k++) {
+            if (k <= index - this.q)
+                alphas.setValue(k, 0)
+            else if (k <= index && k >= index - this.q + 1)
+                alphas.setValue(k, (bareta - this.Eta[k]) / (this.Eta[k + this.q] - this.Eta[k]))
+            else
+                alphas.setValue(k, 1)
+        }
+
+        let kvout: RowVector
+        for (let i = 0; i < Pw.length; i++) {
+            for (let k = 0; k < Pw[i].length; k++)
+                Pwin[k] = Pw[i][k]
+
+            // TODO: No need to recompute the knot vector.
+            let [kvouti, Pwouti] = this.insertKnots(kvin, Pwin, bareta, index, s, r, alphas)
+            kvout = kvouti
+            for (let k = 0; k < Pwouti.length; k++)
+                Pwout[i][k] = Pwouti[k]
+        }
+
+        let [P, newW] = NurbsSurf.fromWeightedControlPoints(Pwout)
+
+        this.controlPoints = P
+        this.Eta = kvout.toArray()
+        this.weights = newW
+
+        return this
+    }
+
+    /**
      * Converts a matrix of control points to a matrix of weighted control points.
      * 
      * @param P 
@@ -285,5 +386,73 @@ export class NurbsSurf {
         }
 
         return Pw
+    }
+
+    /**
+     * Converts weighted points to points and weights.
+     * 
+     * @param Pw 
+     * @returns 
+     */
+     public static fromWeightedControlPoints(Pw: HomPoint[][]): [Point[][], Matrix2] {
+        let P: Point[][] = new Array(Pw.length)
+        let wData: number[][] = new Array(Pw.length)
+        for (let i = 0; i < Pw.length; i++) {
+            P[i] = new Array(Pw[i].length)
+            wData[i] = new Array(Pw[i].length)
+            for (let j = 0; j < Pw[i].length; j++) {
+                wData[i][j] = Pw[i][j].w()
+                P[i][j] = Point.fromVector(Pw[i][j].clone().mult(1 / Pw[i][j].w()).row(0))
+            }
+        }
+
+        return [
+            P,
+            new Matrix2(wData)
+        ]
+    }
+
+    // Private portion
+    // ===============
+    /**
+     * Inserts a knot.
+     * 
+     * @param kvin 
+     * @param Pin 
+     * @param barvalue 
+     * @param index 
+     * @param s 
+     * @param r 
+     * @param alphas 
+     * @returns 
+     */
+    private insertKnots(kvin: RowVector, Pin: HomPoint[], barvalue: number, index: number, s: number, r: number, alphas: RowVector): [kvout: RowVector, Pout: HomPoint[]] {
+        let n = kvin.length() - this.p - 2
+        let kvout = RowVector.zero(kvin.length() + r)
+        let nout = n + r - s
+
+        // Prepare the new knot vector.
+        for (let i = 0; i <= index; i++)
+            kvout.setValue(i, kvin.value(i))
+        for (let i = index + 1; i <= index + r; i++)
+            kvout.setValue(i, barvalue)
+        for (let i = index + r + 1; i < kvout.length(); i++)
+            kvout.setValue(i, kvin.value(index + 1 + i - index - r - 1))
+
+        let Pout: HomPoint[] = new Array(nout)
+        for (let i = 0; i <= nout; i++) {
+            if (i <= index - this.p)
+                Pout[i] = Pin[i].clone()
+            else if (i <= index && i >= index - this.p + 1) {
+                let alpha = alphas.value(i)
+                let _Pw1 = Pin[i].clone().mult(alpha)
+                let _Pw2 = Pin[i - 1].clone().mult(1 - alpha)
+                Pout[i] = HomPoint.fromVector(_Pw1.add(_Pw2).row(0))
+            }
+            else
+                Pout[i] = Pin[i - 1].clone()
+        }
+
+        return [kvout, Pout]
     }
 }

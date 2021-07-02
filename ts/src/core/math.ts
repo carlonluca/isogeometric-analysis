@@ -22,3 +22,7 @@
  export let in_range = (val: number, a: number, b: number, openLeft: boolean = false, openRight: boolean = false) => {
      return val >= a && val <= b
 }
+
+export function approxEqual(val1: number, val2: number, epsilon: number = 1E-6): boolean {
+    return Math.abs(val1 - val2) <= epsilon
+}
