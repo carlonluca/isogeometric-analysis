@@ -530,7 +530,11 @@ define("core/matrix", ["require", "exports", "core/size"], function (require, ex
          * @param index
          * @returns
          */
-        value(index) { return super.value(0, index); }
+        value(a, b) {
+            if (b)
+                return super.value(a, b);
+            return super.value(0, a);
+        }
         /**
          * Sets the value.
          *
@@ -1256,6 +1260,416 @@ define("bspline/bspline", ["require", "exports", "core/matrix", "core/point", "c
 /**
  * Project: Approximation and Finite Elements in Isogeometric Problems
  * Author:  Luca Carlon
+ * Date:    2021.06.05
+ *
+ * Copyright (c) 2021 Luca Carlon. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+define("nurbs/nurbs", ["require", "exports", "core/matrix", "core/point", "bspline/bspline", "core/range"], function (require, exports, matrix_3, point_3, bspline_1, range_2) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.NurbsSurf = exports.NurbsCurve = void 0;
+    /**
+     * Representation of a NURBS curve.
+     */
+    class NurbsCurve {
+        /**
+         * Ctor.
+         *
+         * @param controlPoints
+         * @param knotVector
+         * @param p
+         */
+        constructor(controlPoints, knotVector, weights, p) {
+            this.controlPoints = controlPoints;
+            this.knotVector = knotVector;
+            this.weights = weights;
+            this.p = p;
+        }
+        /**
+         * Computes the curve in xi.
+         *
+         * @param xi
+         */
+        evaluate(xi) {
+            return this.evaluate2(xi);
+        }
+        /**
+         * Evaluates the NURBS curve.
+         *
+         * @param xi
+         * @returns
+         */
+        evaluate1(xi) {
+            let x = 0;
+            let y = 0;
+            let z = 0;
+            let n = this.controlPoints.length - 1;
+            let Xi = new matrix_3.RowVector(this.knotVector);
+            let w = new matrix_3.RowVector(this.weights);
+            for (let i = 0; i <= n; i++) {
+                let N = NurbsCurve.computeBasis(Xi, w, i, this.p, xi);
+                x = x + N * this.controlPoints[i].x();
+                y = y + N * this.controlPoints[i].y();
+                z = z + N * this.controlPoints[i].z();
+            }
+            return new point_3.Point(x, y, z);
+        }
+        /**
+         * Evaluates the NURBS curve in matrix form.
+         *
+         * @param xi
+         * @returns
+         */
+        evaluate2(xi) {
+            let n = this.controlPoints.length - 1;
+            let Xi = this.knotVector;
+            let P = this.controlPoints;
+            let xiSpan = bspline_1.BsplineCurve.findSpan(Xi, xi, this.p, n);
+            let Nxi = bspline_1.BsplineCurve.computeAllNonvanishingBasis(Xi, xiSpan, this.p, xi);
+            // Convert to homogeneous coords.
+            let Pw = NurbsSurf.toWeightedControlPoints([P], new matrix_3.RowVector(this.weights))[0];
+            let P_x = point_3.HomPoint.matFromPoints([Pw], "x").row(0);
+            let P_y = point_3.HomPoint.matFromPoints([Pw], "y").row(0);
+            let P_z = point_3.HomPoint.matFromPoints([Pw], "z").row(0);
+            let P_w = point_3.HomPoint.matFromPoints([Pw], "w").row(0);
+            let sx = Nxi.multMat(P_x.range(new range_2.Range(xiSpan - this.p, xiSpan))
+                .transpose()).value(0, 0);
+            let sy = Nxi.multMat(P_y.range(new range_2.Range(xiSpan - this.p, xiSpan))
+                .transpose()).value(0, 0);
+            let sz = Nxi.multMat(P_z.range(new range_2.Range(xiSpan - this.p, xiSpan))
+                .transpose()).value(0, 0);
+            let sw = Nxi.multMat(P_w.range(new range_2.Range(xiSpan - this.p, xiSpan))
+                .transpose()).value(0, 0);
+            return new point_3.Point(sx / sw, sy / sw, sz / sw);
+        }
+        /**
+         * Implements knot insertion on this NURBS.
+         *
+         * @param barxi value of the new knot to insert.
+         * @param index where the new knot is to be inserted.
+         * @param s initial multiplicity.
+         * @param r multiplicity of the knot to add.
+         */
+        insertKnot(barxi, index, s, r) {
+            let Xi = new matrix_3.RowVector(this.knotVector);
+            let n = Xi.length() - this.p - 2;
+            let barXi = matrix_3.RowVector.zero(Xi.length() + r);
+            let barN = n + r - s;
+            // Prepare the new knot vector.
+            for (let i = 0; i <= index; i++)
+                barXi.setValue(i, Xi.value(i));
+            for (let i = index + 1; i <= index + r; i++)
+                barXi.setValue(i, barxi);
+            for (let i = index + r + 1; i < barXi.length(); i++)
+                barXi.setValue(i, Xi.value(index + 1 + i - index - r - 1));
+            let Pw = NurbsCurve.toWeightedControlPoints([this.controlPoints], new matrix_3.RowVector(this.weights))[0];
+            let barPw = new Array(barN);
+            for (let i = 0; i <= barN; i++) {
+                if (i <= index - this.p)
+                    barPw[i] = Pw[i].clone();
+                else if (i <= index && i >= index - this.p + 1) {
+                    let alpha = (barxi - Xi.value(i)) / (Xi.value(i + this.p) - Xi.value(i));
+                    let _Pw1 = Pw[i].clone().mult(alpha);
+                    let _Pw2 = Pw[i - 1].clone().mult(1 - alpha);
+                    barPw[i] = point_3.HomPoint.fromVector(_Pw1.add(_Pw2).row(0));
+                }
+                else
+                    barPw[i] = Pw[i - 1];
+            }
+            let [barP, barW] = NurbsCurve.fromWeightedControlPoints(barPw);
+            this.controlPoints = barP;
+            this.knotVector = barXi.toArray();
+            this.weights = barW.toArray();
+            return this;
+        }
+        /**
+         * Computes the i-th NURBS basis function.
+         *
+         * @param Xi
+         * @param w
+         * @param i
+         * @param p
+         * @param xi
+         * @returns
+         */
+        static computeBasis(Xi, w, i, p, xi) {
+            let n = Xi.length() - 1;
+            let xiSpan = bspline_1.BsplineCurve.findSpan(Xi.toArray(), xi, p, n);
+            if (i < xiSpan - p || i > xiSpan)
+                return 0;
+            let N = bspline_1.BsplineCurve.computeAllNonvanishingBasis(Xi.toArray(), xiSpan, p, xi);
+            let R = (N.value(p - (xiSpan - i)) * w.value(i)) /
+                N.multMat(w.range(new range_2.Range(xiSpan - p, xiSpan)).transposed()).value(0, 0);
+            return R;
+        }
+        /**
+         * To weighted control points.
+         *
+         * @param P
+         * @param w
+         * @returns
+         */
+        static toWeightedControlPoints(P, w) {
+            let Pw = new Array(P.length);
+            for (let i = 0; i < P.length; i++) {
+                Pw[i] = new Array(P[i].length);
+                for (let j = 0; j < P[i].length; j++)
+                    Pw[i][j] = P[i][j].toHomogeneous(w.value(i, j));
+            }
+            return Pw;
+        }
+        /**
+         * Converts weighted points to points and weights.
+         *
+         * @param Pw
+         * @returns
+         */
+        static fromWeightedControlPoints(Pw) {
+            let P = new Array(Pw.length);
+            let wData = new Array(Pw.length);
+            for (let i = 0; i < Pw.length; i++) {
+                wData[i] = Pw[i].w();
+                P[i] = point_3.Point.fromVector(Pw[i].clone().mult(1 / Pw[i].w()).row(0));
+            }
+            return [
+                P,
+                new matrix_3.RowVector(wData)
+            ];
+        }
+    }
+    exports.NurbsCurve = NurbsCurve;
+    /**
+     * Represents a NURBS surface.
+     */
+    class NurbsSurf {
+        /**
+         * Ctor.
+         *
+         * @param controlPoints
+         * @param Xi
+         * @param Eta
+         * @param p
+         * @param q
+         */
+        constructor(controlPoints, Xi, Eta, weights, p, q) {
+            this.controlPoints = controlPoints;
+            this.Xi = Xi;
+            this.Eta = Eta;
+            this.weights = weights;
+            this.p = p;
+            this.q = q;
+        }
+        /**
+         * Evaluates the NURBS surface in (xi, eta).
+         *
+         * @param xi
+         * @param eta
+         * @returns
+         */
+        evaluate(xi, eta) {
+            let n = this.controlPoints.length - 1;
+            let m = this.controlPoints[0].length - 1;
+            let xiSpan = bspline_1.BsplineCurve.findSpan(this.Xi, xi, this.p, n);
+            let etaSpan = bspline_1.BsplineCurve.findSpan(this.Eta, eta, this.q, m);
+            let Nxi = bspline_1.BsplineCurve.computeAllNonvanishingBasis(this.Xi, xiSpan, this.p, xi);
+            let Neta = bspline_1.BsplineCurve.computeAllNonvanishingBasis(this.Eta, etaSpan, this.q, eta);
+            // Convert to homogeneous coords.
+            let Pw = NurbsSurf.toWeightedControlPoints(this.controlPoints, this.weights);
+            let P_x = point_3.HomPoint.matFromPoints(Pw, "x");
+            let P_y = point_3.HomPoint.matFromPoints(Pw, "y");
+            let P_z = point_3.HomPoint.matFromPoints(Pw, "z");
+            let P_w = point_3.HomPoint.matFromPoints(Pw, "w");
+            let sx = Nxi.multMat(P_x.rect(new point_3.Point(etaSpan - this.q, xiSpan - this.p), new point_3.Point(etaSpan, xiSpan)))
+                .multMat(Neta.transposed()).value(0, 0);
+            let sy = Nxi.multMat(P_y.rect(new point_3.Point(etaSpan - this.q, xiSpan - this.p), new point_3.Point(etaSpan, xiSpan)))
+                .multMat(Neta.transposed()).value(0, 0);
+            let sz = Nxi.multMat(P_z.rect(new point_3.Point(etaSpan - this.q, xiSpan - this.p), new point_3.Point(etaSpan, xiSpan)))
+                .multMat(Neta.transposed()).value(0, 0);
+            let sw = Nxi.multMat(P_w.rect(new point_3.Point(etaSpan - this.q, xiSpan - this.p), new point_3.Point(etaSpan, xiSpan)))
+                .multMat(Neta.transposed()).value(0, 0);
+            return new point_3.Point(sx / sw, sy / sw, sz / sw);
+        }
+        /**
+         * Inserts a knot in the Xi vector.
+         *
+         * @param barxi
+         * @param index
+         * @param s
+         * @param r
+         */
+        insertKnotsXi(barxi, index, s, r) {
+            let Pw = NurbsCurve.toWeightedControlPoints(this.controlPoints, this.weights);
+            let kvin = new matrix_3.RowVector(this.Xi);
+            let n = kvin.length() - this.p - 2;
+            let barN = n + r - s;
+            let alphas = matrix_3.RowVector.zero(barN);
+            let Pwin = new Array(Pw.length);
+            let Pwout = new Array(barN + 1);
+            for (let i = 0; i <= barN; i++)
+                Pwout[i] = new Array(this.controlPoints[0].length);
+            for (let k = 0; k < barN; k++) {
+                if (k <= index - this.p)
+                    alphas.setValue(k, 0);
+                else if (k <= index && k >= index - this.p + 1)
+                    alphas.setValue(k, (barxi - this.Xi[k]) / (this.Xi[k + this.p] - this.Xi[k]));
+                else
+                    alphas.setValue(k, 1);
+            }
+            let kvout;
+            for (let j = 0; j < Pw[0].length; j++) {
+                for (let k = 0; k < Pw.length; k++)
+                    Pwin[k] = Pw[k][j];
+                // TODO: No need to recompute the knot vector.
+                let [kvouti, Pwouti] = this.insertKnots(kvin, Pwin, barxi, index, s, r, alphas);
+                kvout = kvouti;
+                for (let k = 0; k < Pwouti.length; k++)
+                    Pwout[k][j] = Pwouti[k];
+            }
+            let [P, newW] = NurbsSurf.fromWeightedControlPoints(Pwout);
+            this.controlPoints = P;
+            this.Xi = kvout.toArray();
+            this.weights = newW;
+            return this;
+        }
+        /**
+         * Inserts a knot in the Eta vector.
+         *
+         * @param bareta
+         * @param index
+         * @param s
+         * @param r
+         */
+        insertKnotsEta(bareta, index, s, r) {
+            let Pw = NurbsCurve.toWeightedControlPoints(this.controlPoints, this.weights);
+            let kvin = new matrix_3.RowVector(this.Eta);
+            let m = kvin.length() - this.q - 2;
+            let barM = m + r - s;
+            let alphas = matrix_3.RowVector.zero(barM);
+            let Pwin = new Array(Pw[0].length);
+            let Pwout = new Array(this.controlPoints.length);
+            for (let i = 0; i < Pwout.length; i++)
+                Pwout[i] = new Array(barM + 1);
+            for (let k = 0; k < barM; k++) {
+                if (k <= index - this.q)
+                    alphas.setValue(k, 0);
+                else if (k <= index && k >= index - this.q + 1)
+                    alphas.setValue(k, (bareta - this.Eta[k]) / (this.Eta[k + this.q] - this.Eta[k]));
+                else
+                    alphas.setValue(k, 1);
+            }
+            let kvout;
+            for (let i = 0; i < Pw.length; i++) {
+                for (let k = 0; k < Pw[i].length; k++)
+                    Pwin[k] = Pw[i][k];
+                // TODO: No need to recompute the knot vector.
+                let [kvouti, Pwouti] = this.insertKnots(kvin, Pwin, bareta, index, s, r, alphas);
+                kvout = kvouti;
+                for (let k = 0; k < Pwouti.length; k++)
+                    Pwout[i][k] = Pwouti[k];
+            }
+            let [P, newW] = NurbsSurf.fromWeightedControlPoints(Pwout);
+            this.controlPoints = P;
+            this.Eta = kvout.toArray();
+            this.weights = newW;
+            return this;
+        }
+        /**
+         * Converts a matrix of control points to a matrix of weighted control points.
+         *
+         * @param P
+         * @param w
+         */
+        static toWeightedControlPoints(P, w) {
+            let Pw = new Array(P.length);
+            for (let i = 0; i < P.length; i++) {
+                Pw[i] = new Array(P[i].length);
+                for (let j = 0; j < P[i].length; j++) {
+                    Pw[i][j] = P[i][j].toHomogeneous(w.value(i, j));
+                }
+            }
+            return Pw;
+        }
+        /**
+         * Converts weighted points to points and weights.
+         *
+         * @param Pw
+         * @returns
+         */
+        static fromWeightedControlPoints(Pw) {
+            let P = new Array(Pw.length);
+            let wData = new Array(Pw.length);
+            for (let i = 0; i < Pw.length; i++) {
+                P[i] = new Array(Pw[i].length);
+                wData[i] = new Array(Pw[i].length);
+                for (let j = 0; j < Pw[i].length; j++) {
+                    wData[i][j] = Pw[i][j].w();
+                    P[i][j] = point_3.Point.fromVector(Pw[i][j].clone().mult(1 / Pw[i][j].w()).row(0));
+                }
+            }
+            return [
+                P,
+                new matrix_3.Matrix2(wData)
+            ];
+        }
+        // Private portion
+        // ===============
+        /**
+         * Inserts a knot.
+         *
+         * @param kvin
+         * @param Pin
+         * @param barvalue
+         * @param index
+         * @param s
+         * @param r
+         * @param alphas
+         * @returns
+         */
+        insertKnots(kvin, Pin, barvalue, index, s, r, alphas) {
+            let n = kvin.length() - this.p - 2;
+            let kvout = matrix_3.RowVector.zero(kvin.length() + r);
+            let nout = n + r - s;
+            // Prepare the new knot vector.
+            for (let i = 0; i <= index; i++)
+                kvout.setValue(i, kvin.value(i));
+            for (let i = index + 1; i <= index + r; i++)
+                kvout.setValue(i, barvalue);
+            for (let i = index + r + 1; i < kvout.length(); i++)
+                kvout.setValue(i, kvin.value(index + 1 + i - index - r - 1));
+            let Pout = new Array(nout);
+            for (let i = 0; i <= nout; i++) {
+                if (i <= index - this.p)
+                    Pout[i] = Pin[i].clone();
+                else if (i <= index && i >= index - this.p + 1) {
+                    let alpha = alphas.value(i);
+                    let _Pw1 = Pin[i].clone().mult(alpha);
+                    let _Pw2 = Pin[i - 1].clone().mult(1 - alpha);
+                    Pout[i] = point_3.HomPoint.fromVector(_Pw1.add(_Pw2).row(0));
+                }
+                else
+                    Pout[i] = Pin[i - 1].clone();
+            }
+            return [kvout, Pout];
+        }
+    }
+    exports.NurbsSurf = NurbsSurf;
+});
+/**
+ * Project: Approximation and Finite Elements in Isogeometric Problems
+ * Author:  Luca Carlon
  * Date:    2021.05.25
  *
  * Copyright (c) 2021 Luca Carlon. All rights reserved.
@@ -1273,38 +1687,51 @@ define("bspline/bspline", ["require", "exports", "core/matrix", "core/point", "c
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("examples/exampleCurves", ["require", "exports", "bspline/bspline", "core/point"], function (require, exports, bspline_1, point_3) {
+define("examples/exampleCurves", ["require", "exports", "bspline/bspline", "core/matrix", "core/point", "nurbs/nurbs"], function (require, exports, bspline_2, matrix_4, point_4, nurbs_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.bsplineCurveSample1 = exports.exampleCurve3D1 = exports.exampleCurve2D1 = void 0;
+    exports.nurbsCurveSample2D = exports.bsplineCurveSample1 = exports.exampleCurve3D1 = exports.exampleCurve2D1 = void 0;
     exports.exampleCurve2D1 = [
-        new point_3.Point(0, 0),
-        new point_3.Point(1, 1),
-        new point_3.Point(2, 0.5),
-        new point_3.Point(3, 0.5),
-        new point_3.Point(0.5, 1.5),
-        new point_3.Point(1.5, 0)
+        new point_4.Point(0, 0),
+        new point_4.Point(1, 1),
+        new point_4.Point(2, 0.5),
+        new point_4.Point(3, 0.5),
+        new point_4.Point(0.5, 1.5),
+        new point_4.Point(1.5, 0)
     ];
     exports.exampleCurve3D1 = [
-        new point_3.Point(0, 0, 0),
-        new point_3.Point(1, 1, 1),
-        new point_3.Point(2, 0.5, 0),
-        new point_3.Point(3, 0.5, 0),
-        new point_3.Point(0.5, 1.5, 0),
-        new point_3.Point(1.5, 0, 1)
+        new point_4.Point(0, 0, 0),
+        new point_4.Point(1, 1, 1),
+        new point_4.Point(2, 0.5, 0),
+        new point_4.Point(3, 0.5, 0),
+        new point_4.Point(0.5, 1.5, 0),
+        new point_4.Point(1.5, 0, 1)
     ];
     function bsplineCurveSample1() {
         let controlPoints = [];
-        controlPoints.push(new point_3.Point(0, 0));
-        controlPoints.push(new point_3.Point(1, 1));
-        controlPoints.push(new point_3.Point(2, 0.5));
-        controlPoints.push(new point_3.Point(3, 0.5));
-        controlPoints.push(new point_3.Point(0.5, 1.5));
-        controlPoints.push(new point_3.Point(1.5, 0));
+        controlPoints.push(new point_4.Point(0, 0));
+        controlPoints.push(new point_4.Point(1, 1));
+        controlPoints.push(new point_4.Point(2, 0.5));
+        controlPoints.push(new point_4.Point(3, 0.5));
+        controlPoints.push(new point_4.Point(0.5, 1.5));
+        controlPoints.push(new point_4.Point(1.5, 0));
         let knotVector = [0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1];
-        return new bspline_1.BsplineCurve(controlPoints, knotVector, 2);
+        return new bspline_2.BsplineCurve(controlPoints, knotVector, 2);
     }
     exports.bsplineCurveSample1 = bsplineCurveSample1;
+    function nurbsCurveSample2D() {
+        let controlPoints = [];
+        controlPoints.push(new point_4.Point(0, 0));
+        controlPoints.push(new point_4.Point(1, 1));
+        controlPoints.push(new point_4.Point(2, 0.5));
+        controlPoints.push(new point_4.Point(3, 0.5));
+        controlPoints.push(new point_4.Point(0.5, 1.5));
+        controlPoints.push(new point_4.Point(1.5, 0));
+        let knotVector = [0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1];
+        let w = matrix_4.RowVector.one(controlPoints.length);
+        return new nurbs_1.NurbsCurve(controlPoints, knotVector, w.toArray(), 2);
+    }
+    exports.nurbsCurveSample2D = nurbsCurveSample2D;
 });
 /**
  * Project: Approximation and Finite Elements in Isogeometric Problems
@@ -1523,25 +1950,25 @@ define("bezier/drawBezierSurf", ["require", "exports", "bezier/bezier"], functio
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("examples/exampleSurfs", ["require", "exports", "core/point"], function (require, exports, point_4) {
+define("examples/exampleSurfs", ["require", "exports", "core/point"], function (require, exports, point_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.exampleSurf1ControlPoints = void 0;
     exports.exampleSurf1ControlPoints = [[
-            new point_4.Point(-3, 0, 2),
-            new point_4.Point(-2, 0, 6),
-            new point_4.Point(-1, 0, 7),
-            new point_4.Point(0, 0, 2),
+            new point_5.Point(-3, 0, 2),
+            new point_5.Point(-2, 0, 6),
+            new point_5.Point(-1, 0, 7),
+            new point_5.Point(0, 0, 2),
         ], [
-            new point_4.Point(-3, 1, 2),
-            new point_4.Point(-2, 1, 4),
-            new point_4.Point(-1, 1, 5),
-            new point_4.Point(0, 1, 2.5),
+            new point_5.Point(-3, 1, 2),
+            new point_5.Point(-2, 1, 4),
+            new point_5.Point(-1, 1, 5),
+            new point_5.Point(0, 1, 2.5),
         ], [
-            new point_4.Point(-3, 3, 0),
-            new point_4.Point(-2, 3, 2.5),
-            new point_4.Point(-1, 3, 4.5),
-            new point_4.Point(0, 3, 6.5),
+            new point_5.Point(-3, 3, 0),
+            new point_5.Point(-2, 3, 2.5),
+            new point_5.Point(-1, 3, 4.5),
+            new point_5.Point(0, 3, 6.5),
         ],
     ];
 });
@@ -1594,7 +2021,7 @@ define("bezier/drawBezierSurfExample", ["require", "exports", "bezier/drawBezier
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("bspline/drawBsplineCurve", ["require", "exports", "bspline/bspline"], function (require, exports, bspline_2) {
+define("bspline/drawBsplineCurve", ["require", "exports", "bspline/bspline"], function (require, exports, bspline_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.drawBsplineBasisFuncs = exports.drawBsplineCurve = void 0;
@@ -1605,7 +2032,7 @@ define("bspline/drawBsplineCurve", ["require", "exports", "bspline/bspline"], fu
     * @param plot
     */
     let drawBsplineCurve = (controlPoints, knotVector, p, threed, drawControlPoints, plot, bernsteinPlot = null) => {
-        const bspline = new bspline_2.BsplineCurve(controlPoints, knotVector, p);
+        const bspline = new bspline_3.BsplineCurve(controlPoints, knotVector, p);
         // @ts-expect-error
         const xiValues = math.range(0, 1, 0.001).toArray();
         let xValues = [];
@@ -1707,7 +2134,7 @@ define("bspline/drawBsplineCurve", ["require", "exports", "bspline/bspline"], fu
         for (let i = 0; i <= n; i++) {
             const upsiValues = [];
             xiValues.map((xi) => {
-                upsiValues.push(bspline_2.BsplineCurve.computeBasis(bspline.knotVector, i, bspline.p, xi));
+                upsiValues.push(bspline_3.BsplineCurve.computeBasis(bspline.knotVector, i, bspline.p, xi));
             });
             const trace = {
                 x: xiValues,
@@ -1771,7 +2198,7 @@ define("bspline/drawBsplineCurve", ["require", "exports", "bspline/bspline"], fu
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("bspline/drawBsplineCurveExample", ["require", "exports", "core/point", "examples/exampleCurves", "bspline/drawBsplineCurve"], function (require, exports, point_5, exampleCurves_2, drawBsplineCurve_1) {
+define("bspline/drawBsplineCurveExample", ["require", "exports", "core/point", "examples/exampleCurves", "bspline/drawBsplineCurve"], function (require, exports, point_6, exampleCurves_2, drawBsplineCurve_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.drawBsplineCurve2 = exports.drawBsplineCurve1 = void 0;
@@ -1782,12 +2209,12 @@ define("bspline/drawBsplineCurveExample", ["require", "exports", "core/point", "
     exports.drawBsplineCurve1 = drawBsplineCurve1;
     let drawBsplineCurve2 = (plot, drawControlPoints, bernsteinPlot) => {
         let controlPoints = [];
-        controlPoints.push(new point_5.Point(0, 0, 0));
-        controlPoints.push(new point_5.Point(1, 1, 1));
-        controlPoints.push(new point_5.Point(2, 0.5, 0));
-        controlPoints.push(new point_5.Point(3, 0.5, 0));
-        controlPoints.push(new point_5.Point(0.5, 1.5, 0));
-        controlPoints.push(new point_5.Point(1.5, 0, 1));
+        controlPoints.push(new point_6.Point(0, 0, 0));
+        controlPoints.push(new point_6.Point(1, 1, 1));
+        controlPoints.push(new point_6.Point(2, 0.5, 0));
+        controlPoints.push(new point_6.Point(3, 0.5, 0));
+        controlPoints.push(new point_6.Point(0.5, 1.5, 0));
+        controlPoints.push(new point_6.Point(1.5, 0, 1));
         let knotVector = [0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1];
         drawBsplineCurve_1.drawBsplineCurve(controlPoints, knotVector, 2, true, drawControlPoints, plot, bernsteinPlot);
     };
@@ -1813,7 +2240,7 @@ define("bspline/drawBsplineCurveExample", ["require", "exports", "core/point", "
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("bspline/drawBsplineSurf", ["require", "exports", "bspline/bspline"], function (require, exports, bspline_3) {
+define("bspline/drawBsplineSurf", ["require", "exports", "bspline/bspline"], function (require, exports, bspline_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.drawBsplineSurf = void 0;
@@ -1825,7 +2252,7 @@ define("bspline/drawBsplineSurf", ["require", "exports", "bspline/bspline"], fun
      */
     let drawBsplineSurf = (controlPoints, Xi, Eta, p, q, drawControlPoints, plot) => {
         const scaleZ = 3;
-        const bspline = new bspline_3.BsplineSurf(controlPoints, Xi, Eta, p, q);
+        const bspline = new bspline_4.BsplineSurf(controlPoints, Xi, Eta, p, q);
         // @ts-expect-error
         const xiValues = math.range(0, 1, 0.005).toArray();
         // @ts-expect-error
@@ -2018,7 +2445,7 @@ define("bspline/drawBsplineSurfExample", ["require", "exports", "bspline/drawBsp
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("core/conv", ["require", "exports", "core/matrix"], function (require, exports, matrix_3) {
+define("core/conv", ["require", "exports", "core/matrix"], function (require, exports, matrix_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.matFromPoints = void 0;
@@ -2032,7 +2459,7 @@ define("core/conv", ["require", "exports", "core/matrix"], function (require, ex
         let d1 = points.length;
         let d2 = points[0].length;
         let d3 = d;
-        let m = matrix_3.Matrix2.zero(d1, d2);
+        let m = matrix_5.Matrix2.zero(d1, d2);
         for (let i = 0; i < d1; i++) {
             for (let j = 0; j < d2; j++) {
                 m.setValue(i, j, this.controlPoints[i][j][d3]);
@@ -2065,235 +2492,15 @@ define("core/conv", ["require", "exports", "core/matrix"], function (require, ex
 define("core/math", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.in_range = void 0;
+    exports.approxEqual = exports.in_range = void 0;
     let in_range = (val, a, b, openLeft = false, openRight = false) => {
         return val >= a && val <= b;
     };
     exports.in_range = in_range;
-});
-/**
- * Project: Approximation and Finite Elements in Isogeometric Problems
- * Author:  Luca Carlon
- * Date:    2021.06.05
- *
- * Copyright (c) 2021 Luca Carlon. All rights reserved.
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
-define("nurbs/nurbs", ["require", "exports", "core/matrix", "core/point", "bspline/bspline", "core/range"], function (require, exports, matrix_4, point_6, bspline_4, range_2) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.NurbsSurf = exports.NurbsCurve = void 0;
-    /**
-     * Representation of a NURBS curve.
-     */
-    class NurbsCurve {
-        /**
-         * Ctor.
-         *
-         * @param controlPoints
-         * @param knotVector
-         * @param p
-         */
-        constructor(controlPoints, knotVector, weights, p) {
-            this.controlPoints = controlPoints;
-            this.knotVector = knotVector;
-            this.weights = weights;
-            this.p = p;
-        }
-        /**
-         * Computes the curve in xi.
-         *
-         * @param xi
-         */
-        evaluate(xi) {
-            let x = 0;
-            let y = 0;
-            let z = 0;
-            let n = this.controlPoints.length - 1;
-            let Xi = new matrix_4.RowVector(this.knotVector);
-            let w = new matrix_4.RowVector(this.weights);
-            for (let i = 0; i <= n; i++) {
-                let N = NurbsCurve.computeBasis(Xi, w, i, this.p, xi);
-                x = x + N * this.controlPoints[i].x();
-                y = y + N * this.controlPoints[i].y();
-                z = z + N * this.controlPoints[i].z();
-            }
-            return new point_6.Point(x, y, z);
-        }
-        /**
-         * Implements knot insertion on this NURBS.
-         *
-         * @param barxi value of the new knot to insert.
-         * @param index where the new knot is to be inserted.
-         * @param s initial multiplicity.
-         * @param r multiplicity of the knot to add.
-         */
-        insertKnot(barxi, index, s, r) {
-            let Xi = new matrix_4.RowVector(this.knotVector);
-            let n = Xi.length() - this.p - 2;
-            let barXi = matrix_4.RowVector.zero(Xi.length() + r);
-            let barN = n + r - s;
-            // Prepare the new knot vector.
-            for (let i = 0; i <= index; i++)
-                barXi.setValue(i, Xi.value(i));
-            for (let i = index + 1; i <= index + r; i++)
-                barXi.setValue(i, barxi);
-            for (let i = index + r + 1; i < barXi.length(); i++)
-                barXi.setValue(i, Xi.value(index + 1 + i - index - r - 1));
-            let Pw = NurbsCurve.toWeightedControlPoints(this.controlPoints, new matrix_4.RowVector(this.weights));
-            let barPw = new Array(barN);
-            for (let i = 0; i <= barN; i++) {
-                if (i <= index - this.p)
-                    barPw[i] = Pw[i].clone();
-                else if (i <= index && i >= index - this.p + 1) {
-                    let alpha = (barxi - Xi.value(i)) / (Xi.value(i + this.p) - Xi.value(i));
-                    let _Pw1 = Pw[i].clone().mult(alpha);
-                    let _Pw2 = Pw[i - 1].clone().mult(1 - alpha);
-                    barPw[i] = point_6.HomPoint.fromVector(_Pw1.add(_Pw2).row(0));
-                }
-                else
-                    barPw[i] = Pw[i - 1];
-            }
-            let [barP, barW] = NurbsCurve.fromWeightedControlPoints(barPw);
-            this.controlPoints = barP;
-            this.knotVector = barXi.toArray();
-            this.weights = barW.toArray();
-            return this;
-        }
-        /**
-         * Computes the i-th NURBS basis function.
-         *
-         * @param Xi
-         * @param w
-         * @param i
-         * @param p
-         * @param xi
-         * @returns
-         */
-        static computeBasis(Xi, w, i, p, xi) {
-            let n = Xi.length() - 1;
-            let xiSpan = bspline_4.BsplineCurve.findSpan(Xi.toArray(), xi, p, n);
-            if (i < xiSpan - p || i > xiSpan)
-                return 0;
-            let N = bspline_4.BsplineCurve.computeAllNonvanishingBasis(Xi.toArray(), xiSpan, p, xi);
-            let R = (N.value(p - (xiSpan - i)) * w.value(i)) /
-                N.multMat(w.range(new range_2.Range(xiSpan - p, xiSpan)).transposed()).value(0, 0);
-            return R;
-        }
-        /**
-         * To weighted control points.
-         *
-         * @param P
-         * @param w
-         * @returns
-         */
-        static toWeightedControlPoints(P, w) {
-            let Pw = new Array(P.length);
-            for (let i = 0; i < P.length; i++)
-                Pw[i] = P[i].toHomogeneous(w.value(i));
-            return Pw;
-        }
-        /**
-         * Converts weighted points to points and weights.
-         *
-         * @param Pw
-         * @returns
-         */
-        static fromWeightedControlPoints(Pw) {
-            let P = new Array(Pw.length);
-            let wData = new Array(Pw.length);
-            for (let i = 0; i < Pw.length; i++) {
-                wData[i] = Pw[i].w();
-                P[i] = point_6.Point.fromVector(Pw[i].clone().mult(1 / Pw[i].w()).row(0));
-            }
-            return [
-                P,
-                new matrix_4.RowVector(wData)
-            ];
-        }
+    function approxEqual(val1, val2, epsilon = 1E-6) {
+        return Math.abs(val1 - val2) <= epsilon;
     }
-    exports.NurbsCurve = NurbsCurve;
-    /**
-     * Represents a NURBS surface.
-     */
-    class NurbsSurf {
-        /**
-         * Ctor.
-         *
-         * @param controlPoints
-         * @param Xi
-         * @param Eta
-         * @param p
-         * @param q
-         */
-        constructor(controlPoints, Xi, Eta, weights, p, q) {
-            this.controlPoints = controlPoints;
-            this.Xi = Xi;
-            this.Eta = Eta;
-            this.weights = weights;
-            this.p = p;
-            this.q = q;
-        }
-        /**
-         * Evaluates the NURBS surface in (xi, eta).
-         *
-         * @param xi
-         * @param eta
-         * @returns
-         */
-        evaluate(xi, eta) {
-            let n = this.controlPoints.length - 1;
-            let m = this.controlPoints[0].length - 1;
-            let xiSpan = bspline_4.BsplineCurve.findSpan(this.Xi, xi, this.p, n);
-            let etaSpan = bspline_4.BsplineCurve.findSpan(this.Eta, eta, this.q, m);
-            let Nxi = bspline_4.BsplineCurve.computeAllNonvanishingBasis(this.Xi, xiSpan, this.p, xi);
-            let Neta = bspline_4.BsplineCurve.computeAllNonvanishingBasis(this.Eta, etaSpan, this.q, eta);
-            // Convert to homogeneous coords.
-            let Pw = NurbsSurf.toWeightedControlPoints(this.controlPoints, this.weights);
-            let P_x = point_6.HomPoint.matFromPoints(Pw, "x");
-            let P_y = point_6.HomPoint.matFromPoints(Pw, "y");
-            let P_z = point_6.HomPoint.matFromPoints(Pw, "z");
-            let P_w = point_6.HomPoint.matFromPoints(Pw, "w");
-            let sx = Nxi.multMat(P_x.rect(new point_6.Point(etaSpan - this.q, xiSpan - this.p), new point_6.Point(etaSpan, xiSpan)))
-                .multMat(Neta.transposed()).value(0, 0);
-            let sy = Nxi.multMat(P_y.rect(new point_6.Point(etaSpan - this.q, xiSpan - this.p), new point_6.Point(etaSpan, xiSpan)))
-                .multMat(Neta.transposed()).value(0, 0);
-            let sz = Nxi.multMat(P_z.rect(new point_6.Point(etaSpan - this.q, xiSpan - this.p), new point_6.Point(etaSpan, xiSpan)))
-                .multMat(Neta.transposed()).value(0, 0);
-            let sw = Nxi.multMat(P_w.rect(new point_6.Point(etaSpan - this.q, xiSpan - this.p), new point_6.Point(etaSpan, xiSpan)))
-                .multMat(Neta.transposed()).value(0, 0);
-            return new point_6.Point(sx / sw, sy / sw, sz / sw);
-        }
-        /**
-         * Converts a matrix of control points to a matrix of weighted control points.
-         *
-         * @param P
-         * @param w
-         */
-        static toWeightedControlPoints(P, w) {
-            let Pw = new Array(P.length);
-            for (let i = 0; i < P.length; i++) {
-                Pw[i] = new Array(P[i].length);
-                for (let j = 0; j < P[i].length; j++) {
-                    Pw[i][j] = P[i][j].toHomogeneous(w.value(i, j));
-                }
-            }
-            return Pw;
-        }
-    }
-    exports.NurbsSurf = NurbsSurf;
+    exports.approxEqual = approxEqual;
 });
 /**
  * Project: Approximation and Finite Elements in Isogeometric Problems
@@ -2315,14 +2522,14 @@ define("nurbs/nurbs", ["require", "exports", "core/matrix", "core/point", "bspli
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("examples/nurbsCircle", ["require", "exports", "core/point", "nurbs/nurbs"], function (require, exports, point_7, nurbs_1) {
+define("examples/nurbsCircle", ["require", "exports", "core/point", "nurbs/nurbs"], function (require, exports, point_7, nurbs_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.NurbsCirle = void 0;
     /**
      * NURBS circle.
      */
-    class NurbsCirle extends nurbs_1.NurbsCurve {
+    class NurbsCirle extends nurbs_2.NurbsCurve {
         /**
          * Ctor.
          */
@@ -2348,6 +2555,214 @@ define("examples/nurbsCircle", ["require", "exports", "core/point", "nurbs/nurbs
 /**
  * Project: Approximation and Finite Elements in Isogeometric Problems
  * Author:  Luca Carlon
+ * Date:    2021.06.29
+ *
+ * Copyright (c) 2021 Luca Carlon. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+define("examples/nurbsPlate", ["require", "exports", "core/matrix", "core/point", "nurbs/nurbs"], function (require, exports, matrix_6, point_8, nurbs_3) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.NurbsPlateHole = void 0;
+    /**
+     * A plate with a hole.
+     */
+    class NurbsPlateHole extends nurbs_3.NurbsSurf {
+        /**
+         * Ctor.
+         */
+        constructor() {
+            let P = [[
+                    new point_8.Point(-1, 0, 0),
+                    new point_8.Point(-2.5, 0, 0),
+                    new point_8.Point(-4, 0, 0)
+                ], [
+                    new point_8.Point(-1, Math.sqrt(2) - 1, 0),
+                    new point_8.Point(-2.5, 0.75, 0),
+                    new point_8.Point(-4, 4, 0)
+                ], [
+                    new point_8.Point(1 - Math.sqrt(2), 1, 0),
+                    new point_8.Point(-0.75, 2.5, 0),
+                    new point_8.Point(-4, 4, 0)
+                ], [
+                    new point_8.Point(0, 1, 0),
+                    new point_8.Point(0, 2.5, 0),
+                    new point_8.Point(0, 4, 0)
+                ]];
+            let Xi = new matrix_6.RowVector([0, 0, 0, 0.5, 1, 1, 1]);
+            let Eta = new matrix_6.RowVector([0, 0, 0, 1, 1, 1]);
+            let w = matrix_6.Matrix2.one(4, 3);
+            super(P, Xi.toArray(), Eta.toArray(), w, 2, 2);
+        }
+    }
+    exports.NurbsPlateHole = NurbsPlateHole;
+});
+/**
+ * Project: Approximation and Finite Elements in Isogeometric Problems
+ * Author:  Luca Carlon
+ * Date:    2021.07.2
+ *
+ * Copyright (c) 2021 Luca Carlon. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+define("examples/nurbsToroid", ["require", "exports", "core/matrix", "core/point", "nurbs/nurbs"], function (require, exports, matrix_7, point_9, nurbs_4) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.NurbsToroid = void 0;
+    /**
+     * A toroid.
+     */
+    class NurbsToroid extends nurbs_4.NurbsSurf {
+        /**
+         * Ctor.
+         */
+        constructor() {
+            let P = [[
+                    new point_9.Point(5, 0, -1),
+                    new point_9.Point(5, 5, -1),
+                    new point_9.Point(0, 5, -1),
+                    new point_9.Point(-5, 5, -1),
+                    new point_9.Point(-5, 0, -1),
+                    new point_9.Point(-5, -5, -1),
+                    new point_9.Point(0, -5, -1),
+                    new point_9.Point(5, -5, -1),
+                    new point_9.Point(5, 0, -1)
+                ], [
+                    new point_9.Point(6, 0, -1),
+                    new point_9.Point(6, 6, -1),
+                    new point_9.Point(0, 6, -1),
+                    new point_9.Point(-6, 6, -1),
+                    new point_9.Point(-6, 0, -1),
+                    new point_9.Point(-6, -6, -1),
+                    new point_9.Point(0, -6, -1),
+                    new point_9.Point(6, -6, -1),
+                    new point_9.Point(6, 0, -1)
+                ], [
+                    new point_9.Point(6, 0, 0),
+                    new point_9.Point(6, 6, 0),
+                    new point_9.Point(0, 6, 0),
+                    new point_9.Point(-6, 6, 0),
+                    new point_9.Point(-6, 0, 0),
+                    new point_9.Point(-6, -6, 0),
+                    new point_9.Point(0, -6, 0),
+                    new point_9.Point(6, -6, 0),
+                    new point_9.Point(6, 0, 0)
+                ], [
+                    new point_9.Point(6, 0, 1),
+                    new point_9.Point(6, 6, 1),
+                    new point_9.Point(0, 6, 1),
+                    new point_9.Point(-6, 6, 1),
+                    new point_9.Point(-6, 0, 1),
+                    new point_9.Point(-6, -6, 1),
+                    new point_9.Point(0, -6, 1),
+                    new point_9.Point(6, -6, 1),
+                    new point_9.Point(6, 0, 1)
+                ], [
+                    new point_9.Point(5, 0, 1),
+                    new point_9.Point(5, 5, 1),
+                    new point_9.Point(0, 5, 1),
+                    new point_9.Point(-5, 5, 1),
+                    new point_9.Point(-5, 0, 1),
+                    new point_9.Point(-5, -5, 1),
+                    new point_9.Point(0, -5, 1),
+                    new point_9.Point(5, -5, 1),
+                    new point_9.Point(5, 0, 1),
+                ], [
+                    new point_9.Point(4, 0, 1),
+                    new point_9.Point(4, 4, 1),
+                    new point_9.Point(0, 4, 1),
+                    new point_9.Point(-4, 4, 1),
+                    new point_9.Point(-4, 0, 1),
+                    new point_9.Point(-4, -4, 1),
+                    new point_9.Point(0, -4, 1),
+                    new point_9.Point(4, -4, 1),
+                    new point_9.Point(4, 0, 1),
+                ], [
+                    new point_9.Point(4, 0, 0),
+                    new point_9.Point(4, 4, 0),
+                    new point_9.Point(0, 4, 0),
+                    new point_9.Point(-4, 4, 0),
+                    new point_9.Point(-4, 0, 0),
+                    new point_9.Point(-4, -4, 0),
+                    new point_9.Point(0, -4, 0),
+                    new point_9.Point(4, -4, 0),
+                    new point_9.Point(4, 0, 0),
+                ], [
+                    new point_9.Point(4, 0, -1),
+                    new point_9.Point(4, 4, -1),
+                    new point_9.Point(0, 4, -1),
+                    new point_9.Point(-4, 4, -1),
+                    new point_9.Point(-4, 0, -1),
+                    new point_9.Point(-4, -4, -1),
+                    new point_9.Point(0, -4, -1),
+                    new point_9.Point(4, -4, -1),
+                    new point_9.Point(4, 0, -1),
+                ], [
+                    new point_9.Point(5, 0, -1),
+                    new point_9.Point(5, 5, -1),
+                    new point_9.Point(0, 5, -1),
+                    new point_9.Point(-5, 5, -1),
+                    new point_9.Point(-5, 0, -1),
+                    new point_9.Point(-5, -5, -1),
+                    new point_9.Point(0, -5, -1),
+                    new point_9.Point(5, -5, -1),
+                    new point_9.Point(5, 0, -1),
+                ]];
+            let Pt = new Array(P[0].length);
+            for (let i = 0; i < P[0].length; i++)
+                Pt[i] = new Array(P.length);
+            for (let i = 0; i < P.length; i++)
+                for (let j = 0; j < P[i].length; j++)
+                    Pt[j][i] = P[i][j];
+            P = Pt;
+            let Xi = new matrix_7.RowVector([0, 0, 0, 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, 1, 1, 1]).mult(4).row(0);
+            let Eta = new matrix_7.RowVector([0, 0, 0, 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, 1, 1, 1]).mult(4).row(0);
+            let p = 2;
+            let q = 2;
+            let w1 = new matrix_7.RowVector([1, 1 / Math.sqrt(2), 1, 1 / Math.sqrt(2), 1, 1 / Math.sqrt(2), 1, 1 / Math.sqrt(2), 1]);
+            let w2 = new matrix_7.RowVector([1 / Math.sqrt(2), 1 / 2, 1 / Math.sqrt(2), 1 / 2, 1 / Math.sqrt(2), 1 / 2, 1 / Math.sqrt(2), 1 / 2, 1 / Math.sqrt(2)]);
+            let w = matrix_7.Matrix2.zero(9, 9)
+                .assignCol(0, w1)
+                .assignCol(1, w2)
+                .assignCol(2, w1)
+                .assignCol(3, w2)
+                .assignCol(4, w1)
+                .assignCol(5, w2)
+                .assignCol(6, w1)
+                .assignCol(7, w2)
+                .assignCol(8, w1);
+            super(P, Xi.toArray(), Eta.toArray(), w, p, q);
+        }
+    }
+    exports.NurbsToroid = NurbsToroid;
+});
+/**
+ * Project: Approximation and Finite Elements in Isogeometric Problems
+ * Author:  Luca Carlon
  * Date:    2021.06.06
  *
  * Copyright (c) 2021 Luca Carlon. All rights reserved.
@@ -2365,7 +2780,7 @@ define("examples/nurbsCircle", ["require", "exports", "core/point", "nurbs/nurbs
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("nurbs/drawNurbsCurve", ["require", "exports", "core/matrix", "nurbs/nurbs"], function (require, exports, matrix_5, nurbs_2) {
+define("nurbs/drawNurbsCurve", ["require", "exports", "core/matrix", "nurbs/nurbs"], function (require, exports, matrix_8, nurbs_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.drawNurbsBasisFuncs = exports.drawNurbsCurve = void 0;
@@ -2376,7 +2791,7 @@ define("nurbs/drawNurbsCurve", ["require", "exports", "core/matrix", "nurbs/nurb
     * @param plot
     */
     let drawNurbsCurve = (controlPoints, knotVector, weights, p, threed, drawControlPoints, plot, basisPlot = null, sameScale = false, title = "NURBS curve") => {
-        const nurbs = new nurbs_2.NurbsCurve(controlPoints, knotVector, weights, p);
+        const nurbs = new nurbs_5.NurbsCurve(controlPoints, knotVector, weights, p);
         // @ts-expect-error
         const xiValues = math.range(0, 1, 0.001).toArray();
         let xValues = [];
@@ -2480,7 +2895,7 @@ define("nurbs/drawNurbsCurve", ["require", "exports", "core/matrix", "nurbs/nurb
         for (let i = 0; i <= n; i++) {
             const upsiValues = [];
             xiValues.map((xi) => {
-                upsiValues.push(nurbs_2.NurbsCurve.computeBasis(new matrix_5.RowVector(nurbs.knotVector), new matrix_5.RowVector(nurbs.weights), i, nurbs.p, xi));
+                upsiValues.push(nurbs_5.NurbsCurve.computeBasis(new matrix_8.RowVector(nurbs.knotVector), new matrix_8.RowVector(nurbs.weights), i, nurbs.p, xi));
             });
             const trace = {
                 x: xiValues,
@@ -2544,33 +2959,25 @@ define("nurbs/drawNurbsCurve", ["require", "exports", "core/matrix", "nurbs/nurb
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("nurbs/drawNurbsCurveExample", ["require", "exports", "core/matrix", "core/point", "examples/nurbsCircle", "nurbs/drawNurbsCurve"], function (require, exports, matrix_6, point_8, nurbsCircle_1, drawNurbsCurve_1) {
+define("nurbs/drawNurbsCurveExample", ["require", "exports", "core/matrix", "core/point", "examples/exampleCurves", "examples/nurbsCircle", "nurbs/drawNurbsCurve"], function (require, exports, matrix_9, point_10, exampleCurves_3, nurbsCircle_1, drawNurbsCurve_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.drawNurbsKnotInsertionExample = exports.drawNurbsCurveExampleCircle = exports.drawNurbsCurveExample2 = exports.drawNurbsCurveExample1 = void 0;
     let drawNurbsCurveExample1 = (plot, drawControlPoints, basisPlot) => {
-        let controlPoints = [];
-        controlPoints.push(new point_8.Point(0, 0));
-        controlPoints.push(new point_8.Point(1, 1));
-        controlPoints.push(new point_8.Point(2, 0.5));
-        controlPoints.push(new point_8.Point(3, 0.5));
-        controlPoints.push(new point_8.Point(0.5, 1.5));
-        controlPoints.push(new point_8.Point(1.5, 0));
-        let knotVector = [0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1];
-        let w = matrix_6.RowVector.one(controlPoints.length);
-        drawNurbsCurve_1.drawNurbsCurve(controlPoints, knotVector, w.toArray(), 2, false, drawControlPoints, plot, basisPlot);
+        let nurbs = exampleCurves_3.nurbsCurveSample2D();
+        drawNurbsCurve_1.drawNurbsCurve(nurbs.controlPoints, nurbs.knotVector, nurbs.weights, 2, false, drawControlPoints, plot, basisPlot);
     };
     exports.drawNurbsCurveExample1 = drawNurbsCurveExample1;
     let drawNurbsCurveExample2 = (plot, drawControlPoints, basisPlot) => {
         let controlPoints = [];
-        controlPoints.push(new point_8.Point(0, 0, 0));
-        controlPoints.push(new point_8.Point(1, 1, 1));
-        controlPoints.push(new point_8.Point(2, 0.5, 0));
-        controlPoints.push(new point_8.Point(3, 0.5, 0));
-        controlPoints.push(new point_8.Point(0.5, 1.5, 0));
-        controlPoints.push(new point_8.Point(1.5, 0, 1));
+        controlPoints.push(new point_10.Point(0, 0, 0));
+        controlPoints.push(new point_10.Point(1, 1, 1));
+        controlPoints.push(new point_10.Point(2, 0.5, 0));
+        controlPoints.push(new point_10.Point(3, 0.5, 0));
+        controlPoints.push(new point_10.Point(0.5, 1.5, 0));
+        controlPoints.push(new point_10.Point(1.5, 0, 1));
         let knotVector = [0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1];
-        let w = matrix_6.RowVector.one(controlPoints.length);
+        let w = matrix_9.RowVector.one(controlPoints.length);
         drawNurbsCurve_1.drawNurbsCurve(controlPoints, knotVector, w.toArray(), 2, true, drawControlPoints, plot, basisPlot);
     };
     exports.drawNurbsCurveExample2 = drawNurbsCurveExample2;
@@ -2611,7 +3018,7 @@ define("nurbs/drawNurbsCurveExample", ["require", "exports", "core/matrix", "cor
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("nurbs/drawNurbsSurf", ["require", "exports", "nurbs/nurbs"], function (require, exports, nurbs_3) {
+define("nurbs/drawNurbsSurf", ["require", "exports", "nurbs/nurbs"], function (require, exports, nurbs_6) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.drawNurbsSurf = void 0;
@@ -2627,8 +3034,8 @@ define("nurbs/drawNurbsSurf", ["require", "exports", "nurbs/nurbs"], function (r
      * @param drawControlPoints
      * @param plot
      */
-    let drawNurbsSurf = (controlPoints, Xi, Eta, w, p, q, drawControlPoints, plot, sameScale = false, maxXi = 1, maxEta = 1) => {
-        const nurbs = new nurbs_3.NurbsSurf(controlPoints, Xi.toArray(), Eta.toArray(), w, p, q);
+    let drawNurbsSurf = (controlPoints, Xi, Eta, w, p, q, drawControlPoints, plot, sameScale = false, maxXi = 1, maxEta = 1, title = "NURBS surface") => {
+        const nurbs = new nurbs_6.NurbsSurf(controlPoints, Xi.toArray(), Eta.toArray(), w, p, q);
         // @ts-expect-error
         const xiValues = math.range(0, maxXi, 0.005 * maxXi).toArray();
         // @ts-expect-error
@@ -2726,7 +3133,7 @@ define("nurbs/drawNurbsSurf", ["require", "exports", "nurbs/nurbs"], function (r
         }
         var layout = {
             title: {
-                text: "NURBS Surface",
+                text: title,
                 font: {
                     family: "Ubuntu",
                     size: 24,
@@ -2788,152 +3195,47 @@ define("nurbs/drawNurbsSurf", ["require", "exports", "nurbs/nurbs"], function (r
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("nurbs/drawNurbsSurfExamples", ["require", "exports", "core/matrix", "core/point", "nurbs/drawNurbsSurf"], function (require, exports, matrix_7, point_9, drawNurbsSurf_1) {
+define("nurbs/drawNurbsSurfExamples", ["require", "exports", "bspline/bspline", "core/matrix", "examples/nurbsPlate", "examples/nurbsToroid", "nurbs/drawNurbsSurf"], function (require, exports, bspline_5, matrix_10, nurbsPlate_1, nurbsToroid_1, drawNurbsSurf_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.drawNurbsSurfToroid = exports.drawNurbsSurfPlateHole = void 0;
+    exports.drawNURBSKnotInsertionToroid = exports.drawNURBSKnotInsertionPlateHole = exports.drawNurbsSurfToroid = exports.drawNurbsSurfPlateHole = void 0;
     let drawNurbsSurfPlateHole = (plot, drawControlPoints, basisPlot) => {
-        let P = [[
-                new point_9.Point(-1, 0, 0),
-                new point_9.Point(-2.5, 0, 0),
-                new point_9.Point(-4, 0, 0)
-            ], [
-                new point_9.Point(-1, Math.sqrt(2) - 1, 0),
-                new point_9.Point(-2.5, 0.75, 0),
-                new point_9.Point(-4, 4, 0)
-            ], [
-                new point_9.Point(1 - Math.sqrt(2), 1, 0),
-                new point_9.Point(-0.75, 2.5, 0),
-                new point_9.Point(-4, 4, 0)
-            ], [
-                new point_9.Point(0, 1, 0),
-                new point_9.Point(0, 2.5, 0),
-                new point_9.Point(0, 4, 0)
-            ]];
-        let Xi = new matrix_7.RowVector([0, 0, 0, 0.5, 1, 1, 1]);
-        let Eta = new matrix_7.RowVector([0, 0, 0, 1, 1, 1]);
-        let w = matrix_7.Matrix2.one(4, 3);
-        drawNurbsSurf_1.drawNurbsSurf(P, Xi, Eta, w, 2, 2, drawControlPoints, plot);
+        let nurbs = new nurbsPlate_1.NurbsPlateHole();
+        drawNurbsSurf_1.drawNurbsSurf(nurbs.controlPoints, new matrix_10.RowVector(nurbs.Xi), new matrix_10.RowVector(nurbs.Eta), nurbs.weights, 2, 2, drawControlPoints, plot);
     };
     exports.drawNurbsSurfPlateHole = drawNurbsSurfPlateHole;
     function drawNurbsSurfToroid(plot, drawControlPoints, basisPlot) {
-        let P = [[
-                new point_9.Point(5, 0, -1),
-                new point_9.Point(5, 5, -1),
-                new point_9.Point(0, 5, -1),
-                new point_9.Point(-5, 5, -1),
-                new point_9.Point(-5, 0, -1),
-                new point_9.Point(-5, -5, -1),
-                new point_9.Point(0, -5, -1),
-                new point_9.Point(5, -5, -1),
-                new point_9.Point(5, 0, -1)
-            ], [
-                new point_9.Point(6, 0, -1),
-                new point_9.Point(6, 6, -1),
-                new point_9.Point(0, 6, -1),
-                new point_9.Point(-6, 6, -1),
-                new point_9.Point(-6, 0, -1),
-                new point_9.Point(-6, -6, -1),
-                new point_9.Point(0, -6, -1),
-                new point_9.Point(6, -6, -1),
-                new point_9.Point(6, 0, -1)
-            ], [
-                new point_9.Point(6, 0, 0),
-                new point_9.Point(6, 6, 0),
-                new point_9.Point(0, 6, 0),
-                new point_9.Point(-6, 6, 0),
-                new point_9.Point(-6, 0, 0),
-                new point_9.Point(-6, -6, 0),
-                new point_9.Point(0, -6, 0),
-                new point_9.Point(6, -6, 0),
-                new point_9.Point(6, 0, 0)
-            ], [
-                new point_9.Point(6, 0, 1),
-                new point_9.Point(6, 6, 1),
-                new point_9.Point(0, 6, 1),
-                new point_9.Point(-6, 6, 1),
-                new point_9.Point(-6, 0, 1),
-                new point_9.Point(-6, -6, 1),
-                new point_9.Point(0, -6, 1),
-                new point_9.Point(6, -6, 1),
-                new point_9.Point(6, 0, 1)
-            ], [
-                new point_9.Point(5, 0, 1),
-                new point_9.Point(5, 5, 1),
-                new point_9.Point(0, 5, 1),
-                new point_9.Point(-5, 5, 1),
-                new point_9.Point(-5, 0, 1),
-                new point_9.Point(-5, -5, 1),
-                new point_9.Point(0, -5, 1),
-                new point_9.Point(5, -5, 1),
-                new point_9.Point(5, 0, 1),
-            ], [
-                new point_9.Point(4, 0, 1),
-                new point_9.Point(4, 4, 1),
-                new point_9.Point(0, 4, 1),
-                new point_9.Point(-4, 4, 1),
-                new point_9.Point(-4, 0, 1),
-                new point_9.Point(-4, -4, 1),
-                new point_9.Point(0, -4, 1),
-                new point_9.Point(4, -4, 1),
-                new point_9.Point(4, 0, 1),
-            ], [
-                new point_9.Point(4, 0, 0),
-                new point_9.Point(4, 4, 0),
-                new point_9.Point(0, 4, 0),
-                new point_9.Point(-4, 4, 0),
-                new point_9.Point(-4, 0, 0),
-                new point_9.Point(-4, -4, 0),
-                new point_9.Point(0, -4, 0),
-                new point_9.Point(4, -4, 0),
-                new point_9.Point(4, 0, 0),
-            ], [
-                new point_9.Point(4, 0, -1),
-                new point_9.Point(4, 4, -1),
-                new point_9.Point(0, 4, -1),
-                new point_9.Point(-4, 4, -1),
-                new point_9.Point(-4, 0, -1),
-                new point_9.Point(-4, -4, -1),
-                new point_9.Point(0, -4, -1),
-                new point_9.Point(4, -4, -1),
-                new point_9.Point(4, 0, -1),
-            ], [
-                new point_9.Point(5, 0, -1),
-                new point_9.Point(5, 5, -1),
-                new point_9.Point(0, 5, -1),
-                new point_9.Point(-5, 5, -1),
-                new point_9.Point(-5, 0, -1),
-                new point_9.Point(-5, -5, -1),
-                new point_9.Point(0, -5, -1),
-                new point_9.Point(5, -5, -1),
-                new point_9.Point(5, 0, -1),
-            ]];
-        let Pt = new Array(P[0].length);
-        for (let i = 0; i < P[0].length; i++)
-            Pt[i] = new Array(P.length);
-        for (let i = 0; i < P.length; i++)
-            for (let j = 0; j < P[i].length; j++)
-                Pt[j][i] = P[i][j];
-        P = Pt;
-        let Xi = new matrix_7.RowVector([0, 0, 0, 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, 1, 1, 1]).mult(4).row(0);
-        let Eta = new matrix_7.RowVector([0, 0, 0, 0.25, 0.25, 0.5, 0.5, 0.75, 0.75, 1, 1, 1]).mult(4).row(0);
-        let p = 2;
-        let q = 2;
-        let w1 = new matrix_7.RowVector([1, 1 / Math.sqrt(2), 1, 1 / Math.sqrt(2), 1, 1 / Math.sqrt(2), 1, 1 / Math.sqrt(2), 1]);
-        let w2 = new matrix_7.RowVector([1 / Math.sqrt(2), 1 / 2, 1 / Math.sqrt(2), 1 / 2, 1 / Math.sqrt(2), 1 / 2, 1 / Math.sqrt(2), 1 / 2, 1 / Math.sqrt(2)]);
-        let w = matrix_7.Matrix2.zero(9, 9)
-            .assignCol(0, w1)
-            .assignCol(1, w2)
-            .assignCol(2, w1)
-            .assignCol(3, w2)
-            .assignCol(4, w1)
-            .assignCol(5, w2)
-            .assignCol(6, w1)
-            .assignCol(7, w2)
-            .assignCol(8, w1);
-        drawNurbsSurf_1.drawNurbsSurf(P, Xi, Eta, w, p, q, drawControlPoints, plot, true, 4, 4);
+        let nurbs = new nurbsToroid_1.NurbsToroid();
+        drawNurbsSurf_1.drawNurbsSurf(nurbs.controlPoints, new matrix_10.RowVector(nurbs.Xi), new matrix_10.RowVector(nurbs.Eta), nurbs.weights, nurbs.p, nurbs.q, drawControlPoints, plot, true, 4, 4);
     }
     exports.drawNurbsSurfToroid = drawNurbsSurfToroid;
+    function drawNurbsKnotInsertionExample(nurbs, plot1, plot2, plot3, plot4, maxXi = 1, maxEta = 1) {
+        let refine = (step, nurbs) => {
+            for (let i = step; i <= 1 - step; i += step) {
+                let k = bspline_5.BsplineCurve.findSpan(nurbs.Xi, i, nurbs.p, nurbs.controlPoints.length - 1);
+                if (nurbs.Xi[k] != i)
+                    nurbs.insertKnotsXi(i, k, 0, 1);
+                k = bspline_5.BsplineCurve.findSpan(nurbs.Eta, i, nurbs.q, nurbs.controlPoints[0].length - 1);
+                if (nurbs.Eta[k] != i)
+                    nurbs.insertKnotsEta(i, k, 0, 1);
+            }
+        };
+        drawNurbsSurf_1.drawNurbsSurf(nurbs.controlPoints, new matrix_10.RowVector(nurbs.Xi), new matrix_10.RowVector(nurbs.Eta), nurbs.weights, nurbs.p, nurbs.q, true, plot1, true, maxXi, maxEta, "NURBS knot insertion 1");
+        refine(0.25, nurbs);
+        drawNurbsSurf_1.drawNurbsSurf(nurbs.controlPoints, new matrix_10.RowVector(nurbs.Xi), new matrix_10.RowVector(nurbs.Eta), nurbs.weights, nurbs.p, nurbs.q, true, plot2, true, maxXi, maxEta, "NURBS knot insertion 2");
+        refine(0.125, nurbs);
+        drawNurbsSurf_1.drawNurbsSurf(nurbs.controlPoints, new matrix_10.RowVector(nurbs.Xi), new matrix_10.RowVector(nurbs.Eta), nurbs.weights, nurbs.p, nurbs.q, true, plot3, true, maxXi, maxEta, "NURBS knot insertion 3");
+        refine(0.0625, nurbs);
+        drawNurbsSurf_1.drawNurbsSurf(nurbs.controlPoints, new matrix_10.RowVector(nurbs.Xi), new matrix_10.RowVector(nurbs.Eta), nurbs.weights, nurbs.p, nurbs.q, true, plot4, true, maxXi, maxEta, "NURBS knot insertion 4");
+    }
+    function drawNURBSKnotInsertionPlateHole(plot1, plot2, plot3, plot4) {
+        drawNurbsKnotInsertionExample(new nurbsPlate_1.NurbsPlateHole(), plot1, plot2, plot3, plot4);
+    }
+    exports.drawNURBSKnotInsertionPlateHole = drawNURBSKnotInsertionPlateHole;
+    function drawNURBSKnotInsertionToroid(plot1, plot2, plot3, plot4) {
+        drawNurbsKnotInsertionExample(new nurbsToroid_1.NurbsToroid(), plot1, plot2, plot3, plot4, 4, 4);
+    }
+    exports.drawNURBSKnotInsertionToroid = drawNURBSKnotInsertionToroid;
 });
 /**
  * Project: Approximation and Finite Elements in Isogeometric Problems
@@ -2955,14 +3257,14 @@ define("nurbs/drawNurbsSurfExamples", ["require", "exports", "core/matrix", "cor
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("test/bspline_test", ["require", "exports", "examples/exampleCurves"], function (require, exports, exampleCurves_3) {
+define("test/bspline_test", ["require", "exports", "examples/exampleCurves"], function (require, exports, exampleCurves_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     // @ts-expect-error
     var assert = require("assert");
     // Test the two implementations of a b-spline curve.
     {
-        let bspline = exampleCurves_3.bsplineCurveSample1();
+        let bspline = exampleCurves_4.bsplineCurveSample1();
         let epsilon = 1E-6;
         for (let xi = 0; xi < 1; xi += 0.05)
             assert(bspline.evaluate1(xi).sub(bspline.evaluate2(xi)).row(0).norm() < epsilon);
@@ -2988,63 +3290,63 @@ define("test/bspline_test", ["require", "exports", "examples/exampleCurves"], fu
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-define("test/matrix_test", ["require", "exports", "core/matrix", "core/point", "core/range", "core/size"], function (require, exports, matrix_8, point_10, range_3, size_2) {
+define("test/matrix_test", ["require", "exports", "core/matrix", "core/point", "core/range", "core/size"], function (require, exports, matrix_11, point_11, range_3, size_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     // @ts-expect-error
     var assert = require("assert");
     // Test sum 1
     {
-        let m1 = new matrix_8.Matrix2([[1, 2, 3]]);
+        let m1 = new matrix_11.Matrix2([[1, 2, 3]]);
         m1.print();
-        let m2 = new matrix_8.Matrix2([[1, 1, 1]]);
+        let m2 = new matrix_11.Matrix2([[1, 1, 1]]);
         m2.print();
-        let m3 = matrix_8.Matrix2.add(m1, m2);
+        let m3 = matrix_11.Matrix2.add(m1, m2);
         m3.print();
         assert(!m3.equals(m2));
-        assert(m3.equals(new matrix_8.Matrix2([[2, 3, 4]])));
+        assert(m3.equals(new matrix_11.Matrix2([[2, 3, 4]])));
     }
     // Test sum 2
     {
-        let m1 = new matrix_8.Matrix2([
+        let m1 = new matrix_11.Matrix2([
             [5, 6, 7],
             [1, 2, 3],
             [9, 8, 7]
         ]);
-        let m2 = new matrix_8.Matrix2([
+        let m2 = new matrix_11.Matrix2([
             [1, 2, 3],
             [4, 5, 6],
             [7, 8, 9]
         ]);
-        let m3 = matrix_8.Matrix2.identity(3);
-        let m4 = matrix_8.Matrix2.zeroSquare(3);
-        let sum = matrix_8.Matrix2.zeroSquare(3).add(m1).add(m2).add(m3).add(m4);
-        assert(sum.equals(new matrix_8.Matrix2([
+        let m3 = matrix_11.Matrix2.identity(3);
+        let m4 = matrix_11.Matrix2.zeroSquare(3);
+        let sum = matrix_11.Matrix2.zeroSquare(3).add(m1).add(m2).add(m3).add(m4);
+        assert(sum.equals(new matrix_11.Matrix2([
             [7, 8, 10],
             [5, 8, 9],
             [16, 16, 17]
         ])));
-        assert(m1.equals(new matrix_8.Matrix2([
+        assert(m1.equals(new matrix_11.Matrix2([
             [5, 6, 7],
             [1, 2, 3],
             [9, 8, 7]
         ])));
-        assert(m2.equals(new matrix_8.Matrix2([
+        assert(m2.equals(new matrix_11.Matrix2([
             [1, 2, 3],
             [4, 5, 6],
             [7, 8, 9]
         ])));
-        assert(m3.equals(matrix_8.Matrix2.identity(3)));
+        assert(m3.equals(matrix_11.Matrix2.identity(3)));
         sum.print();
     }
     // Test mult by scalar 1
     {
-        let m1 = new matrix_8.Matrix2([
+        let m1 = new matrix_11.Matrix2([
             [5, 6, 7],
             [1, 2, 3],
             [9, 8, 7]
         ]);
-        assert(m1.mult(9).equals(new matrix_8.Matrix2([
+        assert(m1.mult(9).equals(new matrix_11.Matrix2([
             [5 * 9, 6 * 9, 7 * 9],
             [1 * 9, 2 * 9, 3 * 9],
             [9 * 9, 8 * 9, 7 * 9]
@@ -3052,33 +3354,33 @@ define("test/matrix_test", ["require", "exports", "core/matrix", "core/point", "
     }
     // Test mult by a scalar 2
     {
-        let m1 = new matrix_8.Matrix2([
+        let m1 = new matrix_11.Matrix2([
             [5, 6, 7],
             [1, 2, 3],
             [9, 8, 7]
         ]);
-        assert(m1.mult(0).equals(matrix_8.Matrix2.zeroSquare(3)));
+        assert(m1.mult(0).equals(matrix_11.Matrix2.zeroSquare(3)));
     }
     // Test mult by matrix 1
     {
-        let m1 = new matrix_8.Matrix2([
+        let m1 = new matrix_11.Matrix2([
             [5, 6, 7],
             [1, 2, 3],
             [9, 8, 7]
         ]);
-        let m2 = new matrix_8.Matrix2([
+        let m2 = new matrix_11.Matrix2([
             [1, 2, 3],
             [4, 5, 6],
             [7, 8, 9]
         ]);
-        let m3 = matrix_8.Matrix2.identity(3);
-        let m4 = matrix_8.Matrix2.zeroSquare(3);
-        assert(m1.multMat(m1).equals(new matrix_8.Matrix2([
+        let m3 = matrix_11.Matrix2.identity(3);
+        let m4 = matrix_11.Matrix2.zeroSquare(3);
+        assert(m1.multMat(m1).equals(new matrix_11.Matrix2([
             [94, 98, 102],
             [34, 34, 34],
             [116, 126, 136]
         ])));
-        assert(m1.multMat(m2).equals(new matrix_8.Matrix2([
+        assert(m1.multMat(m2).equals(new matrix_11.Matrix2([
             [78, 96, 114],
             [30, 36, 42],
             [90, 114, 138]
@@ -3089,18 +3391,18 @@ define("test/matrix_test", ["require", "exports", "core/matrix", "core/point", "
     }
     // Test mult by matrix 2
     {
-        let m1 = new matrix_8.Matrix2([
+        let m1 = new matrix_11.Matrix2([
             [5, 6, 7],
             [1, 2, 3],
             [9, 8, 7],
             [1, 1, 1]
         ]);
-        let m2 = new matrix_8.Matrix2([
+        let m2 = new matrix_11.Matrix2([
             [1, 2, 3],
             [4, 5, 6],
             [7, 8, 9]
         ]);
-        let m4 = matrix_8.Matrix2.zeroSquare(3);
+        let m4 = matrix_11.Matrix2.zeroSquare(3);
         try {
             m1.multMat(m1);
             assert(false);
@@ -3108,63 +3410,133 @@ define("test/matrix_test", ["require", "exports", "core/matrix", "core/point", "
         catch (e) {
             assert(true);
         }
-        assert(m1.multMat(m2).equals(new matrix_8.Matrix2([
+        assert(m1.multMat(m2).equals(new matrix_11.Matrix2([
             [78, 96, 114],
             [30, 36, 42],
             [90, 114, 138],
             [12, 15, 18]
         ])));
-        assert(m1.multMat(m4).equals(matrix_8.Matrix2.zero(m1.rows(), m2.cols())));
+        assert(m1.multMat(m4).equals(matrix_11.Matrix2.zero(m1.rows(), m2.cols())));
     }
     // Test mult by matrix 2
     {
-        let m = new matrix_8.Matrix2([
+        let m = new matrix_11.Matrix2([
             [1],
             [2],
             [3]
         ]);
         assert(m.transposed().size().equals(new size_2.Size(3, 1)));
         m.transpose();
-        assert(m.equals(new matrix_8.Matrix2([[1, 2, 3]])));
+        assert(m.equals(new matrix_11.Matrix2([[1, 2, 3]])));
     }
     // Test rect extraction
     {
-        let m1 = new matrix_8.Matrix2([
+        let m1 = new matrix_11.Matrix2([
             [5, 6, 7],
             [1, 2, 3],
             [9, 8, 7],
             [1, 1, 1]
         ]);
-        let m2 = new matrix_8.Matrix2([
+        let m2 = new matrix_11.Matrix2([
             [1, 2, 3],
             [4, 5, 6],
             [7, 8, 9]
         ]);
-        assert(m1.rect(new point_10.Point(1, 1), new point_10.Point(2, 2)).equals(new matrix_8.Matrix2([
+        assert(m1.rect(new point_11.Point(1, 1), new point_11.Point(2, 2)).equals(new matrix_11.Matrix2([
             [2, 3],
             [8, 7]
         ])));
     }
     // Test range extraction
     {
-        let m1 = new matrix_8.RowVector([5, 6, 7, 1, 2, 3, 9, 8, 7, 1, 1, 1]);
-        assert(m1.range(new range_3.Range(2, 4)).equals(new matrix_8.RowVector([7, 1, 2])));
+        let m1 = new matrix_11.RowVector([5, 6, 7, 1, 2, 3, 9, 8, 7, 1, 1, 1]);
+        assert(m1.range(new range_3.Range(2, 4)).equals(new matrix_11.RowVector([7, 1, 2])));
     }
     // Test setValue
     {
-        let m1 = new matrix_8.Matrix2([
+        let m1 = new matrix_11.Matrix2([
             [5, 6, 7],
             [1, 2, 3],
             [9, 8, 7],
             [1, 1, 1]
         ]);
         m1.setValue(1, 2, 199);
-        assert(m1.equals(new matrix_8.Matrix2([
+        assert(m1.equals(new matrix_11.Matrix2([
             [5, 6, 7],
             [1, 2, 199],
             [9, 8, 7],
             [1, 1, 1]
         ])));
+    }
+});
+/**
+ * Project: Approximation and Finite Elements in Isogeometric Problems
+ * Author:  Luca Carlon
+ * Date:    2021.06.26
+ *
+ * Copyright (c) 2021 Luca Carlon. All rights reserved.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+define("test/nurbs_test", ["require", "exports", "bspline/bspline", "core/math", "examples/exampleCurves", "examples/nurbsCircle", "examples/nurbsPlate"], function (require, exports, bspline_6, math_1, exampleCurves_5, nurbsCircle_2, nurbsPlate_2) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    // @ts-expect-error
+    var assert = require("assert");
+    function measure(label, f) {
+        console.time(label);
+        f();
+        console.timeEnd(label);
+    }
+    function testEvaluationNurbs(nurbs) {
+        for (let xi = 0; xi < 1; xi += 0.05)
+            assert(math_1.approxEqual(nurbs.evaluate1(xi).norm(), nurbs.evaluate2(xi).norm()));
+    }
+    function testNurbs(n1, n2) {
+        for (let xi = 0; xi <= 1; xi += 0.01)
+            for (let eta = 0; eta <= 1; eta += 0.01)
+                assert(math_1.approxEqual(n1.evaluate(xi, eta).norm(), n2.evaluate(xi, eta).norm()));
+    }
+    // Test the two implementations of a b-spline curve.
+    {
+        testEvaluationNurbs(exampleCurves_5.nurbsCurveSample2D());
+        testEvaluationNurbs(new nurbsCircle_2.NurbsCirle());
+    }
+    //  Test knot insertion.
+    {
+        measure("surf_knot_insertion_xi", () => {
+            let n1 = new nurbsPlate_2.NurbsPlateHole();
+            let n2 = new nurbsPlate_2.NurbsPlateHole();
+            for (let i = 0.1; i <= 1; i += 0.9) {
+                if (n2.Xi[i] != i) {
+                    let k = bspline_6.BsplineCurve.findSpan(n2.Xi, i, n2.p, n2.controlPoints.length - 1);
+                    n2.insertKnotsXi(i, k, 0, 1);
+                    testNurbs(n1, n2);
+                }
+            }
+        });
+        measure("surf_knot_insertion_eta", () => {
+            let n1 = new nurbsPlate_2.NurbsPlateHole();
+            let n2 = new nurbsPlate_2.NurbsPlateHole();
+            for (let i = 0.1; i <= 1; i += 0.9) {
+                if (n2.Xi[i] != i) {
+                    let k = bspline_6.BsplineCurve.findSpan(n2.Xi, i, n2.p, n2.controlPoints.length - 1);
+                    n2.insertKnotsEta(i, k, 0, 1);
+                    testNurbs(n1, n2);
+                }
+            }
+        });
     }
 });
 //# sourceMappingURL=bundle.js.map
