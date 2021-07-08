@@ -39,11 +39,14 @@ for p = 0:5
     Xi(p+1:p+1+length(Xi0)-1) = Xi0;
     Xi(p+1+length(Xi0):p+1+length(Xi0)+p) = Xi0(end);
     n = length(Xi) - p - 3;
+    % Weights.
     w = ones(1, n);
-    w(floor(length(w)./2)) = 3;
+    w(2) = 3;
+    w(3) = 3;
+    w(4) = 3;
     title(sprintf('w = %s', mat2str(w)));
     for i = 0:n
-        xi = 0:0.01:1;
+        xi = 0:0.005:1;
         for j = 1:length(xi)
             y(j) = computeNURBSBasisFun(i, xi(j), n + p + 1, p, Xi, w);
         end
