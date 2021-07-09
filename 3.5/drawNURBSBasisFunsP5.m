@@ -19,14 +19,8 @@
 % along with this program. If not, see <http://www.gnu.org/licenses/>.
 %
 
-% Define the control points.
-P = [0, 0; 1, 1; 2, 0.5; 3, 0.5; 0.5, 1.5; 1.5, 0];
 % Define the knot vector.
-Xi0 = [0, 0, 0, 0.25, 0.5, 0.75, 1, 1, 1];
-% Define the degree.
-p = 2;
-% Compute the dimension.
-d = length(P(1, :));
+Xi0 = [0.25, 0.5, 0.75];
 
 % Draw the basis functions.
 for p = 0:5
@@ -35,20 +29,19 @@ for p = 0:5
     box on;
     grid on;
     axis([0, 1, 0, 1]);
-    Xi(1:p) = Xi0(1);
-    Xi(p+1:p+1+length(Xi0)-1) = Xi0;
-    Xi(p+1+length(Xi0):p+1+length(Xi0)+p) = Xi0(end);
-    n = length(Xi) - p - 3;
+    Xi = ones(1);
+    Xi(1, 1:p + 1) = zeros(1, p + 1);
+    Xi(1, p+2:p+2+length(Xi0)-1) = Xi0;
+    Xi(1, p+2+length(Xi0):p+2+length(Xi0)+p) = ones(1, p + 1);
+    n = length(Xi) - p - 2;
     % Weights.
-    w = ones(1, n);
-    w(2) = 3;
-    w(3) = 3;
-    w(4) = 3;
+    w = ones(1, n + 1);
+    w(1, floor(length(w)/2)) = 3;
     title(sprintf('w = %s', mat2str(w)));
     for i = 0:n
         xi = 0:0.005:1;
         for j = 1:length(xi)
-            y(j) = computeNURBSBasisFun(i, xi(j), n + p + 1, p, Xi, w);
+            y(j) = computeNURBSBasisFun(i, xi(j), n, p, Xi, w);
         end
         
         for j = 2:(length(xi) - 1)
