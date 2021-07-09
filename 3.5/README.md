@@ -4,7 +4,7 @@ NOTE: code in this directory needs code in 3.4.
 ### drawNURBSBasisFunsP5
 Draws NURBS basis funs of degrees in [0, 5].
 
-![basis](nurbs_basis.svg.png)
+![basis](nurbs_basis_w3.svg.png)
 
 ### drawNURBSBasisDerivs
 
