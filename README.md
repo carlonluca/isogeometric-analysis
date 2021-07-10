@@ -4,10 +4,13 @@
 
 * Link to dissertation: https://bugfreeblog.page.link/isogeometric-analysis-dissertation.
 * Link to presentation: https://bugfreeblog.page.link/isogeometric-analysis-presentation.
-* FEM: [blog post](https://thebugfreeblog.blogspot.com/2021/04/igafem.html).
-* Bezier curves and surfaces: [blog post](https://thebugfreeblog.blogspot.com/2021/05/isogeometric-analysis-bezier-curves-and.html), [typescript demo](https://carlonluca.github.io/isogeometric-analysis/bezier.html).
-* B-spline curves and surfaces: [typescript demo](https://carlonluca.github.io/isogeometric-analysis/bspline.html).
-* NURBS curves and surfaces: [typescript demo](https://carlonluca.github.io/isogeometric-analysis/nurbs.html).
+* FEM: [**blog post**](https://thebugfreeblog.blogspot.com/2021/04/igafem.html).
+* Bezier curves and surfaces: [**blog post**](https://thebugfreeblog.blogspot.com/2021/05/isogeometric-analysis-bezier-curves-and.html), [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/bezier.html).
+* B-spline curves and surfaces: [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/bspline.html).
+* NURBS curves and surfaces: [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/nurbs.html).
+* NURBS knot insertion: [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/nurbs_knot_insertion.html)
+
+**NOTE**: typescript demos are not optimised for speed. It may require some time for your browser to complete the computation of the result before you can see the result.
 
 ## Intro
 
