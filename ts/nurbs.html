@@ -5,7 +5,7 @@
     <script src="https://unpkg.com/mathjs@9.3.2/lib/browser/math.js"></script>
     <script src="https://requirejs.org/docs/release/2.3.6/comments/require.js"></script>
     <script src="dist/bundle.js"></script>
-    <script>
+    <!--<script>
         window.onload = () => {
             require(["nurbs/drawNurbsCurveExample"], function(d) {
                 d.drawNurbsCurveExample1("nurbsCanvas1", true)
@@ -16,6 +16,34 @@
                 d.drawNurbsSurfPlateHole("nurbsCanvas4", true)
                 d.drawNurbsSurfToroid("nurbsCanvas5", true)
             })
+        }
+    </script>-->
+    <script>
+        window.onload = () => {
+            // Build a worker from an anonymous function body
+            var blobURL = URL.createObjectURL( new Blob([ '(', function() {
+                importScripts(
+                    "https://unpkg.com/mathjs@9.3.2/lib/browser/math.js",
+                    "https://requirejs.org/docs/release/2.3.6/comments/require.js"
+                )
+                require(["nurbs/drawNurbsCurveExample"], function(d) {
+                    //Long-running work here
+                    onmessage = function(e) {
+                        console.log('Message received from main script' + e)
+                        const values = d.computeNurbsCurveExample1()
+                        postMessage(d)
+                    }
+                })
+            }.toString(), ')()' ], { type: 'application/javascript' }))
+            let url = new URL("dist/bundle.js", window.location.origin)
+            worker = new Worker(blobURL)
+            worker.postMessage(url.toString())
+            worker.onmessage = (e) => {
+                console.log("DONE")
+                console.log(JSON.stringify(e))
+            }
+            // Won't be needing this anymore
+            URL.revokeObjectURL( blobURL );
         }
     </script>
 

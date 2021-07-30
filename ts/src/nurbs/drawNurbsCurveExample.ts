@@ -25,6 +25,27 @@ import { nurbsCurveSample2D } from "../examples/exampleCurves";
 import { NurbsCirle } from "../examples/nurbsCircle";
 import { drawNurbsCurve } from "./drawNurbsCurve"
 
+export let computeNurbsCurveExample1 = (): any => {
+    const nurbs = nurbsCurveSample2D()
+    // @ts-expect-error
+    const xiValues = math.range(0, 1, 0.001).toArray()
+    let xValues = []
+    let yValues = []
+    let zValues = []
+    xiValues.map((xi: number) => {
+        let p = nurbs.evaluate(xi)
+        xValues.push(p.x())
+        yValues.push(p.y())
+        zValues.push(p.z())
+    })
+
+    return {
+        xValues: xValues,
+        yValues: yValues,
+        zValues: zValues
+    }
+}
+
 export let drawNurbsCurveExample1 = (plot: string, drawControlPoints: boolean, basisPlot: string) => {
     let nurbs = nurbsCurveSample2D()
     drawNurbsCurve(nurbs.controlPoints, nurbs.knotVector, nurbs.weights, 2, false, drawControlPoints, plot, basisPlot)
