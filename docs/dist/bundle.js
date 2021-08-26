@@ -1924,6 +1924,11 @@ define("bezier/drawBezierSurf", ["require", "exports", "bezier/bezier"], functio
                     },
                 },
             },
+            margin: {
+                l: 0,
+                r: 0,
+                b: 0
+            }
         };
         // @ts-expect-error
         Plotly.newPlot(plot, data, layout);
@@ -2378,6 +2383,11 @@ define("bspline/drawBsplineSurf", ["require", "exports", "bspline/bspline"], fun
                     },
                 },
             },
+            margin: {
+                l: 0,
+                r: 0,
+                b: 0
+            }
         };
         // @ts-expect-error
         Plotly.newPlot(plot, data, layout);
@@ -3168,6 +3178,11 @@ define("nurbs/drawNurbsSurf", ["require", "exports", "nurbs/nurbs"], function (r
                         }
                     }
                 }
+            },
+            margin: {
+                l: 0,
+                r: 0,
+                b: 0
             }
         };
         // @ts-expect-error
