@@ -161,6 +161,11 @@ export let drawBezierSurf = (controlPoints: Point[][], drawControlPoints: boolea
                 },
             },
         },
+        margin: {
+            l: 0,
+            r: 0,
+            b: 0
+        }
     };
     // @ts-expect-error
     Plotly.newPlot(plot, data, layout)
