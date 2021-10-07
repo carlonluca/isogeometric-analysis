@@ -1,0 +1,26 @@
+<html>
+
+<body>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js" charset="utf-8"></script>
+    <script src="https://unpkg.com/mathjs@9.3.2/lib/browser/math.js"></script>
+    <script src="https://requirejs.org/docs/release/2.3.6/comments/require.js"></script>
+    <script src="dist/bundle.js"></script>
+    <script>
+        window.onload = () => {
+            require(["nurbs/drawNurbsSurfExamples"], function(d) {
+                d.drawNURBSKnotInsertionPlateHole("nurbsCanvas10", "nurbsCanvas11", "nurbsCanvas12", "nurbsCanvas13")
+            })
+        }
+    </script>
+
+    <div style="display: block;border:0px solid #000000;width: 80%;margin: auto">
+        <div style="display: inline-block;border:1px solid #000000;width: 49%;margin: auto"><div style="width: 98%; margin: auto" id="nurbsCanvas10"></div></div>
+        <div style="display: inline-block;border:1px solid #000000;width: 49%;margin: auto"><div style="width: 98%; margin: auto" id="nurbsCanvas11"></div></div>
+    </div>
+    <div style="display: block;border:0px solid #000000;width: 80%;margin: auto">
+        <div style="display: inline-block;border:1px solid #000000;width: 49%;margin: auto"><div style="width: 98%; margin: auto" id="nurbsCanvas12"></div></div>
+        <div style="display: inline-block;border:1px solid #000000;width: 49%;margin: auto"><div style="width: 98%; margin: auto" id="nurbsCanvas13"></div></div>
+    </div>
+</body>
+
+</html>
