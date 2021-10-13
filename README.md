@@ -8,7 +8,9 @@
 * Bezier curves and surfaces: [**blog post**](https://thebugfreeblog.blogspot.com/2021/05/isogeometric-analysis-bezier-curves-and.html), [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/bezier.html).
 * B-spline curves and surfaces: [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/bspline.html).
 * NURBS curves and surfaces: [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/nurbs.html).
-* NURBS knot insertion: [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/nurbs_knot_insertion.html)
+* NURBS knot insertion on a circle: [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/nurbs_knot_insertion_curve.html)
+* NURBS knot insertion on a plate with a hole: [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/nurbs_knot_insertion_plate.html) **NOTE**: this demo needs much time to compute
+* NURBS knot insertion on a toroid: [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/nurbs_knot_insertion_toroid.html) **NOTE**: this demo needs much time to compute
 
 **NOTE**: typescript demos are not optimised for speed. It may require some time for your browser to complete the computation of the result before you can see the result.
 
