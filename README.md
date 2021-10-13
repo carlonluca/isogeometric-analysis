@@ -119,6 +119,12 @@ In [chapter 4.7](4.7) there are more examples of solving 2D problems with IGA, (
 
 ![solution](4.7/iga_2d_56_1.svg.png)
 
+## TypeScript Implementation
+
+Directory [ts](ts) includes a complete TypeScript implementation of many of the algorithms used in IGA.
+
+![toroid](ts/ki_toroid.webp)
+
 ## Links
 
 The code was tested on [**GNU Octave version 6.2.0**](https://www.gnu.org/software/octave/index).
