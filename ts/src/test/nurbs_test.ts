@@ -20,7 +20,7 @@
  */
 
 import { BsplineCurve } from "../bspline/bspline"
-import { approxEqual } from "../core/math"
+import { approxEqualPoints } from "../core/math"
 import { nurbsCurveSample2D } from "../examples/exampleCurves"
 import { NurbsCirle } from "../examples/nurbsCircle"
 import { NurbsPlateHole } from "../examples/nurbsPlate"
@@ -36,13 +36,13 @@ function measure(label: string, f: () => void) {
 
 function testEvaluationNurbs(nurbs: NurbsCurve) {
     for (let xi = 0; xi < 1; xi += 0.05)
-        assert(approxEqual(nurbs.evaluate1(xi).norm(), nurbs.evaluate2(xi).norm()))
+        assert(approxEqualPoints(nurbs.evaluate1(xi), nurbs.evaluate2(xi)))
 }
 
 function testNurbs(n1: NurbsSurf, n2: NurbsSurf) {
     for (let xi = 0; xi <= 1; xi += 0.01)
         for (let eta = 0; eta <= 1; eta += 0.01)
-            assert(approxEqual(n1.evaluate(xi, eta).norm(), n2.evaluate(xi, eta).norm()))
+            assert(approxEqualPoints(n1.evaluate(xi, eta), n2.evaluate(xi, eta)))
 }
 
 // Test the two implementations of a b-spline curve.

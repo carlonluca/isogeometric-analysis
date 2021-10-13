@@ -19,10 +19,16 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Point } from "./point"
+
  export let in_range = (val: number, a: number, b: number, openLeft: boolean = false, openRight: boolean = false) => {
      return val >= a && val <= b
 }
 
 export function approxEqual(val1: number, val2: number, epsilon: number = 1E-6): boolean {
     return Math.abs(val1 - val2) <= epsilon
+}
+
+export function approxEqualPoints(p1: Point, p2: Point, epsilon: number = 1E-6): boolean {
+    return approxEqual(p1.x(), p2.x(), epsilon) && approxEqual(p1.y(), p2.y(), epsilon) && approxEqual(p1.z(), p2.z())
 }
