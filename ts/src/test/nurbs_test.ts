@@ -59,8 +59,7 @@ function testNurbs(n1: NurbsSurf, n2: NurbsSurf) {
         for (let i = 0.1; i <= 1; i += 0.9) {
             if (n2.Xi[i] != i) {
                 let k = BsplineCurve.findSpan(n2.Xi, i, n2.p, n2.controlPoints.length - 1)
-                n2.insertKnotsXi(i, k, 0, 1)
-                testNurbs(n1, n2)
+                testNurbs(n1, n2.insertKnotsXi(i, k, 0, 1))
             }
         }
     })
@@ -71,8 +70,7 @@ function testNurbs(n1: NurbsSurf, n2: NurbsSurf) {
         for (let i = 0.1; i <= 1; i += 0.9) {
             if (n2.Xi[i] != i) {
                 let k = BsplineCurve.findSpan(n2.Xi, i, n2.p, n2.controlPoints.length - 1)
-                n2.insertKnotsEta(i, k, 0, 1)
-                testNurbs(n1, n2)
+                testNurbs(n1, n2.insertKnotsEta(i, k, 0, 1))
             }
         }
     })
