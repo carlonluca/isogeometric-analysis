@@ -57,6 +57,19 @@ export class Matrix2 implements IEquatable<Matrix2> {
     public row(i: number): RowVector { return new RowVector(this.m_data[i]) }
 
     /**
+     * Returns the j-th column.
+     * 
+     * @param j 
+     * @returns 
+     */
+    public col(j: number): ColVector {
+        let ret = []
+        for (let i = 0; i < this.rows(); i++)
+            ret.push(this.m_data[i][j])
+        return new ColVector(ret)
+    }
+
+    /**
      * Returns a subrect of this matrix.
      * 
      * @param topLeft 
@@ -71,19 +84,6 @@ export class Matrix2 implements IEquatable<Matrix2> {
             for (let i = topLeft.y(); i <= bottomRight.y(); i++)
                 retData[i - topLeft.y()][j - topLeft.x()] = this.m_data[i][j]
         return new Matrix2(retData)
-    }
-
-    /**
-     * Returns the j-th column.
-     * 
-     * @param j 
-     * @returns 
-     */
-    public col(j: number): Matrix2 {
-        let ret = []
-        for (let i = 0; i < this.rows(); i++)
-            ret.push(this.m_data[i][j])
-        return new Matrix2([ret])
     }
 
     /**
@@ -445,5 +445,44 @@ export class RowVector extends Matrix2 {
      */
     public static zero(length: number): RowVector {
         return Matrix2.zero(1, length).row(0)
+    }
+}
+
+/**
+ * Represents a column.
+ */
+export class ColVector extends Matrix2 {
+    /**
+     * Ctor.
+     * 
+     * @param values 
+     */
+    constructor(values: number[]) {
+        let col = []
+        for (let i = 0; i < values.length; i++)
+            col.push([ values[i] ])
+        super(col)
+    }
+
+    /**
+     * Returns the value at index.
+     * 
+     * @param index 
+     * @returns 
+     */
+    public value(a: number, b?: number): number {
+        if (b != null && b != undefined)
+            return super.value(a, b)
+        return super.value(a, 0)
+    }
+
+    /**
+     * Returns a null vector of a given size.
+     * 
+     * @param size 
+     * @returns 
+     */
+    public static zero(length: number): ColVector {
+        return Matrix2.zero(length, 1).col(0)
     }
 }
