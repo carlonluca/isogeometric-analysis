@@ -26,7 +26,7 @@ import { ColVector, Matrix2 } from "./matrix";
  * 
  *      Lx = b
  * 
- * @param L triangular matrix
+ * @param L upper-triangular matrix
  * @param b column
  */
 export function forwardSub(L: Matrix2, b: ColVector): ColVector {
@@ -37,6 +37,27 @@ export function forwardSub(L: Matrix2, b: ColVector): ColVector {
         for (let j = 0; j < i; j++)
             bi -= L.value(i, j)*x.value(j)
         x.setValue(i, 0, bi/L.value(i, i))
+    }
+    return x
+}
+
+/**
+ * Implements back substitution in a system of form:
+ * 
+ *      Ux = b
+ * 
+ * @param U lower-triangular matrix
+ * @param b column
+ * @returns 
+ */
+export function backwardSub(U: Matrix2, b: ColVector): ColVector {
+    let n = U.cols()
+    let x = ColVector.zero(n)
+    for (let i = n - 1; i >= 0; i--) {
+        let bi = b.value(i)
+        for (let j = i + 1; j < n; j++)
+            bi -= U.value(i, j)*x.value(j)
+        x.setValue(i, 0, bi/U.value(i, i))
     }
     return x
 }

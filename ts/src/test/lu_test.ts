@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { forwardSub } from "../core/lu"
+import { backwardSub, forwardSub } from "../core/lu"
 import { ColVector, Matrix2 } from "../core/matrix"
 // @ts-expect-error
 var assert = require("assert")
@@ -63,4 +63,30 @@ var assert = require("assert")
     let x = new ColVector([7, -3, 13, 18])
     
     assert(forwardSub(L, b).equals(x))
+}
+
+// Test 1
+{
+    let U = new Matrix2([
+        [1, -1/2, 3/2],
+        [0, 1, -1/5],
+        [0, 0, 1]
+    ])
+    let b = new ColVector([-9/2, 11/5, -1])
+    let x = new ColVector([-2, 2, -1])
+
+    assert(backwardSub(U, b).equals(x))
+}
+
+// Test 2
+{
+    let U = new Matrix2([
+        [20, -12, -5],
+        [0, 9, -7.25],
+        [0, 0, 2.65]
+    ])
+    let b = new ColVector([10, 22.5, 45.5])
+    let x = new ColVector([14.59, 16.33, 17.17])
+
+    assert(backwardSub(U, b).round(2).equals(x))
 }

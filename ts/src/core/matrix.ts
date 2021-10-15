@@ -246,6 +246,19 @@ export class Matrix2 implements IEquatable<Matrix2> {
     }
 
     /**
+     * Rounds all the elements.
+     * 
+     * @param decimals 
+     */
+    public round(decimals: number): Matrix2 {
+        let factor = Math.pow(10, decimals)
+        for (let i = 0; i < this.m_data.length; i++)
+            for (let j = 0; j < this.m_data[i].length; j++)
+                this.m_data[i][j] = Math.round(this.m_data[i][j]*factor)/factor
+        return this
+    }
+
+    /**
      * Clones this matrix.
      * 
      * @returns 
