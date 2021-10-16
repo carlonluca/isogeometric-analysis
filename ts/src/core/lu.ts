@@ -76,7 +76,7 @@ export function backwardSub(U: Matrix2, b: ColVector): ColVector {
     return x
 }
 
-export function luDecomp(A: Matrix2) {
+/*export function luDecomp(A: Matrix2) {
     let n = A.cols()
     if (n == 1) {
         let L = new Matrix2([[1]])
@@ -88,4 +88,4 @@ export function luDecomp(A: Matrix2) {
     let A12 = A.row(0).clone().row(0).right(1)
     let A21 = A.col(0).clone().col(0).bottom(1)
     let A22 = 
-}
+}*/
