@@ -20,6 +20,20 @@
  */
 
 import { ColVector, Matrix2 } from "./matrix";
+import { Range } from "./range";
+
+/**
+ * Data resulting from LU-decomposition.
+ */
+export class LUDecompData {
+    constructor(lower: Matrix2, upper: Matrix2) {
+        this.lower = lower
+        this.upper = upper
+    }
+
+    public lower: Matrix2
+    public upper: Matrix2
+}
 
 /**
  * Implements forward substitution in a system of form:
@@ -60,4 +74,18 @@ export function backwardSub(U: Matrix2, b: ColVector): ColVector {
         x.setValue(i, 0, bi/U.value(i, i))
     }
     return x
+}
+
+export function luDecomp(A: Matrix2) {
+    let n = A.cols()
+    if (n == 1) {
+        let L = new Matrix2([[1]])
+        let U = A.clone()
+        return new LUDecompData(L, U)
+    }
+
+    let A11 = A.value(0, 0)
+    let A12 = A.row(0).clone().row(0).right(1)
+    let A21 = A.col(0).clone().col(0).bottom(1)
+    let A22 = 
 }

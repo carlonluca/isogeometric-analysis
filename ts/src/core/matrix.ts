@@ -259,6 +259,23 @@ export class Matrix2 implements IEquatable<Matrix2> {
     }
 
     /**
+     * Extracts a rect from this matrix.
+     * 
+     * @param v 
+     * @param h 
+     * @returns 
+     */
+    public mid(v: Range, h: Range): Matrix2 {
+        let ret = Matrix2.zero(v.sizeClosed(), h.sizeClosed())
+        for (let i = v.a; i <= v.b; i++) {
+            for (let j = h.a; j <= h.b; j++) {
+                ret.setValue(i - v.a, j - h.a, this.m_data[i - v.a][j - h.a])
+            }
+        }
+        return ret
+    }
+
+    /**
      * Clones this matrix.
      * 
      * @returns 
@@ -441,6 +458,39 @@ export class RowVector extends Matrix2 {
     }
 
     /**
+     * Returns a range of the vector.
+     * 
+     * @param range 
+     * @returns 
+     */
+    public mid(range: Range): RowVector {
+        let data = []
+        for (let i = range.a; i <= range.b; i++)
+            data.push(this.m_data[0][i])
+        return new RowVector(data)
+    }
+
+    /**
+     * Returns the right portion.
+     * 
+     * @param i 
+     * @returns 
+     */
+    public right(i: number): RowVector {
+        return this.mid(new Range(i, this.length() - 1))
+    }
+
+    /**
+     * Returns the left portion.
+     * 
+     * @param i 
+     * @returns 
+     */
+    public left(i: number): RowVector {
+        return this.mid(new Range(0, i))
+    }
+
+    /**
      * Vector of ones.
      * 
      * @param length 
@@ -487,6 +537,39 @@ export class ColVector extends Matrix2 {
         if (b != null && b != undefined)
             return super.value(a, b)
         return super.value(a, 0)
+    }
+
+    /**
+     * Returns a range of the vector.
+     * 
+     * @param range 
+     * @returns 
+     */
+    public mid(range: Range): ColVector {
+        let data = []
+        for (let i = range.a; i <= range.b; i++)
+            data.push(this.m_data[i][0])
+        return new ColVector(data)
+    }
+
+    /**
+     * Returns a range of the column.
+     * 
+     * @param r 
+     * @returns 
+     */
+    public top(r: number): ColVector {
+        return this.mid(new Range(0, r))
+    }
+
+    /**
+     * Returns a range of the column.
+     * 
+     * @param r 
+     * @returns 
+     */
+    public bottom(r: number): ColVector {
+        return this.mid(new Range(r, this.m_data.length - 1))
     }
 
     /**

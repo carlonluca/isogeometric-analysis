@@ -21,4 +21,11 @@
 
 export class Range {
     constructor(public a: number, public b: number) {}
+
+    /**
+     * Size of the closed interval.
+     * 
+     * @returns 
+     */
+    public sizeClosed(): number { return this.b - this.a + 1 }
 }
