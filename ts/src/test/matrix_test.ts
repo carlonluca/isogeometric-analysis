@@ -203,3 +203,24 @@ var assert = require("assert")
         [1, 1, 1]
     ])))
 }
+
+{
+    let m1 = new Matrix2([
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+    ])
+    let m2 = m1.mid(new Range(1, 2), new Range(0, 1))
+    assert(m2.equals(new Matrix2([
+        [4, 5],
+        [7, 8]
+    ])))
+}
+
+{
+    let v1 = new RowVector([1, 2, 3, 4, 5, 6, 7, 8, 9])
+    let v2 = v1.left(4)
+    let v3 = v1.right(4)
+    assert(v2.equals(new RowVector([1, 2, 3, 4, 5])))
+    assert(v3.equals(new RowVector([5, 6, 7, 8, 9])))
+}
