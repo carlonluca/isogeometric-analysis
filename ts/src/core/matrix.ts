@@ -269,7 +269,7 @@ export class Matrix2 implements IEquatable<Matrix2> {
         let ret = Matrix2.zero(v.sizeClosed(), h.sizeClosed())
         for (let i = v.a; i <= v.b; i++) {
             for (let j = h.a; j <= h.b; j++) {
-                ret.setValue(i - v.a, j - h.a, this.m_data[i - v.a][j - h.a])
+                ret.setValue(i - v.a, j - h.a, this.m_data[i][j])
             }
         }
         return ret
