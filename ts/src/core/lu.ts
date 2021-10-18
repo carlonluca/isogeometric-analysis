@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ColVector, Matrix2 } from "./matrix";
+import { ColVector, Matrix2, RowVector } from "./matrix";
 import { Range } from "./range";
 
 /**
@@ -76,7 +76,7 @@ export function backwardSub(U: Matrix2, b: ColVector): ColVector {
     return x
 }
 
-/*export function luDecomp(A: Matrix2) {
+export function luDecomp(A: Matrix2) {
     let n = A.cols()
     if (n == 1) {
         let L = new Matrix2([[1]])
@@ -85,7 +85,21 @@ export function backwardSub(U: Matrix2, b: ColVector): ColVector {
     }
 
     let A11 = A.value(0, 0)
-    let A12 = A.row(0).clone().row(0).right(1)
-    let A21 = A.col(0).clone().col(0).bottom(1)
-    let A22 = 
-}*/
+    let A12 = A.row(0).row(0).right(1)
+    let A21 = A.col(0).col(0).bottom(1)
+    let A22 = A.mid(new Range(1, A.rows() - 1), new Range(1, A.cols() - 1))
+
+    let L11 = 1
+    let U11 = A11
+
+    let L12 = RowVector.zero(n - 1)
+    let U12 = A12.clone()
+
+    let L21 = A21.clone().mult(1/U11)
+    let U21 = ColVector.zero(n - 1)
+
+    let S22 = A22.sub(A21.mult(1/A11).multMat(A12))
+    let luData = luDecomp(S22)
+
+    
+}
