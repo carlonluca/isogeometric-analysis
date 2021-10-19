@@ -276,6 +276,45 @@ export class Matrix2 implements IEquatable<Matrix2> {
     }
 
     /**
+     * Returns true iif the matrix is lower triangular.
+     * 
+     * @returns 
+     */
+     public isLowerTriangular(): boolean {
+        if (!this.isSquare())
+            return false
+        for (let i = 0; i < this.rows() - 1; i++)
+            for (let j = i + 1; j < this.cols(); j++)
+                if (this.m_data[i][j] != 0)
+                    return false
+        return true
+    }
+
+    /**
+     * Returns true iif the matrix is upper triangular.
+     * 
+     * @returns 
+     */
+    public isUpperTriangular(): boolean {
+        if (!this.isSquare())
+            return false
+        for (let i = 1; i < this.rows(); i++)
+            for (let j = 0; j < i; j++)
+                if (this.m_data[i][j] != 0)
+                    return false
+        return true
+    }
+
+    /**
+     * Returns true iif the matrix is square.
+     * 
+     * @returns 
+     */
+    public isSquare(): boolean {
+        return this.cols() == this.rows()
+    }
+
+    /**
      * Clones this matrix.
      * 
      * @returns 

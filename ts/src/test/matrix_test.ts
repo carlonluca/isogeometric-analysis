@@ -224,3 +224,53 @@ var assert = require("assert")
     assert(v2.equals(new RowVector([1, 2, 3, 4, 5])))
     assert(v3.equals(new RowVector([5, 6, 7, 8, 9])))
 }
+
+{
+    let L = new Matrix2([
+        [1, 0, 0, 0],
+        [1, 2, 0, 0],
+        [1, 2, 3, 0],
+        [1, 2, 3, 4]
+    ])
+    assert(L.isLowerTriangular())
+    assert(!L.isUpperTriangular())
+}
+
+{
+    let M = new Matrix2([
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]
+    ])
+    assert(!M.isLowerTriangular())
+    assert(!M.isUpperTriangular())
+    assert(M.isSquare())
+}
+
+{
+    let U = new Matrix2([
+        [1, 2, 3, 4, 5, 6],
+        [0, 2, 3, 4, 5, 6],
+        [0, 0, 3, 4, 5, 6],
+        [0, 0, 0, 4, 5, 6],
+        [0, 0, 0, 0, 5, 6],
+        [0, 0, 0, 0, 0, 6]
+    ])
+    assert(!U.isLowerTriangular())
+    assert(U.isUpperTriangular())
+    assert(U.isSquare())
+}
+
+{
+    let U = new Matrix2([
+        [1, 2, 3, 4, 5, 6],
+        [0, 2, 3, 4, 5, 6],
+        [0, 0, 3, 4, 0, 6],
+        [0, 1, 0, 4, 5, 6],
+        [0, 0, 0, 0, 5, 6],
+        [0, 0, 0, 0, 0, 6]
+    ])
+    assert(!U.isLowerTriangular())
+    assert(!U.isUpperTriangular())
+    assert(U.isSquare())
+}
