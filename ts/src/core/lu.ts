@@ -76,6 +76,12 @@ export function backwardSub(U: Matrix2, b: ColVector): ColVector {
     return x
 }
 
+/**
+ * Implements plain LU decomposition, without any pivoting.
+ * 
+ * @param A 
+ * @returns 
+ */
 export function luDecomp(A: Matrix2) {
     let n = A.cols()
     if (n == 1) {

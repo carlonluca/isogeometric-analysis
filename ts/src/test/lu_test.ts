@@ -91,7 +91,7 @@ var assert = require("assert")
     assert(backwardSub(U, b).round(2).equals(x))
 }
 
-// Test LU
+// Test LU decomp
 {
     let A = new Matrix2([
         [7, 4],
@@ -108,6 +108,7 @@ var assert = require("assert")
     ]).round(2)))
 }
 
+// Test LU decomp
 {
     let A = new Matrix2([
         [1, 2, 2],
