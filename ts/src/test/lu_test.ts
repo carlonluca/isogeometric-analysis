@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { backwardSub, forwardSub } from "../core/lu"
+import { backwardSub, forwardSub, luDecomp } from "../core/lu"
 import { ColVector, Matrix2 } from "../core/matrix"
 // @ts-expect-error
 var assert = require("assert")
@@ -89,4 +89,40 @@ var assert = require("assert")
     let x = new ColVector([14.59, 16.33, 17.17])
 
     assert(backwardSub(U, b).round(2).equals(x))
+}
+
+// Test LU
+{
+    let A = new Matrix2([
+        [7, 4],
+        [3, 5]
+    ])
+    let LU = luDecomp(A)
+    assert(LU.lower.round(2).equals(new Matrix2([
+        [1, 0],
+        [3/7, 1]
+    ]).round(2)))
+    assert(LU.upper.round(2).equals(new Matrix2([
+        [7, 4],
+        [0, 23/7]
+    ]).round(2)))
+}
+
+{
+    let A = new Matrix2([
+        [1, 2, 2],
+        [4, 4, 2],
+        [4, 6, 4]
+    ])
+    let LU = luDecomp(A)
+    assert(LU.lower.round(2).equals(new Matrix2([
+        [1, 0, 0],
+        [4, 1, 0],
+        [4, 0.5, 1]
+    ]).round(2)))
+    assert(LU.upper.round(2).equals(new Matrix2([
+        [1, 2, 2],
+        [0, -4, -6],
+        [0, 0, -1]
+    ]).round(2)))
 }

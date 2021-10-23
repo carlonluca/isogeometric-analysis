@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ColVector, Matrix2 } from "./matrix";
+import { ColVector, Matrix2, RowVector } from "./matrix";
 import { Range } from "./range";
 
 /**
@@ -76,7 +76,7 @@ export function backwardSub(U: Matrix2, b: ColVector): ColVector {
     return x
 }
 
-/*export function luDecomp(A: Matrix2) {
+export function luDecomp(A: Matrix2) {
     let n = A.cols()
     if (n == 1) {
         let L = new Matrix2([[1]])
@@ -87,5 +87,40 @@ export function backwardSub(U: Matrix2, b: ColVector): ColVector {
     let A11 = A.value(0, 0)
     let A12 = A.row(0).clone().row(0).right(1)
     let A21 = A.col(0).clone().col(0).bottom(1)
-    let A22 = 
-}*/
+    let A22 = A.mid(new Range(1, A.rows() - 1), new Range(1, A.cols() - 1))
+
+    let L11 = 1
+    let U11 = A11
+    
+    // TODO: the 0 row and vector could be removed if I start from a zero matrix.
+    let L12 = RowVector.zero(n - 1)
+    let U12 = A12.clone().row(0)
+
+    let L21 = A21.clone().mult(1/U11).col(0)
+    let U21 = ColVector.zero(n - 1)
+    
+    let S22 = A22.sub(L21.multMat(U12))
+    let LU22 = luDecomp(S22)
+
+    let L = Matrix2.zero(L12.cols() + 1, L21.rows() + 1)
+    L.setValue(0, 0, L11)
+    for (let i = 1; i < L.cols(); i++)
+        L.setValue(0, i, L12.value(i - 1))
+    for (let i = 1; i < L.rows(); i++)
+        L.setValue(i, 0, L21.value(i - 1))
+    for (let i = 1; i < LU22.lower.rows() + 1; i++)
+        for (let j = 1; j < LU22.lower.cols() + 1; j++)
+            L.setValue(i, j, LU22.lower.value(i - 1, j - 1))
+    
+    let U = Matrix2.zero(U12.cols() + 1, U21.rows() + 1)
+    U.setValue(0, 0, U11)
+    for (let i = 1; i < U.cols(); i++)
+        U.setValue(0, i, U12.value(i - 1))
+    for (let i = 1; i < U.rows(); i++)
+        U.setValue(i, 0, U21.value(i - 1))
+    for (let i = 1; i < LU22.upper.rows() + 1; i++)
+        for (let j = 1; j < LU22.upper.cols() + 1; j++)
+            U.setValue(i, j, LU22.upper.value(i - 1, j - 1))
+    
+    return new LUDecompData(L, U)
+}
