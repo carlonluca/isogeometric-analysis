@@ -21,17 +21,46 @@
 
 import { linsolve } from "../core/linsystem"
 import { backwardSub, forwardSub, luDecomp } from "../core/lu"
+import { approxEqual } from "../core/math"
 import { ColVector, Matrix2 } from "../core/matrix"
 // @ts-expect-error
 var assert = require("assert")
 
+function testLinSystem(A: Matrix2, b: ColVector, expected: ColVector)
+{
+    let x = linsolve(A, b)
+    assert(x.round(2).equals(expected))
+}
+
 // Test 1
 {
-    let A = new Matrix2([
+    testLinSystem(new Matrix2([
         [1, 1],
         [-3, 1]
-    ])
-    let b = new ColVector([6, 2])
-    let x = linsolve(A, b)
-    assert(x.equals(new ColVector([1, 5])))
+    ]),
+    new ColVector([6, 2]),
+    new ColVector([1, 5])
+    )
+}
+
+// Test 2
+{
+    testLinSystem(new Matrix2([
+        [-3, 1],
+        [4, 1]
+    ]),
+    new ColVector([-1, -8]),
+    new ColVector([-1, -4])
+    )
+}
+
+// Test 3
+{
+    testLinSystem(new Matrix2([
+        [1, -2],
+        [7, -3]
+    ]),
+    new ColVector([-2, 19]),
+    new ColVector([4, 3])
+    )
 }
