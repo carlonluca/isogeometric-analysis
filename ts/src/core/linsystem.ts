@@ -19,7 +19,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { backwardSub, forwardSub, luDecomp } from "./lu";
+import { backwardSub, forwardSub, luDecomp, lupDecomp } from "./lu";
 import { ColVector, Matrix2 } from "./matrix";
 
 /**
@@ -30,8 +30,31 @@ import { ColVector, Matrix2 } from "./matrix";
  * @param A 
  * @param b 
  */
-export function linsolve(A: Matrix2, b: ColVector)
-{
+export function linsolve(A: Matrix2, b: ColVector): ColVector {
+    return lup_linsolve(A, b)
+}
+
+/**
+ * Solves a linear system using LU decomposition.
+ * 
+ * @param A 
+ * @param b 
+ * @returns 
+ */
+ export function lup_linsolve(A: Matrix2, b: ColVector): ColVector {
+    let lupdata = lupDecomp(A)
+    let z = lupdata.perm.multMat(b).col(0)
+    return lusolve(lupdata.lower, lupdata.upper, z)
+}
+
+/**
+ * Solves a linear system using LU decomposition.
+ * 
+ * @param A 
+ * @param b 
+ * @returns 
+ */
+export function lu_linsolve(A: Matrix2, b: ColVector): ColVector {
     let ludata = luDecomp(A)
     return lusolve(ludata.lower, ludata.upper, b)
 }
