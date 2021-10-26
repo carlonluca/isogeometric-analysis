@@ -612,6 +612,33 @@ export class ColVector extends Matrix2 {
     }
 
     /**
+     * Returns an array from this column.
+     */
+    public toArray(): number[] {
+        let ret = []
+        for (let i = 0; i < this.rows(); i++)
+            ret.push(this.value(i))
+        return ret
+    }
+
+    /**
+     * Returns the index of the max value in the column.
+     * 
+     * @returns 
+     */
+    public indexMax(): number {
+        let max = this.value(0)
+        let maxi = 0
+        for (let i = 1; i < this.rows(); i++)
+            if (max < this.value(i)) {
+                max = this.value(i)
+                maxi = i
+            }
+        
+        return maxi
+    }
+
+    /**
      * Returns a null vector of a given size.
      * 
      * @param size 
