@@ -91,7 +91,7 @@ var assert = require("assert")
     assert(backwardSub(U, b).round(2).equals(x))
 }
 
-// Test LU decomp
+// Test LU/LUP decomp
 {
     let A = new Matrix2([
         [7, 4],
@@ -112,7 +112,7 @@ var assert = require("assert")
     assert(LUP.perm.multMat(A).round(2).equals(LUP.lower.multMat(LUP.upper).round(2)))
 }
 
-// Test LU decomp
+// Test LU/LUP decomp
 {
     let A = new Matrix2([
         [1, 2, 2],
@@ -130,4 +130,21 @@ var assert = require("assert")
         [0, -4, -6],
         [0, 0, -1]
     ]).round(2)))
+}
+
+// Test LUP (LU fails with this matrix)
+{
+    let A = new Matrix2([
+        [0, 1],
+        [2, 1]
+    ])
+    let LUP = lupDecomp(A)
+    assert(LUP.lower.equals(new Matrix2([
+        [1, 0],
+        [0, 1]
+    ])))
+    assert(LUP.upper.equals(new Matrix2([
+        [2, 1],
+        [0, 1]
+    ])))
 }
