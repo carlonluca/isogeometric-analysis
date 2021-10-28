@@ -24,6 +24,24 @@ import { Point } from "../core/point"
 import { Range } from "../core/range"
 
 /**
+ * B-spline basis function.
+ */
+export class BsplineBasis {
+    /**
+     * Ctor.
+     * 
+     * @param i index of the B-spline basis function.
+     * @param p degree of the B-spline basis function.
+     * @param Xi knot vector.
+     */
+    constructor(
+        public i: number,
+        public p: number,
+        public Xi: number[],
+        ) {}
+}
+
+/**
  * Class representing a B-spline curve in the 2D or 3D space.
  */
 export class BsplineCurve {
