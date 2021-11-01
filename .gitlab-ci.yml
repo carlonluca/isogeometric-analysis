@@ -1,12 +1,16 @@
 # Node docker image on which this would be run
-image: node:16-alpine
+
 
 stages:
-  - test
+  - test_typescript
+  - test_rust
 
-# Job 1
-Test:
-  stage: test
+# TypeScript
+TestTypeScript:
+  stage: test_typescript
+  image:
+    name: node:16-alpine
+    entrypoint: [""]
   script:
     - cd ts
     - npm install -g typescript
@@ -17,3 +21,14 @@ Test:
     - node js_test/test/lu_test.js
     - node js_test/test/linsystem_test.js
     - node js_test/test/quad_test.js
+
+# Rust
+TestRust:
+  stage: test_rust
+  image:
+    name: rust:1.56-bullseye
+    entrypoint: [""]
+  script:
+    - cd rust/isogeometric-analysis
+    - cargo build
+    - cargo test
