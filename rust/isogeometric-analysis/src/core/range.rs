@@ -20,7 +20,34 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-pub use self::size::Size;
-pub use self::range::IntRange;
-mod size;
-mod range;
+ ///
+ /// Represents linear range.
+ /// 
+pub struct IntRange {
+    pub a: i32,
+    pub b: i32
+}
+
+impl IntRange {
+    ///
+    /// Size of the closed range.
+    /// 
+    pub fn size_closed(&self) -> i32 { self.b - self.a + 1}
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::core::IntRange;
+
+    #[test]
+    fn test_size() {
+        assert_eq!(IntRange {
+            a: 0,
+            b: 0
+        }.size_closed(), 1);
+        assert_eq!(IntRange {
+            a: 0,
+            b: 6
+        }.size_closed(), 7)
+    }
+}
