@@ -20,5 +20,4 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-use crate::core::Size;
-mod core;
+pub mod core;
