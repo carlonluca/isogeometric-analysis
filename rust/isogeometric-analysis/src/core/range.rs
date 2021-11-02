@@ -33,6 +33,11 @@ impl IntRange {
     /// Size of the closed range.
     /// 
     pub fn size_closed(&self) -> i32 { self.b - self.a + 1}
+
+    ///
+    /// Tests whether value is in [a, b].
+    ///
+    pub fn includes(&self, value: i32) -> bool { value >= self.a && value <= self.b }
 }
 
 #[cfg(test)]
@@ -48,6 +53,38 @@ mod tests {
         assert_eq!(IntRange {
             a: 0,
             b: 6
-        }.size_closed(), 7)
+        }.size_closed(), 7);
+    }
+
+    #[test]
+    fn test_includes() {
+        assert!(IntRange {
+            a: 5,
+            b: 19
+        }.includes(10));
+        assert!(IntRange {
+            a: 5,
+            b: 19
+        }.includes(19));
+        assert!(IntRange {
+            a: 5,
+            b: 19
+        }.includes(5));
+        assert!(!IntRange {
+            a: 5,
+            b: 19
+        }.includes(20));
+        assert!(!IntRange {
+            a: 5,
+            b: 19
+        }.includes(4));
+        assert!(IntRange {
+            a: -5,
+            b: 5
+        }.includes(4));
+        assert!(!IntRange {
+            a: -5,
+            b: 5
+        }.includes(-6));
     }
 }
