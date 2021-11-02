@@ -20,14 +20,57 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+use array2d::Array2D;
 use super::equatable::Equatable;
 
 pub struct Matrix2 {
-
+    data: Array2D<f64>
 }
 
 impl Equatable for Matrix2 {
     fn equals(&self) -> bool {
         true
+    }
+}
+
+impl Matrix2 {
+    ///
+    /// Constructs a matrix from data. Ownership is transferred.
+    /// 
+    pub fn from_array(data: Array2D<f64>) -> Matrix2 {
+        Matrix2 { data: data }
+    }
+
+    ///
+    /// Constructs a matrix from data. Ownership is not transferred and
+    /// the array is copied.
+    /// 
+    pub fn from_array_ref(data: &Array2D<f64>) -> Matrix2 {
+        Matrix2 { data: data.clone() }
+    }
+
+    pub fn from_vec(data: &[Vec<f64>]) -> Matrix2 {
+        Matrix2 { data: Array2D::from_rows(data) }
+    }
+
+    pub fn value(&self, row: usize, col: usize) -> f64 {
+        self.data[(row, col)]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::core::Matrix2;
+
+    #[test]
+    fn test_get() {
+        let m = Matrix2::from_vec(&vec![
+            vec![1f64, 2f64],
+            vec![3f64, 4f64]
+        ]);
+        assert_eq!(m.value(0, 0), 1f64);
+        assert_eq!(m.value(0, 1), 2f64);
+        assert_eq!(m.value(1, 0), 3f64);
+        assert_eq!(m.value(1, 1), 4f64);
     }
 }
