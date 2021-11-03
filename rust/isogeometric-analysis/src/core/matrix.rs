@@ -21,6 +21,8 @@
  */
 
 use array2d::Array2D;
+use std::ops::Add;
+use std::ops::Sub;
 use super::size::Size;
 
 #[derive(Debug)]
@@ -31,6 +33,39 @@ pub struct Matrix2 {
 impl PartialEq for Matrix2 {
     fn eq(&self, other: &Self) -> bool {
         self.data == other.data
+    }
+}
+
+impl Add for Matrix2 {
+    type Output = Self;
+
+    ///
+    /// Adds another matrix.
+    ///
+    fn add(self, other: Self) -> Self {
+        return self.mult_add(&other, 1f64);
+    }
+}
+
+impl Sub for Matrix2 {
+    type Output = Self;
+
+    ///
+    /// Subtracts another matrix.
+    /// 
+    fn sub(self, other: Self) -> Self::Output {
+        return self.mult_add(&other, -1f64);
+    }
+}
+
+impl Clone for Matrix2 {
+    ///
+    /// Clones this matrix.
+    /// 
+    fn clone(&self) -> Self {
+        Matrix2 {
+            data: self.data.clone()
+        }
     }
 }
 
@@ -95,19 +130,21 @@ impl Matrix2 {
         }
     }
 
+    // Private impl
     ///
-    /// Adds two matrices.
-    ///
-    pub fn add(&mut self, other: &Matrix2) -> &Matrix2 {
+    /// Adds to another matrix for terms multiplied by a factor.
+    /// 
+    fn mult_add(&self, other: &Matrix2, fac: f64) -> Matrix2 {
         if self.size() != other.size() {
             panic!()
         }
+        let mut output = self.clone();
         for i in 0..self.rows() {
             for j in 0..self.cols() {
-                self.data[(i, j)] += other.value(i, j)
+                output.data[(i, j)] += fac*other.value(i, j);
             }
         }
-        self
+        output
     }
 }
 
@@ -158,13 +195,15 @@ mod tests {
         let m1 = Matrix2::from_vec(&vec![
             vec![1f64, 2f64, 3f64]
         ]);
-        let mut m2 = Matrix2::from_vec(&vec![
+        let m2 = Matrix2::from_vec(&vec![
             vec![1f64, 1f64, 1f64]
         ]);
-        m2.add(&m1);
+        let m3 = m1.mult_add(&m2, 1f64);
+        let m4 = m1.clone() + m2.clone();
         assert_ne!(m2, m1);
-        assert_eq!(m2, Matrix2::from_vec(&vec![
+        assert_eq!(m3, Matrix2::from_vec(&vec![
             vec![2f64, 3f64, 4f64]
         ]));
+        assert_eq!(m3, m4);
     }
 }
