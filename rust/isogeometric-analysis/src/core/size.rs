@@ -20,12 +20,13 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
- ///
- /// Size represents a size with width and height.
- /// 
+///
+/// Size represents a size with width and height.
+///
+#[derive(Debug)]
 pub struct Size {
-    pub width: u32,
-    pub height: u32
+    pub width: usize,
+    pub height: usize
 }
 
 impl Size {
@@ -34,6 +35,12 @@ impl Size {
     /// 
     pub fn is_empty(&self) -> bool {
         if self.width <= 0 || self.height <= 0 { true } else { false }
+    }
+}
+
+impl PartialEq for Size {
+    fn eq(&self, other: &Self) -> bool {
+        self.width == other.width && self.height == other.height
     }
 }
 
@@ -47,5 +54,24 @@ mod tests {
             width: 0,
             height: 0
         }.is_empty(), true);
+    }
+
+    #[test]
+    fn test_equality() {
+        assert_eq!(Size {
+            width: 10,
+            height: 20
+        }, Size {
+            width: 10,
+            height: 20
+        });
+
+        assert_ne!(Size {
+            width: 10,
+            height: 20
+        }, Size {
+            width: 11,
+            height: 20
+        });
     }
 }

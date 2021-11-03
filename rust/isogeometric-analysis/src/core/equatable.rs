@@ -20,6 +20,6 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-pub trait Equatable {
-    fn equals(&self) -> bool;
+pub trait Equatable<T> {
+    fn equals(&self, other: &T) -> bool;
 }

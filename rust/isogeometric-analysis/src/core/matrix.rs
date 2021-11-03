@@ -21,15 +21,16 @@
  */
 
 use array2d::Array2D;
-use super::equatable::Equatable;
+use super::size::Size;
 
+#[derive(Debug)]
 pub struct Matrix2 {
     data: Array2D<f64>
 }
 
-impl Equatable for Matrix2 {
-    fn equals(&self) -> bool {
-        true
+impl PartialEq for Matrix2 {
+    fn eq(&self, other: &Self) -> bool {
+        self.data == other.data
     }
 }
 
@@ -69,6 +70,45 @@ impl Matrix2 {
     pub fn set_value(&mut self, row: usize, col: usize, value: f64) {
         self.data[(row, col)] = value
     }
+
+    ///
+    /// Returns the number of rows.
+    /// 
+    pub fn rows(&self) -> usize {
+        self.data.num_rows()
+    }
+
+    ///
+    /// Returns the number of columns.
+    /// 
+    pub fn cols(&self) -> usize {
+        self.data.num_columns()
+    }
+
+    ///
+    /// Returns the size of the matrix.
+    /// 
+    pub fn size(&self) -> Size {
+        Size {
+            width: self.cols(),
+            height: self.rows()
+        }
+    }
+
+    ///
+    /// Adds two matrices.
+    ///
+    pub fn add(&mut self, other: &Matrix2) -> &Matrix2 {
+        if self.size() != other.size() {
+            panic!()
+        }
+        for i in 0..self.rows() {
+            for j in 0..self.cols() {
+                self.data[(i, j)] += other.value(i, j)
+            }
+        }
+        self
+    }
 }
 
 #[cfg(test)]
@@ -100,5 +140,31 @@ mod tests {
         assert_eq!(m.value(0, 1), 2f64);
         assert_eq!(m.value(1, 0), 3f64);
         assert_eq!(m.value(1, 1), 4f64);
+    }
+
+    #[test]
+    fn test_size() {
+        let m = Matrix2::from_vec(&vec![
+            vec![1f64, 2f64],
+            vec![3f64, 4f64],
+            vec![5f64, 6f64]
+        ]);
+        assert_eq!(m.rows(), 3);
+        assert_eq!(m.cols(), 2);
+    }
+
+    #[test]
+    fn test_add() {
+        let m1 = Matrix2::from_vec(&vec![
+            vec![1f64, 2f64, 3f64]
+        ]);
+        let mut m2 = Matrix2::from_vec(&vec![
+            vec![1f64, 1f64, 1f64]
+        ]);
+        m2.add(&m1);
+        assert_ne!(m2, m1);
+        assert_eq!(m2, Matrix2::from_vec(&vec![
+            vec![2f64, 3f64, 4f64]
+        ]));
     }
 }
