@@ -49,12 +49,25 @@ impl Matrix2 {
         Matrix2 { data: data.clone() }
     }
 
+    ///
+    /// Builds a matrix from an array of vectors.
+    /// 
     pub fn from_vec(data: &[Vec<f64>]) -> Matrix2 {
         Matrix2 { data: Array2D::from_rows(data) }
     }
 
+    ///
+    /// Returns the value.
+    /// 
     pub fn value(&self, row: usize, col: usize) -> f64 {
         self.data[(row, col)]
+    }
+
+    ///
+    /// Sets a value.
+    /// 
+    pub fn set_value(&mut self, row: usize, col: usize, value: f64) {
+        self.data[(row, col)] = value
     }
 }
 
@@ -69,6 +82,21 @@ mod tests {
             vec![3f64, 4f64]
         ]);
         assert_eq!(m.value(0, 0), 1f64);
+        assert_eq!(m.value(0, 1), 2f64);
+        assert_eq!(m.value(1, 0), 3f64);
+        assert_eq!(m.value(1, 1), 4f64);
+    }
+
+    #[test]
+    fn test_set() {
+        let mut m = Matrix2::from_vec(&vec![
+            vec![1f64, 2f64],
+            vec![3f64, 4f64]
+        ]);
+
+        m.set_value(0, 0, 15f64);
+
+        assert_eq!(m.value(0, 0), 15f64);
         assert_eq!(m.value(0, 1), 2f64);
         assert_eq!(m.value(1, 0), 3f64);
         assert_eq!(m.value(1, 1), 4f64);
