@@ -143,6 +143,19 @@ impl Matrix2 {
         }
     }
 
+    ///
+    /// Creates an identity matrix.
+    ///
+    pub fn identity(size: usize) -> Self {
+        let mut zero = Self::zeros(size, size);
+        for i in 0..(size - 1) {
+            for j in 0..(size - 1) {
+                zero.set_value(i, j, if i == j { 1f64 } else { 0f64 });
+            }
+        }
+        return zero;
+    }
+
     // Private impl
     // ============
     ///
@@ -254,5 +267,15 @@ mod tests {
         assert_eq!(m.value(2, 2), 0f64);
         assert_eq!(m.value(3, 3), 0f64);
         assert_eq!(m.value(4, 4), 0f64);
+    }
+
+    #[test]
+    fn test_identity() {
+        let m = Matrix2::identity(10);
+        for i in 0..(m.rows() - 1) {
+            for j in 0..(m.cols() - 1) {
+                assert_eq!(m.value(i, j), if i == j { 1f64 } else { 0f64 });
+            }
+        }
     }
 }
