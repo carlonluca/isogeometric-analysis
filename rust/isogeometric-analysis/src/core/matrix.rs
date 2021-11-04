@@ -130,7 +130,21 @@ impl Matrix2 {
         }
     }
 
+    ///
+    /// Creates a matrix filled with zeros.
+    ///
+    pub fn zeros(rows: usize, cols: usize) -> Self {
+        if rows <= 0 || cols <= 0 {
+            panic!()
+        }
+
+        Self {
+            data: Array2D::filled_with(0f64, rows, cols)
+        }
+    }
+
     // Private impl
+    // ============
     ///
     /// Adds to another matrix for terms multiplied by a factor.
     /// 
@@ -138,6 +152,7 @@ impl Matrix2 {
         if self.size() != other.size() {
             panic!()
         }
+
         let mut output = self.clone();
         for i in 0..self.rows() {
             for j in 0..self.cols() {
@@ -222,5 +237,22 @@ mod tests {
             vec![0f64, 1f64, 2f64]
         ]));
         assert_eq!(m3, m4);
+    }
+
+    #[test]
+    fn test_zeros() {
+        let m = Matrix2::zeros(5, 5);
+        assert_eq!(m, Matrix2::from_vec(&[
+            vec![0f64, 0f64, 0f64, 0f64, 0f64],
+            vec![0f64, 0f64, 0f64, 0f64, 0f64],
+            vec![0f64, 0f64, 0f64, 0f64, 0f64],
+            vec![0f64, 0f64, 0f64, 0f64, 0f64],
+            vec![0f64, 0f64, 0f64, 0f64, 0f64]
+        ]));
+        assert_eq!(m.value(0, 0), 0f64);
+        assert_eq!(m.value(1, 1), 0f64);
+        assert_eq!(m.value(2, 2), 0f64);
+        assert_eq!(m.value(3, 3), 0f64);
+        assert_eq!(m.value(4, 4), 0f64);
     }
 }
