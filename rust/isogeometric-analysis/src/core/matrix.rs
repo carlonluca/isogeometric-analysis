@@ -206,4 +206,21 @@ mod tests {
         ]));
         assert_eq!(m3, m4);
     }
+
+    #[test]
+    fn test_sub() {
+        let m1 = Matrix2::from_vec(&vec![
+            vec![1f64, 2f64, 3f64]
+        ]);
+        let m2 = Matrix2::from_vec(&vec![
+            vec![1f64, 1f64, 1f64]
+        ]);
+        let m3 = m1.mult_add(&m2, -1f64);
+        let m4 = m1.clone() - m2.clone();
+        assert_ne!(m2, m1);
+        assert_eq!(m3, Matrix2::from_vec(&vec![
+            vec![0f64, 1f64, 2f64]
+        ]));
+        assert_eq!(m3, m4);
+    }
 }
