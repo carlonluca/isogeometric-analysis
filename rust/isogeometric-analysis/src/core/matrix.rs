@@ -23,6 +23,7 @@
 use array2d::Array2D;
 use std::ops::Add;
 use std::ops::Sub;
+use std::ops::Mul;
 use super::size::Size;
 
 #[derive(Debug)]
@@ -55,6 +56,24 @@ impl Sub for Matrix2 {
     /// 
     fn sub(self, other: Self) -> Self::Output {
         return self.mult_add(&other, -1f64);
+    }
+}
+
+impl Mul<f64> for Matrix2 {
+    // The multiplication of rational numbers is a closed operation.
+    type Output = Self;
+
+    ///
+    /// Multiplication by a scalar.
+    /// 
+    fn mul(self, scalar: f64) -> Self {
+        let mut ret = self.clone();
+        for i in 0..self.rows() {
+            for j in 0..self.cols() {
+                ret.data[(i, j)] *= scalar;
+            }
+        }
+        return ret;
     }
 }
 
@@ -148,8 +167,8 @@ impl Matrix2 {
     ///
     pub fn identity(size: usize) -> Self {
         let mut zero = Self::zeros(size, size);
-        for i in 0..(size - 1) {
-            for j in 0..(size - 1) {
+        for i in 0..size {
+            for j in 0..size {
                 zero.set_value(i, j, if i == j { 1f64 } else { 0f64 });
             }
         }
@@ -277,5 +296,20 @@ mod tests {
                 assert_eq!(m.value(i, j), if i == j { 1f64 } else { 0f64 });
             }
         }
+    }
+    
+    #[test]
+    fn test_mult_scalar() {
+        let m = Matrix2::from_vec(&[
+            vec![1f64, 2f64, 3f64],
+            vec![4f64, 5f64, 6f64],
+            vec![7f64, 8f64, 9f64]
+        ]);
+        let m2 = m*5f64;
+        assert_eq!(m2, Matrix2::from_vec(&[
+            vec![5f64, 10f64, 15f64],
+            vec![20f64, 25f64, 30f64],
+            vec![35f64, 40f64, 45f64]
+        ]));
     }
 }
