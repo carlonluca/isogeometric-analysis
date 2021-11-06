@@ -175,6 +175,19 @@ impl Matrix2 {
     }
 
     ///
+    /// Transpose this matrix and returns a new transposed instance.
+    /// 
+    pub fn transposed(&self) -> Self {
+        let mut res = Matrix2::zeros(self.cols(), self.rows());
+        for i in 0..self.rows() {
+            for j in 0..self.cols() {
+                res.data[(j, i)] = self.data[(i, j)];
+            }
+        }
+        res
+    }
+
+    ///
     /// Creates a matrix filled with zeros.
     ///
     pub fn zeros(rows: usize, cols: usize) -> Self {
@@ -324,7 +337,7 @@ mod tests {
     }
     
     #[test]
-    fn test_mult_scalar() {
+    fn test_mult_scalar_1() {
         let m = Matrix2::from_vec(&[
             vec![1f64, 2f64, 3f64],
             vec![4f64, 5f64, 6f64],
@@ -336,6 +349,30 @@ mod tests {
             vec![20f64, 25f64, 30f64],
             vec![35f64, 40f64, 45f64]
         ]));
+    }
+
+    #[test]
+    fn test_mult_scalar_2() {
+        let m = Matrix2::from_vec(&[
+            vec![5f64, 6f64, 7f64],
+            vec![1f64, 2f64, 3f64],
+            vec![9f64, 8f64, 7f64]
+        ]);
+        assert_eq!(m.clone()*9f64, Matrix2::from_vec(&[
+            vec![5f64*9f64, 6f64*9f64, 7f64*9f64],
+            vec![1f64*9f64, 2f64*9f64, 3f64*9f64],
+            vec![9f64*9f64, 8f64*9f64, 7f64*9f64]
+        ]));
+    }
+
+    #[test]
+    fn test_mult_scalar_3() {
+        let m = Matrix2::from_vec(&[
+            vec![5f64*9f64, 6f64*9f64, 7f64*9f64],
+            vec![1f64*9f64, 2f64*9f64, 3f64*9f64],
+            vec![9f64*9f64, 8f64*9f64, 7f64*9f64]
+        ]);
+        assert_eq!(m*0f64, Matrix2::zeros(3, 3));
     }
 
     #[test]
@@ -365,5 +402,19 @@ mod tests {
         assert_eq!(m1.clone()*m3.clone(), m1);
         assert_eq!(m2.clone()*m3.clone(), m2);
         assert_eq!(m1.clone()*m4.clone(), m4);
+    }
+
+    #[test]
+    fn test_transpose() {
+        let m = Matrix2::from_vec(&[
+            vec![1f64, 2f64, 3f64],
+            vec![4f64, 5f64, 6f64],
+            vec![7f64, 8f64, 9f64]
+        ]);
+        assert_eq!(m, Matrix2::from_vec(&[
+            vec![1f64, 4f64, 7f64],
+            vec![2f64, 5f64, 8f64],
+            vec![3f64, 6f64, 9f64]
+        ]).transposed());
     }
 }
