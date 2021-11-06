@@ -60,7 +60,6 @@ impl Sub for Matrix2 {
 }
 
 impl Mul<f64> for Matrix2 {
-    // The multiplication of rational numbers is a closed operation.
     type Output = Self;
 
     ///
@@ -74,6 +73,32 @@ impl Mul<f64> for Matrix2 {
             }
         }
         return ret;
+    }
+}
+
+impl Mul<Matrix2> for Matrix2 {
+    type Output = Self;
+
+    ///
+    /// Multiplication by another matrix.
+    /// 
+    fn mul(self, other: Self) -> Self {
+        if self.cols() != other.rows() {
+            panic!();
+        }
+
+        let mut res = Matrix2::zeros(self.rows(), other.cols());
+        for i in 0..self.rows() {
+            for j in 0..self.cols() {
+                let mut e: f64 = 0f64;
+                for p in 0..self.cols() {
+                    e += self.data[(i, p)]*other.data[(p, j)];
+                }
+                res.data[(i, j)] = e;
+            }
+        }
+
+        return res;
     }
 }
 
@@ -311,5 +336,34 @@ mod tests {
             vec![20f64, 25f64, 30f64],
             vec![35f64, 40f64, 45f64]
         ]));
+    }
+
+    #[test]
+    fn test_mult_matrix() {
+        let m1 = Matrix2::from_vec(&[
+            vec![5f64, 6f64, 7f64],
+            vec![1f64, 2f64, 3f64],
+            vec![9f64, 8f64, 7f64]
+        ]);
+        let m2 = Matrix2::from_vec(&[
+            vec![1f64, 2f64, 3f64],
+            vec![4f64, 5f64, 6f64],
+            vec![7f64, 8f64, 9f64]
+        ]);
+        let m3 = Matrix2::identity(3);
+        let m4 = Matrix2::zeros(3, 3);
+        assert_eq!(m1.clone()*m1.clone(), Matrix2::from_vec(&[
+            vec![94f64, 98f64, 102f64],
+            vec![34f64, 34f64, 34f64],
+            vec![116f64, 126f64, 136f64]
+        ]));
+        assert_eq!(m1.clone()*m2.clone(), Matrix2::from_vec(&[
+            vec![78f64, 96f64, 114f64],
+            vec![30f64, 36f64, 42f64],
+            vec![90f64, 114f64, 138f64]
+        ]));
+        assert_eq!(m1.clone()*m3.clone(), m1);
+        assert_eq!(m2.clone()*m3.clone(), m2);
+        assert_eq!(m1.clone()*m4.clone(), m4);
     }
 }
