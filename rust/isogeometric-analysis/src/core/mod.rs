@@ -24,6 +24,8 @@ pub use self::size::Size;
 pub use self::range::IntRange;
 pub use self::equatable::Equatable;
 pub use self::matrix::Matrix2;
+pub use self::matrix::MatricialForm;
+pub use self::matrix::RowVector;
 mod size;
 mod range;
 mod equatable;

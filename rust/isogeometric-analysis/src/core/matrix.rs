@@ -26,9 +26,51 @@ use std::ops::Sub;
 use std::ops::Mul;
 use super::size::Size;
 
+pub trait MatricialData {
+    fn data(&self) -> &Array2D<f64>;
+}
+
+pub trait MatricialForm {
+    fn value(&self, row: usize, col: usize) -> f64;
+}
+
+#[derive(Debug)]
+pub struct RowVector {
+    data: Array2D<f64>
+}
+
+impl MatricialData for RowVector {
+    fn data(&self) -> &Array2D<f64> {
+        &self.data
+    }
+}
+
+impl RowVector {
+    pub fn from_vec(data: &[f64]) -> RowVector {
+        RowVector {
+            data: Array2D::from_rows(&[data.clone().to_vec()])
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct Matrix2 {
     data: Array2D<f64>
+}
+
+impl MatricialData for Matrix2 {
+    fn data(&self) -> &Array2D<f64> {
+        &self.data
+    }
+}
+
+impl<T> MatricialForm for T where T: MatricialData {
+    ///
+    /// Returns the value.
+    /// 
+    fn value(&self, row: usize, col: usize) -> f64 {
+        self.data()[(row, col)]
+    }
 }
 
 impl PartialEq for Matrix2 {
@@ -137,13 +179,6 @@ impl Matrix2 {
     }
 
     ///
-    /// Returns the value.
-    /// 
-    pub fn value(&self, row: usize, col: usize) -> f64 {
-        self.data[(row, col)]
-    }
-
-    ///
     /// Sets a value.
     /// 
     pub fn set_value(&mut self, row: usize, col: usize, value: f64) {
@@ -236,6 +271,8 @@ impl Matrix2 {
 #[cfg(test)]
 mod tests {
     use crate::core::Matrix2;
+    use crate::core::RowVector;
+    use crate::core::MatricialForm;
 
     #[test]
     fn test_get() {
@@ -416,5 +453,12 @@ mod tests {
             vec![2f64, 5f64, 8f64],
             vec![3f64, 6f64, 9f64]
         ]).transposed());
+    }
+
+    #[test]
+    fn test_v_get() {
+        let v = RowVector::from_vec(&[1f64, 2f64]);
+        assert_eq!(v.value(0, 0), 1f64);
+        assert_eq!(v.value(0, 1), 2f64);
     }
 }
