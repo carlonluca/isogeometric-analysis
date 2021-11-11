@@ -26,20 +26,67 @@ use std::ops::Sub;
 use std::ops::Mul;
 use super::size::Size;
 
+///
+/// Trait for a type containing data in form of a matrix.
+/// 
 pub trait MatricialData {
+    fn data_mut(&mut self) -> &mut Array2D<f64>;
     fn data(&self) -> &Array2D<f64>;
 }
 
+///
+/// Trait for any type behaving like a matrix.
+/// 
 pub trait MatricialForm {
     fn value(&self, row: usize, col: usize) -> f64;
+    fn set_value(&mut self, row: usize, col: usize, value: f64);
+    fn rows(&self) -> usize;
+    fn cols(&self) -> usize;
 }
 
+impl<T> MatricialForm for T where T: MatricialData {
+    ///
+    /// Returns the value.
+    /// 
+    fn value(&self, row: usize, col: usize) -> f64 {
+        self.data()[(row, col)]
+    }
+
+    ///
+    /// Sets a value.
+    /// 
+    fn set_value(&mut self, row: usize, col: usize, value: f64) {
+        self.data_mut()[(row, col)] = value
+    }
+
+    ///
+    /// Returns the number of rows.
+    /// 
+    fn rows(&self) -> usize {
+        self.data().num_rows()
+    }
+
+    ///
+    /// Returns the number of columns.
+    /// 
+    fn cols(&self) -> usize {
+        self.data().num_columns()
+    }
+}
+
+///
+/// A row.
+/// 
 #[derive(Debug)]
 pub struct RowVector {
     data: Array2D<f64>
 }
 
 impl MatricialData for RowVector {
+    fn data_mut(&mut self) -> &mut Array2D<f64> {
+        &mut self.data
+    }
+
     fn data(&self) -> &Array2D<f64> {
         &self.data
     }
@@ -53,23 +100,21 @@ impl RowVector {
     }
 }
 
+///
+/// Represents a rectangular matrix.
+/// 
 #[derive(Debug)]
 pub struct Matrix2 {
     data: Array2D<f64>
 }
 
 impl MatricialData for Matrix2 {
+    fn data_mut(&mut self) -> &mut Array2D<f64> {
+        &mut self.data
+    }
+
     fn data(&self) -> &Array2D<f64> {
         &self.data
-    }
-}
-
-impl<T> MatricialForm for T where T: MatricialData {
-    ///
-    /// Returns the value.
-    /// 
-    fn value(&self, row: usize, col: usize) -> f64 {
-        self.data()[(row, col)]
     }
 }
 
@@ -179,27 +224,6 @@ impl Matrix2 {
     }
 
     ///
-    /// Sets a value.
-    /// 
-    pub fn set_value(&mut self, row: usize, col: usize, value: f64) {
-        self.data[(row, col)] = value
-    }
-
-    ///
-    /// Returns the number of rows.
-    /// 
-    pub fn rows(&self) -> usize {
-        self.data.num_rows()
-    }
-
-    ///
-    /// Returns the number of columns.
-    /// 
-    pub fn cols(&self) -> usize {
-        self.data.num_columns()
-    }
-
-    ///
     /// Returns the size of the matrix.
     /// 
     pub fn size(&self) -> Size {
@@ -271,6 +295,7 @@ impl Matrix2 {
 #[cfg(test)]
 mod tests {
     use crate::core::Matrix2;
+    use crate::core::MatricialData;
     use crate::core::RowVector;
     use crate::core::MatricialForm;
 
@@ -457,7 +482,7 @@ mod tests {
 
     #[test]
     fn test_v_get() {
-        let v = RowVector::from_vec(&[1f64, 2f64]);
+        let v: Box<dyn MatricialForm> = Box::new(RowVector::from_vec(&[1f64, 2f64]));
         assert_eq!(v.value(0, 0), 1f64);
         assert_eq!(v.value(0, 1), 2f64);
     }

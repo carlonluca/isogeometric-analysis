@@ -1,7 +1,7 @@
 /**
  * Project: Approximation and Finite Elements in Isogeometric Problems
  * Author:  Luca Carlon
- * Date:    2021.11.01
+ * Date:    2021.11.02
  *
  * Copyright (c) 2021 Luca Carlon. All rights reserved.
  *
@@ -20,14 +20,29 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-pub use self::size::Size;
-pub use self::range::IntRange;
-pub use self::equatable::Equatable;
-pub use self::matrix::Matrix2;
-pub use self::matrix::MatricialForm;
-pub use self::matrix::MatricialData;
-pub use self::matrix::RowVector;
-mod size;
-mod range;
-mod equatable;
-mod matrix;
+use array2d::Array2D;
+
+struct RowVector {
+    data: Vec<f64>
+}
+
+impl Matrix for RowVector {
+}
+
+impl RowVector {
+    pub fn from_vec(data: Vec<f64>) {
+        RowVector {
+            data: data
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::core::Matrix2;
+
+    #[test]
+    fn test_add() {
+
+    }
+}
