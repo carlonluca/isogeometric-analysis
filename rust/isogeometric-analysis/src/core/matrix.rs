@@ -42,6 +42,7 @@ pub trait MatricialForm {
     fn set_value(&mut self, row: usize, col: usize, value: f64);
     fn rows(&self) -> usize;
     fn cols(&self) -> usize;
+    fn size(&self) -> Size;
 }
 
 impl<T> MatricialForm for T where T: MatricialData {
@@ -72,6 +73,86 @@ impl<T> MatricialForm for T where T: MatricialData {
     fn cols(&self) -> usize {
         self.data().num_columns()
     }
+
+    ///
+    /// Returns the size of the matrix.
+    /// 
+    fn size(&self) -> Size {
+        Size {
+            width: self.cols(),
+            height: self.rows()
+        }
+    }
+}
+
+///
+/// Macro to implement basic matrix ops.
+/// 
+macro_rules! matrix_ops {
+    ($t: ident) => {
+        impl PartialEq for $t {
+            fn eq(&self, other: &Self) -> bool {
+                self.data == other.data
+            }
+        }
+
+        impl Add for $t {
+            type Output = Self;
+
+            fn add(self, other: Self) -> Self {
+                if self.size() != other.size() {
+                    panic!()
+                }
+        
+                let mut output = self.clone();
+                for i in 0..self.rows() {
+                    for j in 0..self.cols() {
+                        output.data[(i, j)] += other.value(i, j);
+                    }
+                }
+                output
+            }
+        }
+
+        impl Mul<f64> for $t {
+            type Output = Self;
+        
+            ///
+            /// Multiplication by a scalar.
+            /// 
+            fn mul(self, scalar: f64) -> Self {
+                let mut ret = self.clone();
+                for i in 0..self.rows() {
+                    for j in 0..self.cols() {
+                        ret.data[(i, j)] *= scalar;
+                    }
+                }
+                return ret;
+            }
+        }
+
+        impl Sub for $t {
+            type Output = Self;
+        
+            ///
+            /// Subtracts another matrix.
+            /// 
+            fn sub(self, other: Self) -> Self {
+                self + other*-1f64
+            }
+        }
+
+        impl Clone for $t {
+            ///
+            /// Clones this matrix.
+            /// 
+            fn clone(&self) -> Self {
+                Self {
+                    data: self.data.clone()
+                }
+            }
+        }
+    }
 }
 
 ///
@@ -92,7 +173,12 @@ impl MatricialData for RowVector {
     }
 }
 
+matrix_ops!(RowVector);
+
 impl RowVector {
+    ///
+    /// Creates a row from a vector of values.
+    /// 
     pub fn from_vec(data: &[f64]) -> RowVector {
         RowVector {
             data: Array2D::from_rows(&[data.clone().to_vec()])
@@ -118,50 +204,7 @@ impl MatricialData for Matrix2 {
     }
 }
 
-impl PartialEq for Matrix2 {
-    fn eq(&self, other: &Self) -> bool {
-        self.data == other.data
-    }
-}
-
-impl Add for Matrix2 {
-    type Output = Self;
-
-    ///
-    /// Adds another matrix.
-    ///
-    fn add(self, other: Self) -> Self {
-        return self.mult_add(&other, 1f64);
-    }
-}
-
-impl Sub for Matrix2 {
-    type Output = Self;
-
-    ///
-    /// Subtracts another matrix.
-    /// 
-    fn sub(self, other: Self) -> Self::Output {
-        return self.mult_add(&other, -1f64);
-    }
-}
-
-impl Mul<f64> for Matrix2 {
-    type Output = Self;
-
-    ///
-    /// Multiplication by a scalar.
-    /// 
-    fn mul(self, scalar: f64) -> Self {
-        let mut ret = self.clone();
-        for i in 0..self.rows() {
-            for j in 0..self.cols() {
-                ret.data[(i, j)] *= scalar;
-            }
-        }
-        return ret;
-    }
-}
+matrix_ops!(Matrix2);
 
 impl Mul<Matrix2> for Matrix2 {
     type Output = Self;
@@ -189,17 +232,6 @@ impl Mul<Matrix2> for Matrix2 {
     }
 }
 
-impl Clone for Matrix2 {
-    ///
-    /// Clones this matrix.
-    /// 
-    fn clone(&self) -> Self {
-        Matrix2 {
-            data: self.data.clone()
-        }
-    }
-}
-
 impl Matrix2 {
     ///
     /// Constructs a matrix from data. Ownership is transferred.
@@ -221,16 +253,6 @@ impl Matrix2 {
     /// 
     pub fn from_vec(data: &[Vec<f64>]) -> Matrix2 {
         Matrix2 { data: Array2D::from_rows(data) }
-    }
-
-    ///
-    /// Returns the size of the matrix.
-    /// 
-    pub fn size(&self) -> Size {
-        Size {
-            width: self.cols(),
-            height: self.rows()
-        }
     }
 
     ///
@@ -271,31 +293,11 @@ impl Matrix2 {
         }
         return zero;
     }
-
-    // Private impl
-    // ============
-    ///
-    /// Adds to another matrix for terms multiplied by a factor.
-    /// 
-    fn mult_add(&self, other: &Matrix2, fac: f64) -> Matrix2 {
-        if self.size() != other.size() {
-            panic!()
-        }
-
-        let mut output = self.clone();
-        for i in 0..self.rows() {
-            for j in 0..self.cols() {
-                output.data[(i, j)] += fac*other.value(i, j);
-            }
-        }
-        output
-    }
 }
 
 #[cfg(test)]
 mod tests {
     use crate::core::Matrix2;
-    use crate::core::MatricialData;
     use crate::core::RowVector;
     use crate::core::MatricialForm;
 
@@ -345,7 +347,7 @@ mod tests {
         let m2 = Matrix2::from_vec(&vec![
             vec![1f64, 1f64, 1f64]
         ]);
-        let m3 = m1.mult_add(&m2, 1f64);
+        let m3 = m1.clone() + m2.clone();
         let m4 = m1.clone() + m2.clone();
         assert_ne!(m2, m1);
         assert_eq!(m3, Matrix2::from_vec(&vec![
@@ -362,7 +364,7 @@ mod tests {
         let m2 = Matrix2::from_vec(&vec![
             vec![1f64, 1f64, 1f64]
         ]);
-        let m3 = m1.mult_add(&m2, -1f64);
+        let m3 = m1.clone() - m2.clone();
         let m4 = m1.clone() - m2.clone();
         assert_ne!(m2, m1);
         assert_eq!(m3, Matrix2::from_vec(&vec![
