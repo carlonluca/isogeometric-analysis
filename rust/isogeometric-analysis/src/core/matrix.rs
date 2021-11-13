@@ -35,6 +35,23 @@ pub trait MatricialData {
 }
 
 ///
+/// Macro to implement basic matrix ops.
+/// 
+macro_rules! impl_matricial_data {
+    ($t: ident) => {
+        impl MatricialData for $t {
+            fn data_mut(&mut self) -> &mut Array2D<f64> {
+                &mut self.data
+            }
+        
+            fn data(&self) -> &Array2D<f64> {
+                &self.data
+            }
+        }
+    }
+}
+
+///
 /// Trait for any type behaving like a matrix.
 /// 
 pub trait MatricialForm {
@@ -88,7 +105,7 @@ impl<T> MatricialForm for T where T: MatricialData {
 ///
 /// Macro to implement basic matrix ops.
 /// 
-macro_rules! matrix_ops {
+macro_rules! impl_matrix_ops {
     ($t: ident) => {
         impl PartialEq for $t {
             fn eq(&self, other: &Self) -> bool {
@@ -163,17 +180,8 @@ pub struct RowVector {
     data: Array2D<f64>
 }
 
-impl MatricialData for RowVector {
-    fn data_mut(&mut self) -> &mut Array2D<f64> {
-        &mut self.data
-    }
-
-    fn data(&self) -> &Array2D<f64> {
-        &self.data
-    }
-}
-
-matrix_ops!(RowVector);
+impl_matricial_data!(RowVector);
+impl_matrix_ops!(RowVector);
 
 impl RowVector {
     ///
@@ -194,17 +202,8 @@ pub struct Matrix2 {
     data: Array2D<f64>
 }
 
-impl MatricialData for Matrix2 {
-    fn data_mut(&mut self) -> &mut Array2D<f64> {
-        &mut self.data
-    }
-
-    fn data(&self) -> &Array2D<f64> {
-        &self.data
-    }
-}
-
-matrix_ops!(Matrix2);
+impl_matricial_data!(Matrix2);
+impl_matrix_ops!(Matrix2);
 
 impl Mul<Matrix2> for Matrix2 {
     type Output = Self;
