@@ -188,6 +188,28 @@ impl Matrix2 {
     }
 
     ///
+    /// Returns true iif this is a row.
+    /// 
+    pub fn is_row(&self) -> bool {
+        self.cols() >= 1 && self.rows() == 1
+    }
+
+    ///
+    /// Returns true iif this a col.
+    /// 
+    pub fn is_cols(&self) -> bool {
+        self.cols() == 1 && self.rows() >= 1
+    }
+
+    pub fn get_row(&self, index: usize) -> Vec<f64> {
+        if index >= self.rows() {
+            panic!("Not enough rows");
+        }
+
+        self.data.as_rows()[index]
+    }
+
+    ///
     /// Creates a matrix filled with zeros.
     ///
     pub fn zeros(rows: usize, cols: usize) -> Self {
