@@ -27,17 +27,17 @@ use std::ops::Mul;
 use super::size::Size;
 
 #[derive(Debug)]
-pub struct Matrix2 {
+pub struct RectMatrix {
     data: Array2D<f64>
 }
 
-impl PartialEq for Matrix2 {
+impl PartialEq for RectMatrix {
     fn eq(&self, other: &Self) -> bool {
         self.data == other.data
     }
 }
 
-impl Add for Matrix2 {
+impl Add for RectMatrix {
     type Output = Self;
 
     ///
@@ -48,7 +48,7 @@ impl Add for Matrix2 {
     }
 }
 
-impl Sub for Matrix2 {
+impl Sub for RectMatrix {
     type Output = Self;
 
     ///
@@ -59,7 +59,7 @@ impl Sub for Matrix2 {
     }
 }
 
-impl Mul<f64> for Matrix2 {
+impl Mul<f64> for RectMatrix {
     type Output = Self;
 
     ///
@@ -76,7 +76,7 @@ impl Mul<f64> for Matrix2 {
     }
 }
 
-impl Mul<Matrix2> for Matrix2 {
+impl Mul<RectMatrix> for RectMatrix {
     type Output = Self;
 
     ///
@@ -87,7 +87,7 @@ impl Mul<Matrix2> for Matrix2 {
             panic!();
         }
 
-        let mut res = Matrix2::zeros(self.rows(), other.cols());
+        let mut res = RectMatrix::zeros(self.rows(), other.cols());
         for i in 0..self.rows() {
             for j in 0..self.cols() {
                 let mut e: f64 = 0f64;
@@ -102,38 +102,38 @@ impl Mul<Matrix2> for Matrix2 {
     }
 }
 
-impl Clone for Matrix2 {
+impl Clone for RectMatrix {
     ///
     /// Clones this matrix.
     /// 
     fn clone(&self) -> Self {
-        Matrix2 {
+        RectMatrix {
             data: self.data.clone()
         }
     }
 }
 
-impl Matrix2 {
+impl RectMatrix {
     ///
     /// Constructs a matrix from data. Ownership is transferred.
     /// 
-    pub fn from_array(data: Array2D<f64>) -> Matrix2 {
-        Matrix2 { data: data }
+    pub fn from_array(data: Array2D<f64>) -> RectMatrix {
+        RectMatrix { data: data }
     }
 
     ///
     /// Constructs a matrix from data. Ownership is not transferred and
     /// the array is copied.
     /// 
-    pub fn from_array_ref(data: &Array2D<f64>) -> Matrix2 {
-        Matrix2 { data: data.clone() }
+    pub fn from_array_ref(data: &Array2D<f64>) -> RectMatrix {
+        RectMatrix { data: data.clone() }
     }
 
     ///
     /// Builds a matrix from an array of vectors.
     /// 
-    pub fn from_vec(data: &[Vec<f64>]) -> Matrix2 {
-        Matrix2 { data: Array2D::from_rows(data) }
+    pub fn from_vec(data: &[Vec<f64>]) -> RectMatrix {
+        RectMatrix { data: Array2D::from_rows(data) }
     }
 
     ///
@@ -178,7 +178,7 @@ impl Matrix2 {
     /// Transpose this matrix and returns a new transposed instance.
     /// 
     pub fn transposed(&self) -> Self {
-        let mut res = Matrix2::zeros(self.cols(), self.rows());
+        let mut res = RectMatrix::zeros(self.cols(), self.rows());
         for i in 0..self.rows() {
             for j in 0..self.cols() {
                 res.data[(j, i)] = self.data[(i, j)];
@@ -197,7 +197,7 @@ impl Matrix2 {
     ///
     /// Returns true iif this a col.
     /// 
-    pub fn is_cols(&self) -> bool {
+    pub fn is_col(&self) -> bool {
         self.cols() == 1 && self.rows() >= 1
     }
 
@@ -205,8 +205,7 @@ impl Matrix2 {
         if index >= self.rows() {
             panic!("Not enough rows");
         }
-
-        self.data.as_rows()[index]
+        self.data.as_rows()[index].clone()
     }
 
     ///
@@ -240,7 +239,7 @@ impl Matrix2 {
     ///
     /// Adds to another matrix for terms multiplied by a factor.
     /// 
-    fn mult_add(&self, other: &Matrix2, fac: f64) -> Matrix2 {
+    fn mult_add(&self, other: &RectMatrix, fac: f64) -> RectMatrix {
         if self.size() != other.size() {
             panic!()
         }
@@ -255,13 +254,69 @@ impl Matrix2 {
     }
 }
 
+///
+/// Represents a row.
+/// 
+pub struct RowVector {
+    pub matrix: RectMatrix
+}
+
+impl RowVector {
+    ///
+    /// Builds a RowVector from a vector.
+    /// 
+    pub fn from_vec(data: &[f64]) -> RowVector {
+        RowVector {
+            matrix: RectMatrix {
+                data: Array2D::from_rows(&[data.to_vec()])
+            }
+        }
+    }
+
+    ///
+    /// Length of the row.
+    /// 
+    pub fn length(&self) -> usize {
+        self.matrix.cols()
+    }
+}
+
+///
+/// Represents a column.
+/// 
+pub struct ColVector {
+    pub matrix: RectMatrix
+}
+
+impl ColVector {
+    ///
+    /// Builds a ColVector from a vector.
+    /// 
+    pub fn from_vec(data: &[f64]) -> ColVector {
+        ColVector {
+            matrix: RectMatrix {
+                data: Array2D::from_columns(&[data.to_vec()])
+            }
+        }
+    }
+
+    ///
+    /// Height of the column.
+    /// 
+    pub fn height(&self) -> usize {
+        self.matrix.rows()
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::core::Matrix2;
+    use crate::core::RectMatrix;
+    use crate::core::RowVector;
+    use crate::core::ColVector;
 
     #[test]
     fn test_get() {
-        let m = Matrix2::from_vec(&vec![
+        let m = RectMatrix::from_vec(&vec![
             vec![1f64, 2f64],
             vec![3f64, 4f64]
         ]);
@@ -273,7 +328,7 @@ mod tests {
 
     #[test]
     fn test_set() {
-        let mut m = Matrix2::from_vec(&vec![
+        let mut m = RectMatrix::from_vec(&vec![
             vec![1f64, 2f64],
             vec![3f64, 4f64]
         ]);
@@ -288,7 +343,7 @@ mod tests {
 
     #[test]
     fn test_size() {
-        let m = Matrix2::from_vec(&vec![
+        let m = RectMatrix::from_vec(&vec![
             vec![1f64, 2f64],
             vec![3f64, 4f64],
             vec![5f64, 6f64]
@@ -299,16 +354,16 @@ mod tests {
 
     #[test]
     fn test_add() {
-        let m1 = Matrix2::from_vec(&vec![
+        let m1 = RectMatrix::from_vec(&vec![
             vec![1f64, 2f64, 3f64]
         ]);
-        let m2 = Matrix2::from_vec(&vec![
+        let m2 = RectMatrix::from_vec(&vec![
             vec![1f64, 1f64, 1f64]
         ]);
         let m3 = m1.mult_add(&m2, 1f64);
         let m4 = m1.clone() + m2.clone();
         assert_ne!(m2, m1);
-        assert_eq!(m3, Matrix2::from_vec(&vec![
+        assert_eq!(m3, RectMatrix::from_vec(&vec![
             vec![2f64, 3f64, 4f64]
         ]));
         assert_eq!(m3, m4);
@@ -316,16 +371,16 @@ mod tests {
 
     #[test]
     fn test_sub() {
-        let m1 = Matrix2::from_vec(&vec![
+        let m1 = RectMatrix::from_vec(&vec![
             vec![1f64, 2f64, 3f64]
         ]);
-        let m2 = Matrix2::from_vec(&vec![
+        let m2 = RectMatrix::from_vec(&vec![
             vec![1f64, 1f64, 1f64]
         ]);
         let m3 = m1.mult_add(&m2, -1f64);
         let m4 = m1.clone() - m2.clone();
         assert_ne!(m2, m1);
-        assert_eq!(m3, Matrix2::from_vec(&vec![
+        assert_eq!(m3, RectMatrix::from_vec(&vec![
             vec![0f64, 1f64, 2f64]
         ]));
         assert_eq!(m3, m4);
@@ -333,8 +388,8 @@ mod tests {
 
     #[test]
     fn test_zeros() {
-        let m = Matrix2::zeros(5, 5);
-        assert_eq!(m, Matrix2::from_vec(&[
+        let m = RectMatrix::zeros(5, 5);
+        assert_eq!(m, RectMatrix::from_vec(&[
             vec![0f64, 0f64, 0f64, 0f64, 0f64],
             vec![0f64, 0f64, 0f64, 0f64, 0f64],
             vec![0f64, 0f64, 0f64, 0f64, 0f64],
@@ -350,7 +405,7 @@ mod tests {
 
     #[test]
     fn test_identity() {
-        let m = Matrix2::identity(10);
+        let m = RectMatrix::identity(10);
         for i in 0..(m.rows() - 1) {
             for j in 0..(m.cols() - 1) {
                 assert_eq!(m.value(i, j), if i == j { 1f64 } else { 0f64 });
@@ -360,13 +415,13 @@ mod tests {
     
     #[test]
     fn test_mult_scalar_1() {
-        let m = Matrix2::from_vec(&[
+        let m = RectMatrix::from_vec(&[
             vec![1f64, 2f64, 3f64],
             vec![4f64, 5f64, 6f64],
             vec![7f64, 8f64, 9f64]
         ]);
         let m2 = m*5f64;
-        assert_eq!(m2, Matrix2::from_vec(&[
+        assert_eq!(m2, RectMatrix::from_vec(&[
             vec![5f64, 10f64, 15f64],
             vec![20f64, 25f64, 30f64],
             vec![35f64, 40f64, 45f64]
@@ -375,12 +430,12 @@ mod tests {
 
     #[test]
     fn test_mult_scalar_2() {
-        let m = Matrix2::from_vec(&[
+        let m = RectMatrix::from_vec(&[
             vec![5f64, 6f64, 7f64],
             vec![1f64, 2f64, 3f64],
             vec![9f64, 8f64, 7f64]
         ]);
-        assert_eq!(m.clone()*9f64, Matrix2::from_vec(&[
+        assert_eq!(m.clone()*9f64, RectMatrix::from_vec(&[
             vec![5f64*9f64, 6f64*9f64, 7f64*9f64],
             vec![1f64*9f64, 2f64*9f64, 3f64*9f64],
             vec![9f64*9f64, 8f64*9f64, 7f64*9f64]
@@ -389,34 +444,34 @@ mod tests {
 
     #[test]
     fn test_mult_scalar_3() {
-        let m = Matrix2::from_vec(&[
+        let m = RectMatrix::from_vec(&[
             vec![5f64*9f64, 6f64*9f64, 7f64*9f64],
             vec![1f64*9f64, 2f64*9f64, 3f64*9f64],
             vec![9f64*9f64, 8f64*9f64, 7f64*9f64]
         ]);
-        assert_eq!(m*0f64, Matrix2::zeros(3, 3));
+        assert_eq!(m*0f64, RectMatrix::zeros(3, 3));
     }
 
     #[test]
     fn test_mult_matrix() {
-        let m1 = Matrix2::from_vec(&[
+        let m1 = RectMatrix::from_vec(&[
             vec![5f64, 6f64, 7f64],
             vec![1f64, 2f64, 3f64],
             vec![9f64, 8f64, 7f64]
         ]);
-        let m2 = Matrix2::from_vec(&[
+        let m2 = RectMatrix::from_vec(&[
             vec![1f64, 2f64, 3f64],
             vec![4f64, 5f64, 6f64],
             vec![7f64, 8f64, 9f64]
         ]);
-        let m3 = Matrix2::identity(3);
-        let m4 = Matrix2::zeros(3, 3);
-        assert_eq!(m1.clone()*m1.clone(), Matrix2::from_vec(&[
+        let m3 = RectMatrix::identity(3);
+        let m4 = RectMatrix::zeros(3, 3);
+        assert_eq!(m1.clone()*m1.clone(), RectMatrix::from_vec(&[
             vec![94f64, 98f64, 102f64],
             vec![34f64, 34f64, 34f64],
             vec![116f64, 126f64, 136f64]
         ]));
-        assert_eq!(m1.clone()*m2.clone(), Matrix2::from_vec(&[
+        assert_eq!(m1.clone()*m2.clone(), RectMatrix::from_vec(&[
             vec![78f64, 96f64, 114f64],
             vec![30f64, 36f64, 42f64],
             vec![90f64, 114f64, 138f64]
@@ -428,15 +483,26 @@ mod tests {
 
     #[test]
     fn test_transpose() {
-        let m = Matrix2::from_vec(&[
+        let m = RectMatrix::from_vec(&[
             vec![1f64, 2f64, 3f64],
             vec![4f64, 5f64, 6f64],
             vec![7f64, 8f64, 9f64]
         ]);
-        assert_eq!(m, Matrix2::from_vec(&[
+        assert_eq!(m, RectMatrix::from_vec(&[
             vec![1f64, 4f64, 7f64],
             vec![2f64, 5f64, 8f64],
             vec![3f64, 6f64, 9f64]
         ]).transposed());
+    }
+
+    #[test]
+    fn test_vec() {
+        let r = RowVector::from_vec(&[1f64, 2f64]);
+        assert_eq!(r.length(), 2);
+        assert_eq!(r.matrix.is_row(), true);
+
+        let c = ColVector::from_vec(&[2f64, 4f64]);
+        assert_eq!(c.height(), 2);
+        assert_eq!(c.matrix.is_col(), true);
     }
 }
