@@ -500,9 +500,11 @@ mod tests {
         let r = RowVector::from_vec(&[1f64, 2f64]);
         assert_eq!(r.length(), 2);
         assert_eq!(r.matrix.is_row(), true);
+        assert_eq!(r.matrix.transposed().is_col(), true);
 
         let c = ColVector::from_vec(&[2f64, 4f64]);
         assert_eq!(c.height(), 2);
         assert_eq!(c.matrix.is_col(), true);
+        assert_eq!(c.matrix.transposed().is_row(), true);
     }
 }
