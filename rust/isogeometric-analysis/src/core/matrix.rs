@@ -25,6 +25,7 @@ use std::ops::Add;
 use std::ops::Sub;
 use std::ops::Mul;
 use super::size::Size;
+use super::point::IntPoint;
 
 #[derive(Debug)]
 pub struct RectMatrix {
@@ -178,6 +179,21 @@ impl RectMatrix {
     pub fn col(&self, i: usize) -> ColVector {
         // TODO: Optimize
         ColVector::from_vec(&self.data.as_columns()[i])
+    }
+
+    ///
+    /// Crops the matrix.
+    /// 
+    pub fn rect(&self, top_left: IntPoint, bottom_right: IntPoint) -> RectMatrix {
+        let cols = bottom_right.x - top_left.x + 1;
+        let rows = bottom_right.y - top_left.y + 1;
+        let mut mat = RectMatrix::zeros(rows as usize, cols as usize);
+        for j in top_left.x..(bottom_right.x + 1) {
+            for i in top_left.y..(bottom_right.y + 1) {
+                mat.set_value((i - top_left.y) as usize, (j - top_left.x) as usize, self.value(i as usize, j as usize));
+            }
+        }
+        mat
     }
 
     ///
@@ -336,6 +352,7 @@ mod tests {
     use crate::core::RectMatrix;
     use crate::core::RowVector;
     use crate::core::ColVector;
+    use crate::core::IntPoint;
 
     #[test]
     fn test_get() {
@@ -534,5 +551,26 @@ mod tests {
         assert_eq!(c.height(), 2);
         assert_eq!(c.matrix.is_col(), true);
         assert_eq!(c.matrix.transposed().is_row(), true);
+    }
+
+    #[test]
+    fn test_rect() {
+        let m1 = RectMatrix::from_vec(&[
+            vec![5f64, 6f64, 7f64],
+            vec![1f64, 2f64, 3f64],
+            vec![9f64, 8f64, 7f64],
+            vec![1f64, 1f64, 1f64]
+        ]);
+        let m2 = RectMatrix::from_vec(&[
+            vec![2f64, 3f64],
+            vec![8f64, 7f64]
+        ]);
+        assert_eq!(m1.rect(IntPoint {
+            x: 1,
+            y: 1
+        }, IntPoint {
+            x: 2,
+            y: 2
+        }), m2);
     }
 }
