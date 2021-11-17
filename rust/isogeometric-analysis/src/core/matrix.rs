@@ -158,10 +158,26 @@ impl RectMatrix {
     }
 
     ///
+    /// Returns the i-th row.
+    /// 
+    pub fn row(&self, i: usize) -> RowVector {
+        // TODO: Optimize
+        RowVector::from_vec(&self.data.as_rows()[i])
+    }
+
+    ///
     /// Returns the number of columns.
     /// 
     pub fn cols(&self) -> usize {
         self.data.num_columns()
+    }
+
+    ///
+    /// Returns the i-th column.
+    /// 
+    pub fn col(&self, i: usize) -> ColVector {
+        // TODO: Optimize
+        ColVector::from_vec(&self.data.as_columns()[i])
     }
 
     ///
@@ -199,13 +215,6 @@ impl RectMatrix {
     /// 
     pub fn is_col(&self) -> bool {
         self.cols() == 1 && self.rows() >= 1
-    }
-
-    pub fn get_row(&self, index: usize) -> Vec<f64> {
-        if index >= self.rows() {
-            panic!("Not enough rows");
-        }
-        self.data.as_rows()[index].clone()
     }
 
     ///
@@ -257,6 +266,7 @@ impl RectMatrix {
 ///
 /// Represents a row.
 /// 
+#[derive(Debug)]
 pub struct RowVector {
     pub matrix: RectMatrix
 }
@@ -281,9 +291,16 @@ impl RowVector {
     }
 }
 
+impl PartialEq for RowVector {
+    fn eq(&self, other: &Self) -> bool {
+        other.matrix == self.matrix
+    }
+}
+
 ///
 /// Represents a column.
 /// 
+#[derive(Debug)]
 pub struct ColVector {
     pub matrix: RectMatrix
 }
@@ -308,6 +325,12 @@ impl ColVector {
     }
 }
 
+impl PartialEq for ColVector {
+    fn eq(&self, other: &Self) -> bool {
+        other.matrix == self.matrix
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::core::RectMatrix;
@@ -324,6 +347,11 @@ mod tests {
         assert_eq!(m.value(0, 1), 2f64);
         assert_eq!(m.value(1, 0), 3f64);
         assert_eq!(m.value(1, 1), 4f64);
+        assert_eq!(m.row(0).matrix, RowVector::from_vec(&[1f64, 2f64]).matrix);
+        assert_eq!(m.row(0), RowVector::from_vec(&[1f64, 2f64]));
+        assert_eq!(m.row(1), RowVector::from_vec(&[3f64, 4f64]));
+        assert_eq!(m.col(0), ColVector::from_vec(&[1f64, 3f64]));
+        assert_eq!(m.col(1), ColVector::from_vec(&[2f64, 4f64]));
     }
 
     #[test]
