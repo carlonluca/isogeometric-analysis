@@ -26,6 +26,7 @@ use std::ops::Sub;
 use std::ops::Mul;
 use super::size::Size;
 use super::point::IntPoint;
+use log;
 
 #[derive(Debug)]
 pub struct RectMatrix {
@@ -179,6 +180,45 @@ impl RectMatrix {
     pub fn col(&self, i: usize) -> ColVector {
         // TODO: Optimize
         ColVector::from_vec(&self.data.as_columns()[i])
+    }
+    
+    ///
+    /// Returns the max value in column.
+    /// 
+    pub fn max_col(&self, j: usize) -> f64 {
+        let mut max = f64::MIN;
+        for i in 0..self.rows() {
+            if max < self.data[(i, j)] {
+                max = self.data[(i, j)];
+            }
+        }
+        max
+    }
+
+    ///
+    /// Prints the matrix.
+    /// 
+    pub fn print(&self) {
+        let mut ret = String::new();
+        for i in 0..self.rows() {
+            if i == 0 { ret += "⎡"; }
+            else if i == self.rows() - 1 { ret += "⎣"; }
+            else { ret += "⎢" }
+            for j in 0..self.cols() {
+                let max = self.max_col(j);
+                let size = max.to_string().chars().count() + 1;
+                let thisItem = self.data[(i, j)].to_string();
+                let spaces = &size - thisItem.chars().count();
+                ret += &String::from_utf8(vec![b' '; spaces]).unwrap();
+                ret += &thisItem;
+            }
+            if i == 0 { ret += " ⎤"; }
+            else if i == self.rows() - 1 { ret += " ⎦"; }
+            else { ret += " ⎥" }
+            ret += "\n";
+        }
+
+        log::info!("\n{}", ret);
     }
 
     ///
@@ -356,6 +396,7 @@ mod tests {
 
     #[test]
     fn test_get() {
+        env_logger::init();
         let m = RectMatrix::from_vec(&vec![
             vec![1f64, 2f64],
             vec![3f64, 4f64]
@@ -572,5 +613,29 @@ mod tests {
             x: 2,
             y: 2
         }), m2);
+    }
+
+    #[test]
+    fn test_max() {
+        let m = RectMatrix::from_vec(&[
+            vec![5f64, 6f64, 7f64],
+            vec![1f64, 2f64, 3f64],
+            vec![9f64, 8f64, 7f64],
+            vec![1f64, 1f64, 1f64]
+        ]);
+        assert_eq!(m.max_col(0), 9f64);
+        assert_eq!(m.max_col(1), 8f64);
+        assert_eq!(m.max_col(2), 7f64);
+    }
+
+    #[test]
+    fn test_print() {
+        let m = RectMatrix::from_vec(&[
+            vec![500f64, 6f64, 7f64],
+            vec![1f64, 200f64, 3f64],
+            vec![9f64, 8f64, 700000f64],
+            vec![1f64, 1f64, 1f64]
+        ]);
+        m.print();
     }
 }

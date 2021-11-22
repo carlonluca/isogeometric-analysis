@@ -7,3 +7,5 @@ edition = "2018"
 
 [dependencies]
 array2d = "0.2.1"
+env_logger = "0.9.0"
+log = "0.4.14"
