@@ -267,6 +267,19 @@ impl RectMatrix {
     }
 
     ///
+    /// Assigns a column.
+    /// 
+    pub fn assign_col(&mut self, col: usize, v: ColVector) -> &RectMatrix {
+        if v.length() != self.rows() {
+            panic!();
+        }
+        for i in 0..v.length() {
+            self.data[(i, col)] = v.value(i);
+        }
+        self
+    }
+
+    ///
     /// Returns true iif this is a row.
     /// 
     pub fn is_row(&self) -> bool {
@@ -352,6 +365,13 @@ impl RowVector {
     pub fn length(&self) -> usize {
         self.matrix.cols()
     }
+
+    ///
+    /// Value in row.
+    /// 
+    pub fn value(&self, j: usize) -> f64 {
+        self.matrix.value(0, j).clone()
+    }
 }
 
 impl PartialEq for RowVector {
@@ -385,6 +405,20 @@ impl ColVector {
     /// 
     pub fn height(&self) -> usize {
         self.matrix.rows()
+    }
+
+    ///
+    /// Height of the column.
+    /// 
+    pub fn length(&self) -> usize {
+        self.height()
+    }
+
+    ///
+    /// Value in row.
+    /// 
+    pub fn value(&self, i: usize) -> f64 {
+        self.matrix.value(i, 0)
     }
 }
 
@@ -650,5 +684,22 @@ mod tests {
 
         let _c = ColVector::from_vec(&[10f64, 200f64, 3000f64]);
         //c.matrix.print();
+    }
+
+    #[test]
+    fn test_assign_col() {
+        let mut m = RectMatrix::from_vec(&[
+            vec![5f64, 6f64, 7f64],
+            vec![1f64, 2f64, 3f64],
+            vec![9f64, 8f64, 7f64],
+            vec![1f64, 1f64, 1f64]
+        ]);
+        m.assign_col(1, ColVector::from_vec(&vec![4f64, 4f64, 4f64, 4f64]));
+        assert_eq!(m, RectMatrix::from_vec(&[
+            vec![5f64, 4f64, 7f64],
+            vec![1f64, 4f64, 3f64],
+            vec![9f64, 4f64, 7f64],
+            vec![1f64, 4f64, 1f64]
+        ]));
     }
 }
