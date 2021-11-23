@@ -199,22 +199,29 @@ impl RectMatrix {
     /// Prints the matrix.
     /// 
     pub fn print(&self) {
+        if self.rows() == 0 || self.cols() == 0 {
+            log::info!("\n[ ]");
+            return;
+        }
+
         let mut ret = String::new();
         for i in 0..self.rows() {
-            if i == 0 { ret += "⎡"; }
+            if self.rows() == 1 { ret += "["; }
+            else if i == 0 { ret += "⎡"; }
             else if i == self.rows() - 1 { ret += "⎣"; }
             else { ret += "⎢" }
             for j in 0..self.cols() {
                 let max = self.max_col(j);
                 let size = max.to_string().chars().count() + 1;
-                let thisItem = self.data[(i, j)].to_string();
-                let spaces = &size - thisItem.chars().count();
+                let this_item = self.data[(i, j)].to_string();
+                let spaces = &size - this_item.chars().count();
                 ret += &String::from_utf8(vec![b' '; spaces]).unwrap();
-                ret += &thisItem;
+                ret += &this_item;
             }
-            if i == 0 { ret += " ⎤"; }
+            if self.rows() == 1 { ret += " ]"; }
+            else if i == 0 { ret += " ⎤"; }
             else if i == self.rows() - 1 { ret += " ⎦"; }
-            else { ret += " ⎥" }
+            else { ret += " ⎥"; }
             ret += "\n";
         }
 
@@ -630,12 +637,18 @@ mod tests {
 
     #[test]
     fn test_print() {
-        let m = RectMatrix::from_vec(&[
+        let _m = RectMatrix::from_vec(&[
             vec![500f64, 6f64, 7f64],
             vec![1f64, 200f64, 3f64],
             vec![9f64, 8f64, 700000f64],
             vec![1f64, 1f64, 1f64]
         ]);
-        m.print();
+        //m.print();
+
+        let _r = RowVector::from_vec(&[10f64, 200f64, 3000f64]);
+        //r.matrix.print();
+
+        let _c = ColVector::from_vec(&[10f64, 200f64, 3000f64]);
+        //c.matrix.print();
     }
 }
