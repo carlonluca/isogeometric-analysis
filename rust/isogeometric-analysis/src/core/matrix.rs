@@ -294,6 +294,50 @@ impl RectMatrix {
     }
 
     ///
+    /// Returns true iif the matrix is lower triangular.
+    /// 
+    pub fn is_lower_triangular(&self) -> bool {
+        if !self.is_square() {
+            return false;
+        }
+        for i in 0..(self.rows() - 1) {
+            for j in (i + 1)..self.cols() {
+                if (self.data[(i, j)]) != 0f64 {
+                    return false;
+                }
+            }
+        }
+        true
+    }
+
+    ///
+    /// Returns true iif the matrix is upper triangular.
+    /// 
+    pub fn is_upper_triangular(&self) -> bool {
+        log::info!("==");
+        self.print();
+        if !self.is_square() {
+            return false;
+        }
+        for i in 1..(self.rows()) {
+            for j in 0..(i) {
+                log::info!("{} == {}", self.data[(i, j)], 0f64);
+                if (self.data[(i, j)]) != 0f64 {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    ///
+    /// Returns true iif the matrix is square.
+    /// 
+    pub fn is_square(&self) -> bool {
+        self.cols() == self.rows()
+    }
+
+    ///
     /// Returns true iif this is a row.
     /// 
     pub fn is_row(&self) -> bool {
@@ -727,5 +771,17 @@ mod tests {
         assert_ne!(m.value(0, 0), 5.6666777f64);
         assert_eq!(m.value(0, 1), 6.78f64);
         assert_eq!(m.value(0, 2), 7.00f64);
+    }
+
+    #[test]
+    fn test_low_upp_triangular() {
+        let l = RectMatrix::from_vec(&[
+            vec![1f64, 0f64, 0f64, 0f64],
+            vec![1f64, 2f64, 0f64, 0f64],
+            vec![1f64, 2f64, 3f64, 0f64],
+            vec![1f64, 2f64, 3f64, 4f64]
+        ]);
+        assert_eq!(l.is_lower_triangular(), true);
+        assert_eq!(l.is_upper_triangular(), false);
     }
 }
