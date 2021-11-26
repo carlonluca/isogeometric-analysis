@@ -280,6 +280,20 @@ impl RectMatrix {
     }
 
     ///
+    /// Rounds all the values in the matrix.
+    /// 
+    pub fn round(&mut self, decimals: u32) -> &RectMatrix {
+        let ten: i32 = 10;
+        let factor = ten.pow(decimals);
+        for i in 0..self.rows() {
+            for j in 0..self.cols() {
+                self.data[(i, j)] = (self.data[(i, j)]*(factor as f64)).round()/(factor as f64);
+            }
+        }
+        self
+    }
+
+    ///
     /// Returns true iif this is a row.
     /// 
     pub fn is_row(&self) -> bool {
@@ -701,5 +715,17 @@ mod tests {
             vec![9f64, 4f64, 7f64],
             vec![1f64, 4f64, 1f64]
         ]));
+    }
+
+    #[test]
+    fn test_round() {
+        let mut m = RectMatrix::from_vec(&[
+            vec![5.6666777f64, 6.7777f64, 7f64]
+        ]);
+        m.round(2);
+        assert_eq!(m.value(0, 0), 5.67f64);
+        assert_ne!(m.value(0, 0), 5.6666777f64);
+        assert_eq!(m.value(0, 1), 6.78f64);
+        assert_eq!(m.value(0, 2), 7.00f64);
     }
 }
