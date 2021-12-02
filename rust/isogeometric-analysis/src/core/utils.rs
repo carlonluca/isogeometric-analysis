@@ -1,7 +1,7 @@
 /**
  * Project: Approximation and Finite Elements in Isogeometric Problems
  * Author:  Luca Carlon
- * Date:    2021.11.01
+ * Date:    2021.12.02
  *
  * Copyright (c) 2021 Luca Carlon. All rights reserved.
  *
@@ -20,19 +20,9 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-pub use self::size::Size;
-pub use self::point::IntPoint;
-pub use self::range::IntRange;
-pub use self::equatable::Equatable;
-pub use self::matrix::RectMatrix;
-pub use self::matrix::RowVector;
-pub use self::matrix::ColVector;
-pub use self::factorial::fact;
-pub use self::utils::measure_time;
-mod size;
-mod point;
-mod range;
-mod equatable;
-mod matrix;
-mod factorial;
-mod utils;
+use time_test::time_test;
+
+pub fn measure_time(desc: &str, f: impl Fn()) {
+    time_test!(desc);
+    f();
+}
