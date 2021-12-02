@@ -20,6 +20,9 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+///
+/// Computes the factorial.
+/// 
 pub fn fact(n: i32) -> i64 {
     if n < 0 {
         panic!()
