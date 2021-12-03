@@ -705,13 +705,10 @@ mod tests {
             vec![2f64, 3f64],
             vec![8f64, 7f64]
         ]);
-        assert_eq!(m1.rect(IntPoint {
-            x: 1,
-            y: 1
-        }, IntPoint {
-            x: 2,
-            y: 2
-        }), m2);
+        assert_eq!(m1.rect(
+            IntPoint::point2d(1, 1),
+            IntPoint::point2d(2, 2)),
+            m2);
     }
 
     #[test]

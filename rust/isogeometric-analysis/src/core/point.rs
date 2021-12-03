@@ -20,10 +20,31 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
- ///
- /// Represents a point with integer coords.
- /// 
- pub struct IntPoint {
-    pub x: i32,
-    pub y: i32
+use num::traits::Zero;
+
+///
+/// Represents a point.
+///
+pub struct Point<T: Zero> {
+    pub x: T,
+    pub y: T,
+    pub z: T
 }
+
+impl<T: Zero> Point<T> {
+    ///
+    /// Creates a 2D point.
+    /// 
+    pub fn point2d(x: T, y: T) -> Point<T> {
+        return Point {
+            x: x,
+            y: y,
+            z: T::zero()
+        };
+    }
+}
+
+///
+/// Represents a point with integer coords.
+/// 
+pub type IntPoint = Point<i32>;
