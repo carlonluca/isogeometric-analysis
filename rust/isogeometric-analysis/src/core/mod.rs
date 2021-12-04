@@ -22,6 +22,7 @@
 
 pub use self::size::Size;
 pub use self::point::IntPoint;
+pub use self::point::Point;
 pub use self::range::IntRange;
 pub use self::equatable::Equatable;
 pub use self::matrix::RectMatrix;

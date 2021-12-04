@@ -25,13 +25,14 @@ use num::traits::Zero;
 ///
 /// Represents a point.
 ///
-pub struct Point<T: Zero> {
+#[derive(Debug)]
+pub struct Point<T: Zero + PartialEq> {
     pub x: T,
     pub y: T,
     pub z: T
 }
 
-impl<T: Zero> Point<T> {
+impl<T: Zero + PartialEq> Point<T> {
     ///
     /// Creates a 2D point.
     /// 
@@ -44,7 +45,24 @@ impl<T: Zero> Point<T> {
     }
 }
 
+impl<T: Zero + PartialEq> PartialEq for Point<T> {
+    fn eq(&self, other: &Point<T>) -> bool {
+        return self.x == other.x && self.y == other.y && self.z == other.z;
+    }
+}
+
 ///
 /// Represents a point with integer coords.
 /// 
 pub type IntPoint = Point<i32>;
+
+#[cfg(test)]
+mod tests {
+    use crate::core::Point;
+
+    #[test]
+    fn test_eq() {
+        assert_eq!(Point::point2d(6, 5), Point::point2d(6, 5));
+        assert_eq!(Point::point2d(56.7, 12.3), Point::point2d(56.7, 12.3));
+    }
+}
