@@ -34,13 +34,24 @@ pub struct Point<T: Zero + PartialEq> {
 
 impl<T: Zero + PartialEq> Point<T> {
     ///
-    /// Creates a 2D point.
+    /// Creates a point in the 2D space.
     /// 
     pub fn point2d(x: T, y: T) -> Point<T> {
         return Point {
             x: x,
             y: y,
             z: T::zero()
+        };
+    }
+
+    ///
+    /// Creates a point in the 3D space.
+    /// 
+    pub fn point3d(x: T, y: T, z: T) -> Point<T> {
+        return Point {
+            x: x,
+            y: y,
+            z: z
         };
     }
 }
