@@ -26,7 +26,7 @@ TestTypeScript:
 TestRust:
   stage: test_rust
   image:
-    name: rust:1.56-bullseye
+    name: rust:1.57-bullseye
     entrypoint: [""]
   script:
     - cd rust/isogeometric-analysis
