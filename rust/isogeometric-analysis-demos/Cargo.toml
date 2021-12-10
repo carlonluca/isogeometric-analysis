@@ -1,0 +1,11 @@
+[package]
+name = "isogeometric_analysis_demos"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies.isogeometric_analysis]
+path = "../isogeometric-analysis"
+
+[dependencies]
+env_logger = "0.9.0"
+log = "0.4.14"
