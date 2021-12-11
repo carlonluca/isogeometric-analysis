@@ -314,8 +314,6 @@ impl RectMatrix {
     /// Returns true iif the matrix is upper triangular.
     /// 
     pub fn is_upper_triangular(&self) -> bool {
-        log::info!("==");
-        self.print();
         if !self.is_square() {
             return false;
         }
@@ -415,6 +413,20 @@ impl RowVector {
                 data: Array2D::from_rows(&[data.to_vec()])
             }
         }
+    }
+
+    ///
+    /// Creates a evenly spaced sequence of numbers.
+    /// 
+    pub fn evenly_spaced(a: f64, b: f64, count: i64) -> RowVector {
+        if count < 2 {
+            return RowVector::from_vec(&[]);
+        }
+        let mut v: Vec<f64> = Vec::new();
+        for i in 0..count {
+            v.push(a + (i as f64)*(b - a)/(count as f64 - 1f64));
+        }
+        return RowVector::from_vec(&v);
     }
 
     ///
@@ -780,5 +792,33 @@ mod tests {
         ]);
         assert_eq!(l.is_lower_triangular(), true);
         assert_eq!(l.is_upper_triangular(), false);
+    }
+
+    #[test]
+    fn test_evenly_spaced() {
+        let seq = RowVector::evenly_spaced(1f64, 4f64, 4);
+        assert_eq!(seq.value(0), 1f64);
+        assert_eq!(seq.value(1), 2f64);
+        assert_eq!(seq.value(2), 3f64);
+        assert_eq!(seq.value(3), 4f64);
+
+        let seq = RowVector::evenly_spaced(-1f64, -4f64, 4);
+        assert_eq!(seq.value(0), -1f64);
+        assert_eq!(seq.value(1), -2f64);
+        assert_eq!(seq.value(2), -3f64);
+        assert_eq!(seq.value(3), -4f64);
+
+        let seq = RowVector::evenly_spaced(-4f64, -1f64, 4);
+        assert_eq!(seq.value(0), -4f64);
+        assert_eq!(seq.value(1), -3f64);
+        assert_eq!(seq.value(2), -2f64);
+        assert_eq!(seq.value(3), -1f64);
+
+        let seq = RowVector::evenly_spaced(-4.5f64, -1.5f64, 5);
+        assert_eq!(seq.value(0), -4.5f64);
+        assert_eq!(seq.value(1), -3.75f64);
+        assert_eq!(seq.value(2), -3f64);
+        assert_eq!(seq.value(3), -2.25f64);
+        assert_eq!(seq.value(4), -1.5f64);
     }
 }
