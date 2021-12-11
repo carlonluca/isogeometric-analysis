@@ -34,6 +34,17 @@ pub struct Point<T: Zero + PartialEq> {
 
 impl<T: Zero + PartialEq> Point<T> {
     ///
+    /// Creates a point on a straight line.
+    /// 
+    pub fn point1d(x: T) -> Point<T> {
+        return Point {
+            x: x,
+            y: T::zero(),
+            z: T::zero()
+        };
+    }
+
+    ///
     /// Creates a point in the 2D space.
     /// 
     pub fn point2d(x: T, y: T) -> Point<T> {

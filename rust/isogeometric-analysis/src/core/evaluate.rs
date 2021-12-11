@@ -1,7 +1,7 @@
 /**
  * Project: Approximation and Finite Elements in Isogeometric Problems
  * Author:  Luca Carlon
- * Date:    2021.11.01
+ * Date:    2021.12.11
  *
  * Copyright (c) 2021 Luca Carlon. All rights reserved.
  *
@@ -20,22 +20,12 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-pub use self::size::Size;
-pub use self::point::IntPoint;
-pub use self::point::Point;
-pub use self::range::IntRange;
-pub use self::equatable::Equatable;
-pub use self::matrix::RectMatrix;
-pub use self::matrix::RowVector;
-pub use self::matrix::ColVector;
-pub use self::factorial::fact;
-pub use self::utils::measure_time;
-pub use self::evaluate::Evaluatable;
-mod size;
-mod point;
-mod range;
-mod equatable;
-mod matrix;
-mod factorial;
-mod utils;
-mod evaluate;
+use num::traits::Zero;
+use crate::core::Point;
+
+///
+/// Generic interface for an evaluatable element.
+/// 
+pub trait Evaluatable<I: Zero + PartialEq, O: Zero + PartialEq> {
+    fn evaluate(&self, p: Point<I>) -> Point<O>;
+}

@@ -22,6 +22,7 @@
 
 use crate::core::fact;
 use crate::core::Point;
+use crate::core::Evaluatable;
 use num::traits::Pow;
 
 ///
@@ -31,19 +32,20 @@ pub struct BezierCurve {
     p: Vec<Point<f64>>
 }
 
-impl BezierCurve {
+impl Evaluatable<f64, f64> for BezierCurve {
     ///
-    /// Evaluates the Bezier curve in point xi.
+    /// Evaluates the Bezier curve in point xi. Point xi is intended in the
+    /// parametric space.
     /// 
-    pub fn evaluate(&self, xi: f64) -> Point<f64> {
+    fn evaluate(&self, xi: Point<f64>) -> Point<f64> {
         let mut x = 0f64;
         let mut y = 0f64;
         let mut z = 0f64;
         let n = self.p.len();
         for i in 0..n {
-            x = x + Bezier::bernstein((n - 1) as i32, i as i32, xi)*self.p[i].x;
-            y = y + Bezier::bernstein((n - 1) as i32, i as i32, xi)*self.p[i].y;
-            z = z + Bezier::bernstein((n - 1) as i32, i as i32, xi)*self.p[i].z;
+            x = x + Bezier::bernstein((n - 1) as i32, i as i32, xi.x)*self.p[i].x;
+            y = y + Bezier::bernstein((n - 1) as i32, i as i32, xi.x)*self.p[i].y;
+            z = z + Bezier::bernstein((n - 1) as i32, i as i32, xi.x)*self.p[i].z;
         }
 
         return Point::point3d(x, y, z);
