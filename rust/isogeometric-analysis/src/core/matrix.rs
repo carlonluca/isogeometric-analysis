@@ -442,6 +442,10 @@ impl RowVector {
     pub fn value(&self, j: usize) -> f64 {
         self.matrix.value(0, j).clone()
     }
+
+    pub fn to_vec(&self) -> Vec<f64> {
+        return self.matrix.data.as_rows()[0].clone();
+    }
 }
 
 impl PartialEq for RowVector {

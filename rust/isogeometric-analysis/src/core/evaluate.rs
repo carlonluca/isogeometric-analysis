@@ -27,5 +27,5 @@ use crate::core::Point;
 /// Generic interface for an evaluatable element.
 /// 
 pub trait Evaluatable<I: Zero + PartialEq, O: Zero + PartialEq> {
-    fn evaluate(&self, p: Point<I>) -> Point<O>;
+    fn evaluate(&self, p: &Point<I>) -> Point<O>;
 }

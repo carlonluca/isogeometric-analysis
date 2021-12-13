@@ -9,3 +9,4 @@ path = "../isogeometric-analysis"
 [dependencies]
 env_logger = "0.9.0"
 log = "0.4.14"
+gnuplot = "0.0.37"

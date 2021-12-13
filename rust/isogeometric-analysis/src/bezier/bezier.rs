@@ -37,15 +37,15 @@ impl Evaluatable<f64, f64> for BezierCurve {
     /// Evaluates the Bezier curve in point xi. Point xi is intended in the
     /// parametric space.
     /// 
-    fn evaluate(&self, xi: Point<f64>) -> Point<f64> {
+    fn evaluate(&self, xi: &Point<f64>) -> Point<f64> {
         let mut x = 0f64;
         let mut y = 0f64;
         let mut z = 0f64;
         let n = self.p.len();
         for i in 0..n {
-            x = x + Bezier::bernstein((n - 1) as i32, i as i32, xi.x)*self.p[i].x;
-            y = y + Bezier::bernstein((n - 1) as i32, i as i32, xi.x)*self.p[i].y;
-            z = z + Bezier::bernstein((n - 1) as i32, i as i32, xi.x)*self.p[i].z;
+            x = x + Bezier::bernstein((n - 1) as i32, i as i32, &xi.x)*self.p[i].x;
+            y = y + Bezier::bernstein((n - 1) as i32, i as i32, &xi.x)*self.p[i].y;
+            z = z + Bezier::bernstein((n - 1) as i32, i as i32, &xi.x)*self.p[i].z;
         }
 
         return Point::point3d(x, y, z);
@@ -58,7 +58,7 @@ impl Bezier {
     ///
     /// Computes the i-th bernstein basis of degree n in xi.
     /// 
-    pub fn bernstein(n: i32, i: i32, xi: f64) -> f64 {
+    pub fn bernstein(n: i32, i: i32, xi: &f64) -> f64 {
         ((fact(n) as f64)*xi.pow(i as f64)*(1f64 - xi).pow((n - i) as f64))/((fact(i)*fact(n - i)) as f64)
     }
 }
