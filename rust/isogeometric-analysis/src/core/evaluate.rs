@@ -21,11 +21,47 @@
  */
 
 use num::traits::Zero;
+use crate::core::RealPoint;
 use crate::core::Point;
+use crate::core::RowVector;
 
 ///
 /// Generic interface for an evaluatable element.
 /// 
 pub trait Evaluatable<I: Zero + PartialEq, O: Zero + PartialEq> {
     fn evaluate(&self, p: &Point<I>) -> Point<O>;
+}
+
+///
+/// This class is used to automate computations for curves.
+/// 
+pub struct Evaluator {}
+
+impl Evaluator {
+    ///
+    /// Computes a geometric element in a range of points.
+    /// 
+    pub fn evaluate(element: &impl Evaluatable<f64, f64>, values: &Vec<RealPoint>) -> Vec<RealPoint> {
+        let mut ret: Vec<RealPoint> = Vec::new();
+        for p in values.iter() {
+            ret.push(element.evaluate(p));
+        }
+        return ret;
+    }
+
+    pub fn evaluate_r_to_r3(element: &impl Evaluatable<f64, f64>, from: &f64, to: &f64, count: &i64) -> (Vec<RealPoint>, Vec<RealPoint>) {
+        let values = RowVector::evenly_spaced(from, to, count).to_vec();
+        let mut input: Vec<RealPoint> = Vec::new();
+        for v in values {
+            let p = Point::point1d(v);
+            input.push(p);
+        }
+
+        let mut output: Vec<RealPoint> = Vec::new();
+        for p in &input {
+            output.push(element.evaluate(&p));
+        }
+
+        return (input, output);
+    }
 }

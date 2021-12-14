@@ -20,6 +20,6 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-pub use self::bezier::Bezier;
+pub use self::bezier::Bernstein;
 pub use self::bezier::BezierCurve;
 mod bezier;

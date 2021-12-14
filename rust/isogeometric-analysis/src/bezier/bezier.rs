@@ -22,6 +22,7 @@
 
 use crate::core::fact;
 use crate::core::Point;
+use crate::core::RealPoint;
 use crate::core::Evaluatable;
 use num::traits::Pow;
 
@@ -29,7 +30,7 @@ use num::traits::Pow;
 /// Implements Bezier curves and surfaces.
 /// 
 pub struct BezierCurve {
-    p: Vec<Point<f64>>
+    p: Vec<RealPoint>
 }
 
 impl Evaluatable<f64, f64> for BezierCurve {
@@ -37,28 +38,34 @@ impl Evaluatable<f64, f64> for BezierCurve {
     /// Evaluates the Bezier curve in point xi. Point xi is intended in the
     /// parametric space.
     /// 
-    fn evaluate(&self, xi: &Point<f64>) -> Point<f64> {
+    fn evaluate(&self, xi: &RealPoint) -> RealPoint {
         let mut x = 0f64;
         let mut y = 0f64;
         let mut z = 0f64;
         let n = self.p.len();
         for i in 0..n {
-            x = x + Bezier::bernstein((n - 1) as i32, i as i32, &xi.x)*self.p[i].x;
-            y = y + Bezier::bernstein((n - 1) as i32, i as i32, &xi.x)*self.p[i].y;
-            z = z + Bezier::bernstein((n - 1) as i32, i as i32, &xi.x)*self.p[i].z;
+            let bernstein = Bernstein {
+                n: n as i32 - 1i32,
+                i: i as i32
+            };
+            x = x + bernstein.evaluate(&RealPoint::point1d(xi.x)).x*self.p[i].x;
+            y = y + bernstein.evaluate(&RealPoint::point1d(xi.x)).x*self.p[i].y;
+            z = z + bernstein.evaluate(&RealPoint::point1d(xi.x)).x*self.p[i].z;
         }
 
         return Point::point3d(x, y, z);
     }
 }
 
-pub struct Bezier {}
+pub struct Bernstein {
+    pub n: i32,
+    pub i: i32
+}
 
-impl Bezier {
-    ///
-    /// Computes the i-th bernstein basis of degree n in xi.
-    /// 
-    pub fn bernstein(n: i32, i: i32, xi: &f64) -> f64 {
-        ((fact(n) as f64)*xi.pow(i as f64)*(1f64 - xi).pow((n - i) as f64))/((fact(i)*fact(n - i)) as f64)
+impl Evaluatable<f64, f64> for Bernstein {
+    fn evaluate(&self, xi: &RealPoint) -> RealPoint {
+        let num = ((fact(self.n) as f64)*xi.x.pow(self.i as f64)*(1f64 - xi.x).pow((self.n - self.i) as f64));
+        let den = ((fact(self.i)*fact(self.n - self.i)) as f64);
+        return Point::point1d(num/den);
     }
 }

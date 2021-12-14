@@ -22,6 +22,7 @@
 
 pub use self::size::Size;
 pub use self::point::IntPoint;
+pub use self::point::RealPoint;
 pub use self::point::Point;
 pub use self::range::IntRange;
 pub use self::equatable::Equatable;
@@ -31,6 +32,7 @@ pub use self::matrix::ColVector;
 pub use self::factorial::fact;
 pub use self::utils::measure_time;
 pub use self::evaluate::Evaluatable;
+pub use self::evaluate::Evaluator;
 mod size;
 mod point;
 mod range;

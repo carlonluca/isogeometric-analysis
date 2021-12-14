@@ -78,6 +78,11 @@ impl<T: Zero + PartialEq> PartialEq for Point<T> {
 /// 
 pub type IntPoint = Point<i32>;
 
+///
+/// Represents a point in ℝ^3.
+/// 
+pub type RealPoint = Point<f64>;
+
 #[cfg(test)]
 mod tests {
     use crate::core::Point;

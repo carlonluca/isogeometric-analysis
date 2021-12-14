@@ -418,13 +418,13 @@ impl RowVector {
     ///
     /// Creates a evenly spaced sequence of numbers.
     /// 
-    pub fn evenly_spaced(a: f64, b: f64, count: i64) -> RowVector {
-        if count < 2 {
+    pub fn evenly_spaced(a: &f64, b: &f64, count: &i64) -> RowVector {
+        if count < &2i64 {
             return RowVector::from_vec(&[]);
         }
         let mut v: Vec<f64> = Vec::new();
-        for i in 0..count {
-            v.push(a + (i as f64)*(b - a)/(count as f64 - 1f64));
+        for i in 0i64..*count {
+            v.push(a + (i as f64)*(b - a)/((*count - 1i64) as f64));
         }
         return RowVector::from_vec(&v);
     }
@@ -443,6 +443,9 @@ impl RowVector {
         self.matrix.value(0, j).clone()
     }
 
+    ///
+    /// Clones data and returns a vector.
+    /// 
     pub fn to_vec(&self) -> Vec<f64> {
         return self.matrix.data.as_rows()[0].clone();
     }
@@ -800,25 +803,25 @@ mod tests {
 
     #[test]
     fn test_evenly_spaced() {
-        let seq = RowVector::evenly_spaced(1f64, 4f64, 4);
+        let seq = RowVector::evenly_spaced(&1f64, &4f64, &4);
         assert_eq!(seq.value(0), 1f64);
         assert_eq!(seq.value(1), 2f64);
         assert_eq!(seq.value(2), 3f64);
         assert_eq!(seq.value(3), 4f64);
 
-        let seq = RowVector::evenly_spaced(-1f64, -4f64, 4);
+        let seq = RowVector::evenly_spaced(&-1f64, &-4f64, &4);
         assert_eq!(seq.value(0), -1f64);
         assert_eq!(seq.value(1), -2f64);
         assert_eq!(seq.value(2), -3f64);
         assert_eq!(seq.value(3), -4f64);
 
-        let seq = RowVector::evenly_spaced(-4f64, -1f64, 4);
+        let seq = RowVector::evenly_spaced(&-4f64, &-1f64, &4);
         assert_eq!(seq.value(0), -4f64);
         assert_eq!(seq.value(1), -3f64);
         assert_eq!(seq.value(2), -2f64);
         assert_eq!(seq.value(3), -1f64);
 
-        let seq = RowVector::evenly_spaced(-4.5f64, -1.5f64, 5);
+        let seq = RowVector::evenly_spaced(&-4.5f64, &-1.5f64, &5);
         assert_eq!(seq.value(0), -4.5f64);
         assert_eq!(seq.value(1), -3.75f64);
         assert_eq!(seq.value(2), -3f64);
