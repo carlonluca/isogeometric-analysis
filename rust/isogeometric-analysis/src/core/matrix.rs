@@ -24,22 +24,24 @@ use array2d::Array2D;
 use std::ops::Add;
 use std::ops::Sub;
 use std::ops::Mul;
+use std::clone::Clone;
 use super::size::Size;
 use super::point::IntPoint;
 use log;
 
 #[derive(Debug)]
-pub struct RectMatrix {
-    data: Array2D<f64>
+#[derive(Clone)]
+pub struct RectMatrix<T: std::clone::Clone + PartialEq + Mul> {
+    data: Array2D<T>
 }
 
-impl PartialEq for RectMatrix {
+impl<T: std::clone::Clone + PartialEq> PartialEq for RectMatrix<T> {
     fn eq(&self, other: &Self) -> bool {
         self.data == other.data
     }
 }
 
-impl Add for RectMatrix {
+impl<T: std::clone::Clone + PartialEq> Add for RectMatrix<T> {
     type Output = Self;
 
     ///
@@ -50,7 +52,7 @@ impl Add for RectMatrix {
     }
 }
 
-impl Sub for RectMatrix {
+impl<T: std::clone::Clone + PartialEq> Sub for RectMatrix<T> {
     type Output = Self;
 
     ///
@@ -61,7 +63,7 @@ impl Sub for RectMatrix {
     }
 }
 
-impl Mul<f64> for RectMatrix {
+impl<T: std::clone::Clone + PartialEq> Mul for RectMatrix<T> {
     type Output = Self;
 
     ///
@@ -78,7 +80,7 @@ impl Mul<f64> for RectMatrix {
     }
 }
 
-impl Mul<RectMatrix> for RectMatrix {
+impl<T: std::clone::Clone + PartialEq + Mul + Add> Mul<RectMatrix<T>> for RectMatrix<T> {
     type Output = Self;
 
     ///
