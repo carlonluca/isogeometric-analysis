@@ -34,6 +34,8 @@ use log;
 
 pub trait MatElement: Signed + Clone + MulAssign + AddAssign {}
 
+pub struct Scalar<T: MatElement> { value: dyn MatElement }
+
 #[derive(Debug)]
 pub struct RectMatrix<T: MatElement> {
     data: Array2D<T>
@@ -51,7 +53,7 @@ impl<T: MatElement> Add for RectMatrix<T> {
     ///
     /// Adds another matrix.
     ///
-    fn add(self, other: Self) -> Self {
+    fn add(&self, other: Self) -> Self {
         return self.mult_add(&other, T::one());
     }
 }
@@ -62,18 +64,18 @@ impl<T: MatElement> Sub for RectMatrix<T> {
     ///
     /// Subtracts another matrix.
     /// 
-    fn sub(self, other: Self) -> Self::Output {
+    fn sub(&self, other: Self) -> Self::Output {
         return self.mult_add(&other, T::one().neg());
     }
 }
 
-impl<T: MatElement> Mul<dyn Num> for RectMatrix<T> {
+impl<T: MatElement> Mul<Scalar<dyn MatElement>> for RectMatrix<T> {
     type Output = Self;
 
     ///
     /// Multiplication by a scalar.
     /// 
-    fn mul(self, scalar: &dyn Num) -> Self {
+    fn mul(&self, scalar: Scalar<dyn MatElement>) -> Self::Output {
         let mut ret = self.clone();
         for i in 0..self.rows() {
             for j in 0..self.cols() {
@@ -90,7 +92,7 @@ impl<T: MatElement> Mul<RectMatrix<T>> for RectMatrix<T> {
     ///
     /// Multiplication by another matrix.
     /// 
-    fn mul(self, other: Self) -> Self {
+    fn mul(&self, other: Self) -> Self {
         if self.cols() != other.rows() {
             panic!();
         }
