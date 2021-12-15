@@ -24,52 +24,56 @@ use array2d::Array2D;
 use std::ops::Add;
 use std::ops::Sub;
 use std::ops::Mul;
+use std::ops::Neg;
+use std::ops::{MulAssign, AddAssign};
 use std::clone::Clone;
 use super::size::Size;
 use super::point::IntPoint;
+use num::traits::{Signed, Num};
 use log;
 
+pub trait MatElement: Signed + Clone + MulAssign + AddAssign {}
+
 #[derive(Debug)]
-#[derive(Clone)]
-pub struct RectMatrix<T: std::clone::Clone + PartialEq + Mul> {
+pub struct RectMatrix<T: MatElement> {
     data: Array2D<T>
 }
 
-impl<T: std::clone::Clone + PartialEq> PartialEq for RectMatrix<T> {
+impl<T: MatElement> PartialEq for RectMatrix<T> {
     fn eq(&self, other: &Self) -> bool {
         self.data == other.data
     }
 }
 
-impl<T: std::clone::Clone + PartialEq> Add for RectMatrix<T> {
+impl<T: MatElement> Add for RectMatrix<T> {
     type Output = Self;
 
     ///
     /// Adds another matrix.
     ///
     fn add(self, other: Self) -> Self {
-        return self.mult_add(&other, 1f64);
+        return self.mult_add(&other, T::one());
     }
 }
 
-impl<T: std::clone::Clone + PartialEq> Sub for RectMatrix<T> {
+impl<T: MatElement> Sub for RectMatrix<T> {
     type Output = Self;
 
     ///
     /// Subtracts another matrix.
     /// 
     fn sub(self, other: Self) -> Self::Output {
-        return self.mult_add(&other, -1f64);
+        return self.mult_add(&other, T::one().neg());
     }
 }
 
-impl<T: std::clone::Clone + PartialEq> Mul for RectMatrix<T> {
+impl<T: MatElement> Mul<dyn Num> for RectMatrix<T> {
     type Output = Self;
 
     ///
     /// Multiplication by a scalar.
     /// 
-    fn mul(self, scalar: f64) -> Self {
+    fn mul(self, scalar: &dyn Num) -> Self {
         let mut ret = self.clone();
         for i in 0..self.rows() {
             for j in 0..self.cols() {
@@ -80,7 +84,7 @@ impl<T: std::clone::Clone + PartialEq> Mul for RectMatrix<T> {
     }
 }
 
-impl<T: std::clone::Clone + PartialEq + Mul + Add> Mul<RectMatrix<T>> for RectMatrix<T> {
+impl<T: MatElement> Mul<RectMatrix<T>> for RectMatrix<T> {
     type Output = Self;
 
     ///
@@ -106,7 +110,7 @@ impl<T: std::clone::Clone + PartialEq + Mul + Add> Mul<RectMatrix<T>> for RectMa
     }
 }
 
-impl Clone for RectMatrix {
+impl<T: MatElement> Clone for RectMatrix<T> {
     ///
     /// Clones this matrix.
     /// 
@@ -117,11 +121,11 @@ impl Clone for RectMatrix {
     }
 }
 
-impl RectMatrix {
+impl<T: MatElement> RectMatrix<T> {
     ///
     /// Constructs a matrix from data. Ownership is transferred.
     /// 
-    pub fn from_array(data: Array2D<f64>) -> RectMatrix {
+    pub fn from_array(data: Array2D<T>) -> RectMatrix<T> {
         RectMatrix { data: data }
     }
 
@@ -129,14 +133,14 @@ impl RectMatrix {
     /// Constructs a matrix from data. Ownership is not transferred and
     /// the array is copied.
     /// 
-    pub fn from_array_ref(data: &Array2D<f64>) -> RectMatrix {
+    pub fn from_array_ref(data: &Array2D<T>) -> RectMatrix<T> {
         RectMatrix { data: data.clone() }
     }
 
     ///
     /// Builds a matrix from an array of vectors.
     /// 
-    pub fn from_vec(data: &[Vec<f64>]) -> RectMatrix {
+    pub fn from_vec(data: &[Vec<T>]) -> RectMatrix<T> {
         RectMatrix { data: Array2D::from_rows(data) }
     }
 
@@ -164,7 +168,7 @@ impl RectMatrix {
     ///
     /// Returns the i-th row.
     /// 
-    pub fn row(&self, i: usize) -> RowVector {
+    pub fn row(&self, i: usize) -> RowVector<T> {
         // TODO: Optimize
         RowVector::from_vec(&self.data.as_rows()[i])
     }
@@ -179,7 +183,7 @@ impl RectMatrix {
     ///
     /// Returns the i-th column.
     /// 
-    pub fn col(&self, i: usize) -> ColVector {
+    pub fn col(&self, i: usize) -> ColVector<T> {
         // TODO: Optimize
         ColVector::from_vec(&self.data.as_columns()[i])
     }
@@ -233,7 +237,7 @@ impl RectMatrix {
     ///
     /// Crops the matrix.
     /// 
-    pub fn rect(&self, top_left: IntPoint, bottom_right: IntPoint) -> RectMatrix {
+    pub fn rect(&self, top_left: IntPoint, bottom_right: IntPoint) -> RectMatrix<T> {
         let cols = bottom_right.x - top_left.x + 1;
         let rows = bottom_right.y - top_left.y + 1;
         let mut mat = RectMatrix::zeros(rows as usize, cols as usize);
@@ -271,7 +275,7 @@ impl RectMatrix {
     ///
     /// Assigns a column.
     /// 
-    pub fn assign_col(&mut self, col: usize, v: ColVector) -> &RectMatrix {
+    pub fn assign_col(&mut self, col: usize, v: ColVector<T>) -> &RectMatrix<T> {
         if v.length() != self.rows() {
             panic!();
         }
@@ -284,12 +288,12 @@ impl RectMatrix {
     ///
     /// Rounds all the values in the matrix.
     /// 
-    pub fn round(&mut self, decimals: u32) -> &RectMatrix {
+    pub fn round(&mut self, decimals: u32) -> &RectMatrix<T> {
         let ten: i32 = 10;
         let factor = ten.pow(decimals);
         for i in 0..self.rows() {
             for j in 0..self.cols() {
-                self.data[(i, j)] = (self.data[(i, j)]*(factor as f64)).round()/(factor as f64);
+                self.data[(i, j)] = (self.data[(i, j)]*(factor as T)).round()/(factor as T);
             }
         }
         self
@@ -382,7 +386,7 @@ impl RectMatrix {
     ///
     /// Adds to another matrix for terms multiplied by a factor.
     /// 
-    fn mult_add(&self, other: &RectMatrix, fac: f64) -> RectMatrix {
+    fn mult_add(&self, other: &RectMatrix<T>, fac: T) -> RectMatrix<T> {
         if self.size() != other.size() {
             panic!()
         }
@@ -401,15 +405,15 @@ impl RectMatrix {
 /// Represents a row.
 /// 
 #[derive(Debug)]
-pub struct RowVector {
-    pub matrix: RectMatrix
+pub struct RowVector<T: MatElement> {
+    pub matrix: RectMatrix<T>
 }
 
-impl RowVector {
+impl<T: MatElement> RowVector<T> {
     ///
     /// Builds a RowVector from a vector.
     /// 
-    pub fn from_vec(data: &[f64]) -> RowVector {
+    pub fn from_vec(data: &[T]) -> RowVector<T> {
         RowVector {
             matrix: RectMatrix {
                 data: Array2D::from_rows(&[data.to_vec()])
@@ -420,7 +424,7 @@ impl RowVector {
     ///
     /// Creates a evenly spaced sequence of numbers.
     /// 
-    pub fn evenly_spaced(a: &f64, b: &f64, count: &i64) -> RowVector {
+    pub fn evenly_spaced(a: &f64, b: &f64, count: &i64) -> RowVector<T> {
         if count < &2i64 {
             return RowVector::from_vec(&[]);
         }
@@ -453,7 +457,7 @@ impl RowVector {
     }
 }
 
-impl PartialEq for RowVector {
+impl<T: MatElement> PartialEq for RowVector<T> {
     fn eq(&self, other: &Self) -> bool {
         other.matrix == self.matrix
     }
@@ -463,15 +467,15 @@ impl PartialEq for RowVector {
 /// Represents a column.
 /// 
 #[derive(Debug)]
-pub struct ColVector {
-    pub matrix: RectMatrix
+pub struct ColVector<T: MatElement> {
+    pub matrix: RectMatrix<T>
 }
 
-impl ColVector {
+impl<T: MatElement> ColVector<T> {
     ///
     /// Builds a ColVector from a vector.
     /// 
-    pub fn from_vec(data: &[f64]) -> ColVector {
+    pub fn from_vec(data: &[T]) -> ColVector<T> {
         ColVector {
             matrix: RectMatrix {
                 data: Array2D::from_columns(&[data.to_vec()])
@@ -501,7 +505,7 @@ impl ColVector {
     }
 }
 
-impl PartialEq for ColVector {
+impl<T: MatElement> PartialEq for ColVector<T> {
     fn eq(&self, other: &Self) -> bool {
         other.matrix == self.matrix
     }
