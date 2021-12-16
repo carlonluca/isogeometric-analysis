@@ -194,9 +194,9 @@ impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> RectMatri
     pub fn max_col(&self, j: usize) -> T {
         let mut max: Option<T> = None;
         for i in 0..self.rows() {
-            match max {
+            match &max {
                 None => max = Some(self.data[(i, j)].clone()),
-                Some(v) => if v < self.data[(i, j)] { max = Some(self.data[(i, j)].clone()); }
+                Some(v) => if v < &self.data[(i, j)] { max = Some(self.data[(i, j)].clone()); }
             }
         }
         match max {
