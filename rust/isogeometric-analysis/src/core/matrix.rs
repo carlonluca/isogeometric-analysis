@@ -29,23 +29,25 @@ use std::clone::Clone;
 use std::fmt::Display;
 use super::size::Size;
 use super::point::IntPoint;
-use num::traits::{Signed};
+use num::traits::{Signed, Float};
+use num::traits::{cast::FromPrimitive};
 use log;
 
 pub trait MatElement: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display {}
+impl<T> MatElement for T where T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display { }
 
 #[derive(Debug)]
-pub struct RectMatrix<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> {
+pub struct RectMatrix<T: MatElement> {
     data: Array2D<T>
 }
 
-impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> PartialEq for RectMatrix<T> {
+impl<T: MatElement> PartialEq for RectMatrix<T> {
     fn eq(&self, other: &Self) -> bool {
         self.data == other.data
     }
 }
 
-impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> Add for RectMatrix<T> {
+impl<T: MatElement> Add for RectMatrix<T> {
     type Output = Self;
 
     ///
@@ -56,7 +58,7 @@ impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> Add for R
     }
 }
 
-impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> Sub for RectMatrix<T> {
+impl<T: MatElement> Sub for RectMatrix<T> {
     type Output = Self;
 
     ///
@@ -67,7 +69,7 @@ impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> Sub for R
     }
 }
 
-impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> Mul<T> for RectMatrix<T> {
+impl<T: MatElement> Mul<T> for RectMatrix<T> {
     type Output = Self;
 
     ///
@@ -84,7 +86,7 @@ impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> Mul<T> fo
     }
 }
 
-impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> Mul<RectMatrix<T>> for RectMatrix<T> {
+impl<T: MatElement> Mul<RectMatrix<T>> for RectMatrix<T> {
     type Output = Self;
 
     ///
@@ -110,7 +112,7 @@ impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> Mul<RectM
     }
 }
 
-impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> Clone for RectMatrix<T> {
+impl<T: MatElement> Clone for RectMatrix<T> {
     ///
     /// Clones this matrix.
     /// 
@@ -121,7 +123,7 @@ impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> Clone for
     }
 }
 
-impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> RectMatrix<T> {
+impl<T: MatElement> RectMatrix<T> {
     ///
     /// Constructs a matrix from data. Ownership is transferred.
     /// 
@@ -290,20 +292,6 @@ impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> RectMatri
     }
 
     ///
-    /// Rounds all the values in the matrix.
-    /// 
-    /*pub fn round(&mut self, decimals: u32) -> &RectMatrix<T> {
-        let ten: i32 = 10;
-        let factor = ten.pow(decimals);
-        for i in 0..self.rows() {
-            for j in 0..self.cols() {
-                self.data[(i, j)] = (self.data[(i, j)]*factor).round()/(factor as T);
-            }
-        }
-        self
-    }*/
-
-    ///
     /// Returns true iif the matrix is lower triangular.
     /// 
     pub fn is_lower_triangular(&self) -> bool {
@@ -404,15 +392,31 @@ impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> RectMatri
     }
 }
 
+impl<T: Float + Signed + Clone + MulAssign + AddAssign + PartialOrd + Display + FromPrimitive> RectMatrix<T> {
+    ///
+    /// Rounds all the values in the matrix.
+    /// 
+    pub fn round(&mut self, decimals: i32) -> &RectMatrix<T> {
+        let ten = T::from_f64(10f64).unwrap();
+        let factor = ten.powi(decimals);
+        for i in 0..self.rows() {
+            for j in 0..self.cols() {
+                self.data[(i, j)] = (self.data[(i, j)]*factor).round()/factor;
+            }
+        }
+        self
+    }
+}
+
 ///
 /// Represents a row.
 /// 
 #[derive(Debug)]
-pub struct RowVector<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> {
+pub struct RowVector<T: MatElement> {
     pub matrix: RectMatrix<T>
 }
 
-impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> RowVector<T> {
+impl<T: MatElement> RowVector<T> {
     ///
     /// Builds a RowVector from a vector.
     /// 
@@ -461,7 +465,7 @@ impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> RowVector
     }
 }
 
-impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> PartialEq for RowVector<T> {
+impl<T: MatElement> PartialEq for RowVector<T> {
     fn eq(&self, other: &Self) -> bool {
         other.matrix == self.matrix
     }
@@ -471,11 +475,11 @@ impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> PartialEq
 /// Represents a column.
 /// 
 #[derive(Debug)]
-pub struct ColVector<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> {
+pub struct ColVector<T: MatElement> {
     pub matrix: RectMatrix<T>
 }
 
-impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> ColVector<T> {
+impl<T: MatElement> ColVector<T> {
     ///
     /// Builds a ColVector from a vector.
     /// 
@@ -509,7 +513,7 @@ impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> ColVector
     }
 }
 
-impl<T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display> PartialEq for ColVector<T> {
+impl<T: MatElement> PartialEq for ColVector<T> {
     fn eq(&self, other: &Self) -> bool {
         other.matrix == self.matrix
     }
@@ -619,12 +623,12 @@ mod tests {
 
     #[test]
     fn test_identity() {
-        /*let m = RectMatrix::identity(10);
+        let m = RectMatrix::<f64>::identity(10);
         for i in 0..(m.rows() - 1) {
             for j in 0..(m.cols() - 1) {
                 assert_eq!(m.value(i, j), if i == j { 1f64 } else { 0f64 });
             }
-        }*/
+        }
     }
     
     #[test]
@@ -788,7 +792,7 @@ mod tests {
     }
 
     #[test]
-    /*fn test_round() {
+    fn test_round() {
         let mut m = RectMatrix::from_vec(&[
             vec![5.6666777f64, 6.7777f64, 7f64]
         ]);
@@ -797,7 +801,7 @@ mod tests {
         assert_ne!(m.value(0, 0), 5.6666777f64);
         assert_eq!(m.value(0, 1), 6.78f64);
         assert_eq!(m.value(0, 2), 7.00f64);
-    }*/
+    }
 
     #[test]
     fn test_low_upp_triangular() {
