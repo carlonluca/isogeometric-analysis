@@ -64,8 +64,8 @@ pub struct Bernstein {
 
 impl Evaluatable<f64, f64> for Bernstein {
     fn evaluate(&self, xi: &RealPoint) -> RealPoint {
-        let num = ((fact(self.n) as f64)*xi.x.pow(self.i as f64)*(1f64 - xi.x).pow((self.n - self.i) as f64));
-        let den = ((fact(self.i)*fact(self.n - self.i)) as f64);
+        let num = (fact(self.n) as f64)*xi.x.pow(self.i as f64)*(1f64 - xi.x).pow((self.n - self.i) as f64);
+        let den = (fact(self.i)*fact(self.n - self.i)) as f64;
         return Point::point1d(num/den);
     }
 }
