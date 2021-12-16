@@ -50,7 +50,8 @@ impl Evaluator {
     }
 
     pub fn evaluate_r_to_r3(element: &impl Evaluatable<f64, f64>, from: &f64, to: &f64, count: &i64) -> (Vec<RealPoint>, Vec<RealPoint>) {
-        let values = RowVector::evenly_spaced(from, to, count).to_vec();
+        let rv: RowVector<f64> = RowVector::<f64>::evenly_spaced(from, to, count);
+        let values = rv.to_vec();
         let mut input: Vec<RealPoint> = Vec::new();
         for v in values {
             let p = Point::point1d(v);
