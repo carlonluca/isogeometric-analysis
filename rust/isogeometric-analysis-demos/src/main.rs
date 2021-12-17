@@ -12,10 +12,10 @@ fn main() {
     let mut xvalues = Vec::new();
     let mut yvalues = Vec::new();
     for p in &xpoints {
-        xvalues.push(p.x);
+        xvalues.push(p.x());
     }
     for p in &ypoints {
-        yvalues.push(p.x);
+        yvalues.push(p.x());
     }
 
     let mut fg = Figure::new();

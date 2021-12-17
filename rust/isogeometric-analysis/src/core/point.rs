@@ -20,56 +20,90 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-use num::traits::Zero;
+use super::RowVector;
+use super::MatElement;
 
 ///
 /// Represents a point.
 ///
 #[derive(Debug)]
-pub struct Point<T: Zero + PartialEq> {
-    pub x: T,
-    pub y: T,
-    pub z: T
+#[derive(Eq)]
+pub struct Point<T: MatElement> {
+    pub vector: RowVector<T>
 }
 
-impl<T: Zero + PartialEq> Point<T> {
+impl<T: MatElement> Point<T> {
     ///
     /// Creates a point on a straight line.
     /// 
     pub fn point1d(x: T) -> Point<T> {
-        return Point {
-            x: x,
-            y: T::zero(),
-            z: T::zero()
-        };
+        Point {
+            vector: RowVector::from_vec(&[x])
+        }
     }
 
     ///
     /// Creates a point in the 2D space.
     /// 
     pub fn point2d(x: T, y: T) -> Point<T> {
-        return Point {
-            x: x,
-            y: y,
-            z: T::zero()
-        };
+        Point {
+            vector: RowVector::from_vec(&[x, y])
+        }
     }
 
     ///
     /// Creates a point in the 3D space.
     /// 
     pub fn point3d(x: T, y: T, z: T) -> Point<T> {
-        return Point {
-            x: x,
-            y: y,
-            z: z
-        };
+        Point {
+            vector: RowVector::from_vec(&[x, y, z])
+        }
+    }
+
+    ///
+    /// Returns the x coord if it exists or zero.
+    ///
+    pub fn x(&self) -> T {
+        self.element_if_exists(0)
+    }
+
+    ///
+    /// Returns the y coord if it exists or zero.
+    ///
+    pub fn y(&self) -> T {
+        self.element_if_exists(1)
+    }
+
+    ///
+    /// Returns the z coord if it exists or zero.
+    ///
+    pub fn z(&self) -> T {
+        self.element_if_exists(2)
+    }
+
+    ///
+    /// Returns the dimension of the space in which the point is included.
+    /// 
+    pub fn dim(&self) -> usize {
+        self.vector.length()
+    }
+
+    ///
+    /// Returns the idx-th element or zero.
+    ///
+    fn element_if_exists(&self, idx: usize) -> T {
+        return if self.vector.length() > idx {
+            self.vector.value(idx)
+        }
+        else {
+            T::zero()
+        }
     }
 }
 
-impl<T: Zero + PartialEq> PartialEq for Point<T> {
-    fn eq(&self, other: &Point<T>) -> bool {
-        return self.x == other.x && self.y == other.y && self.z == other.z;
+impl<T: MatElement> PartialEq for Point<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.vector == other.vector
     }
 }
 

@@ -48,9 +48,9 @@ impl Evaluatable<f64, f64> for BezierCurve {
                 n: n as i32 - 1i32,
                 i: i as i32
             };
-            x = x + bernstein.evaluate(&RealPoint::point1d(xi.x)).x*self.p[i].x;
-            y = y + bernstein.evaluate(&RealPoint::point1d(xi.x)).x*self.p[i].y;
-            z = z + bernstein.evaluate(&RealPoint::point1d(xi.x)).x*self.p[i].z;
+            x = x + bernstein.evaluate(&RealPoint::point1d(xi.x().clone())).x()*self.p[i].x();
+            y = y + bernstein.evaluate(&RealPoint::point1d(xi.x().clone())).x()*self.p[i].y();
+            z = z + bernstein.evaluate(&RealPoint::point1d(xi.x().clone())).x()*self.p[i].z();
         }
 
         return Point::point3d(x, y, z);
@@ -64,7 +64,7 @@ pub struct Bernstein {
 
 impl Evaluatable<f64, f64> for Bernstein {
     fn evaluate(&self, xi: &RealPoint) -> RealPoint {
-        let num = (fact(self.n) as f64)*xi.x.pow(self.i as f64)*(1f64 - xi.x).pow((self.n - self.i) as f64);
+        let num = (fact(self.n) as f64)*xi.x().pow(self.i as f64)*(1f64 - xi.x()).pow((self.n - self.i) as f64);
         let den = (fact(self.i)*fact(self.n - self.i)) as f64;
         return Point::point1d(num/den);
     }

@@ -20,15 +20,15 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-use num::traits::Zero;
 use crate::core::RealPoint;
 use crate::core::Point;
 use crate::core::RowVector;
+use crate::core::MatElement;
 
 ///
 /// Generic interface for an evaluatable element.
 /// 
-pub trait Evaluatable<I: Zero + PartialEq, O: Zero + PartialEq> {
+pub trait Evaluatable<I: MatElement, O: MatElement> {
     fn evaluate(&self, p: &Point<I>) -> Point<O>;
 }
 

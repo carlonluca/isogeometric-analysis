@@ -37,6 +37,7 @@ pub trait MatElement: Signed + Clone + MulAssign + AddAssign + PartialOrd + Disp
 impl<T> MatElement for T where T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display { }
 
 #[derive(Debug)]
+#[derive(Eq)]
 pub struct RectMatrix<T: MatElement> {
     data: Array2D<T>
 }
@@ -244,12 +245,12 @@ impl<T: MatElement> RectMatrix<T> {
     /// Crops the matrix.
     /// 
     pub fn rect(&self, top_left: IntPoint, bottom_right: IntPoint) -> RectMatrix<T> {
-        let cols = bottom_right.x - top_left.x + 1;
-        let rows = bottom_right.y - top_left.y + 1;
+        let cols = bottom_right.x() - top_left.x() + 1;
+        let rows = bottom_right.y() - top_left.y() + 1;
         let mut mat = RectMatrix::zeros(rows as usize, cols as usize);
-        for j in top_left.x..(bottom_right.x + 1) {
-            for i in top_left.y..(bottom_right.y + 1) {
-                mat.set_value((i - top_left.y) as usize, (j - top_left.x) as usize, self.value(i as usize, j as usize));
+        for j in top_left.x().clone()..(bottom_right.x() + 1) {
+            for i in top_left.y().clone()..(bottom_right.y() + 1) {
+                mat.set_value((i - top_left.y()) as usize, (j - top_left.x()) as usize, self.value(i as usize, j as usize));
             }
         }
         mat
@@ -412,6 +413,7 @@ impl<T: Float + Signed + Clone + MulAssign + AddAssign + PartialOrd + Display + 
 /// Represents a row.
 /// 
 #[derive(Debug)]
+#[derive(Eq)]
 pub struct RowVector<T: MatElement> {
     pub matrix: RectMatrix<T>
 }
@@ -475,6 +477,7 @@ impl<T: MatElement> PartialEq for RowVector<T> {
 /// Represents a column.
 /// 
 #[derive(Debug)]
+#[derive(Eq)]
 pub struct ColVector<T: MatElement> {
     pub matrix: RectMatrix<T>
 }
