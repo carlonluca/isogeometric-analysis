@@ -39,7 +39,7 @@ pub struct Evaluator {}
 
 impl Evaluator {
     ///
-    /// Computes a geometric element in a range of points.
+    /// Computes a geometric element for a sequence of points.
     /// 
     pub fn evaluate(element: &impl Evaluatable<f64, f64>, values: &Vec<RealPoint>) -> Vec<RealPoint> {
         let mut ret: Vec<RealPoint> = Vec::new();
@@ -49,6 +49,9 @@ impl Evaluator {
         return ret;
     }
 
+    ///
+    /// Evalutes a geometric element for an interval of elements of R.
+    /// 
     pub fn evaluate_r_to_r3(element: &impl Evaluatable<f64, f64>, from: &f64, to: &f64, count: &i64) -> (Vec<RealPoint>, Vec<RealPoint>) {
         let rv: RowVector<f64> = RowVector::<f64>::evenly_spaced(from, to, count);
         let values = rv.to_vec();
