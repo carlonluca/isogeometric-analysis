@@ -531,7 +531,6 @@ mod tests {
 
     #[test]
     fn test_get() {
-        env_logger::init();
         let m = RectMatrix::from_vec(&vec![
             vec![1f64, 2f64],
             vec![3f64, 4f64]

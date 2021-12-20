@@ -68,4 +68,68 @@ impl Evaluator {
 
         return (input, output);
     }
+
+    ///
+    /// Rearranges coords in arrays.
+    /// 
+    pub fn split_coords<T: MatElement>(mapx: usize, x: &Vec<Point<T>>, mapy: usize, y: &Vec<Point<T>>, mapz: usize, z: &Vec<Point<T>>) -> (Vec<T>, Vec<T>, Vec<T>) {
+        let sizes = vec![x.len(), y.len(), z.len()];
+        let count = sizes.iter().min().clone();
+        match count {
+            None => { return (vec![], vec![], vec![]) },
+            Some(c) => {
+                let mut xvalues = Vec::new();
+                let mut yvalues = Vec::new();
+                let mut zvalues = Vec::new();
+                for i in 0..*c {
+                    xvalues.push(x[i].vector.value(mapx));
+                    yvalues.push(y[i].vector.value(mapy));
+                    zvalues.push(z[i].vector.value(mapz));
+                }
+
+                return (xvalues, yvalues, zvalues);
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::core::Evaluator;
+    use crate::core::RealPoint;
+
+    #[test]
+    fn test() {
+        env_logger::init();
+        let xvalues = vec![
+            RealPoint::point1d(0f64),
+            RealPoint::point1d(1f64),
+            RealPoint::point1d(2f64)
+        ];
+        let yvalues = vec![
+            RealPoint::point1d(3f64),
+            RealPoint::point1d(4f64),
+            RealPoint::point1d(5f64)
+        ];
+        let zvalues = vec![
+            RealPoint::point1d(6f64),
+            RealPoint::point1d(7f64),
+            RealPoint::point1d(8f64)
+        ];
+        let (x, y, z) = Evaluator::split_coords(0, &xvalues, 0, &yvalues, 0, &zvalues);
+        assert_eq!(x.len(), 3);
+        assert_eq!(y.len(), 3);
+        assert_eq!(z.len(), 3);
+        log::info!("Adding: {}", x[1]);
+        assert_eq!(x[0], 0f64);
+        assert_eq!(x[1], 1f64);
+        assert_eq!(x[2], 2f64);
+        log::info!("Adding: {}", y[0]);
+        assert_eq!(y[0], 3f64);
+        assert_eq!(y[1], 4f64);
+        assert_eq!(y[2], 5f64);
+        assert_eq!(z[0], 6f64);
+        assert_eq!(z[1], 7f64);
+        assert_eq!(z[2], 8f64);
+    }
 }
