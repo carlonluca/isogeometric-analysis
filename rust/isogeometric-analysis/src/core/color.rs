@@ -1,7 +1,7 @@
 /**
  * Project: Approximation and Finite Elements in Isogeometric Problems
  * Author:  Luca Carlon
- * Date:    2021.11.01
+ * Date:    2021.12.21
  *
  * Copyright (c) 2021 Luca Carlon. All rights reserved.
  *
@@ -20,27 +20,35 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-pub use self::size::Size;
-pub use self::point::IntPoint;
-pub use self::point::RealPoint;
-pub use self::point::Point;
-pub use self::range::IntRange;
-pub use self::equatable::Equatable;
-pub use self::matrix::RectMatrix;
-pub use self::matrix::RowVector;
-pub use self::matrix::ColVector;
-pub use self::matrix::MatElement;
-pub use self::factorial::fact;
-pub use self::utils::measure_time;
-pub use self::evaluate::Evaluatable;
-pub use self::evaluate::Evaluator;
-pub use self::color::HslProvider;
-mod size;
-mod point;
-mod range;
-mod equatable;
-mod matrix;
-mod factorial;
-mod utils;
-mod evaluate;
-mod color;
+use colorsys::{Rgb, Hsl};
+
+///
+/// Structure to automatically compute colors for plots.
+/// 
+pub struct HslProvider {
+    pub count: i32
+}
+
+impl HslProvider {
+    ///
+    /// Returns the color by rotating the HSL space of i*360/count degrees.
+    /// 
+    pub fn hex_color_for_index(&self, i: i32) -> String {
+        let hsl = Hsl::new(360f64/(self.count as f64)*(i as f64), 100f64, 50f64, None);
+        let rgb = Rgb::from(hsl);
+        rgb.to_hex_string()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::core::HslProvider;
+
+    #[test]
+    fn test() {
+        let hsl = HslProvider { count: 3 };
+        assert_eq!("#ff0000", hsl.hex_color_for_index(0));
+        assert_eq!("#00ff00", hsl.hex_color_for_index(1));
+        assert_eq!("#0000ff", hsl.hex_color_for_index(2));
+    }
+}
