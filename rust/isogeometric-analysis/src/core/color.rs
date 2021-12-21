@@ -46,9 +46,12 @@ mod tests {
 
     #[test]
     fn test() {
-        let hsl = HslProvider { count: 3 };
+        let mut hsl = HslProvider { count: 3 };
         assert_eq!("#ff0000", hsl.hex_color_for_index(0));
         assert_eq!("#00ff00", hsl.hex_color_for_index(1));
         assert_eq!("#0000ff", hsl.hex_color_for_index(2));
+
+        hsl = HslProvider { count: 15 };
+        assert_eq!("#00ff66", hsl.hex_color_for_index(6));
     }
 }
