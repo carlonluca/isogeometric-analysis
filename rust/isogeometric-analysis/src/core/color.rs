@@ -26,14 +26,14 @@ use colorsys::{Rgb, Hsl};
 /// Structure to automatically compute colors for plots.
 /// 
 pub struct HslProvider {
-    pub count: i32
+    pub count: u32
 }
 
 impl HslProvider {
     ///
     /// Returns the color by rotating the HSL space of i*360/count degrees.
     /// 
-    pub fn hex_color_for_index(&self, i: i32) -> String {
+    pub fn hex_color_for_index(&self, i: u32) -> String {
         let hsl = Hsl::new(360f64/(self.count as f64)*(i as f64), 100f64, 50f64, None);
         let rgb = Rgb::from(hsl);
         rgb.to_hex_string()

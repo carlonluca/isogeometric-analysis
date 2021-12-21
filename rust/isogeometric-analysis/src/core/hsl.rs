@@ -1,7 +1,7 @@
 /**
  * Project: Approximation and Finite Elements in Isogeometric Problems
  * Author:  Luca Carlon
- * Date:    2021.12.02
+ * Date:    2021.12.20
  *
  * Copyright (c) 2021 Luca Carlon. All rights reserved.
  *
@@ -20,32 +20,14 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-///
-/// Computes the factorial.
-/// 
-pub fn fact(n: u32) -> i64 {
-    if n == 0 || n == 1 {
-        return 1i64;
-    }
-    return (n as i64)*fact(n - 1);
+use colors_transform::Hsl;
+
+pub struct HslProvider {
+    pub count: usize
 }
 
-#[cfg(test)]
-mod tests {
-    use crate::core::fact;
-    use crate::core::measure_time;
-
-    #[test]
-    fn test() {
-        assert_eq!(fact(0), 1);
-        assert_eq!(fact(1), 1);
-        assert_eq!(fact(2), 2);
-        assert_eq!(fact(4), 24);
-        assert_eq!(fact(5), 120);
-        measure_time("fact(6)", || assert_eq!(fact(6), 720));
-        measure_time("fact(7)", || assert_eq!(fact(7), 5040));
-        measure_time("fact(8)", || assert_eq!(fact(8), 40320));
-        measure_time("fact(9)", || assert_eq!(fact(9), 362880));
-        measure_time("fact(20)", || assert_eq!(fact(20), 2432902008176640000));
+impl HslProvider {
+    pub fn color_for_index(&self, i: i32) -> Hsl {
+        return Hsl::from(300f32, 50.0f32, 50.0f32);
     }
 }

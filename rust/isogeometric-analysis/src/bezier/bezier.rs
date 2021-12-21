@@ -45,8 +45,8 @@ impl Evaluatable<f64, f64> for BezierCurve {
         let n = self.p.len();
         for i in 0..n {
             let bernstein = Bernstein {
-                n: n as i32 - 1i32,
-                i: i as i32
+                n: n as u32 - 1u32,
+                i: i as u32
             };
             x = x + bernstein.evaluate(&RealPoint::point1d(xi.x().clone())).x()*self.p[i].x();
             y = y + bernstein.evaluate(&RealPoint::point1d(xi.x().clone())).x()*self.p[i].y();
@@ -57,15 +57,34 @@ impl Evaluatable<f64, f64> for BezierCurve {
     }
 }
 
+///
+/// Represents a Bernstein basis polynomial.
+/// 
 pub struct Bernstein {
-    pub n: i32,
-    pub i: i32
+    n: u32,
+    i: u32
 }
 
 impl Evaluatable<f64, f64> for Bernstein {
+    ///
+    /// Evaluates the function.
+    /// 
     fn evaluate(&self, xi: &RealPoint) -> RealPoint {
         let num = (fact(self.n) as f64)*xi.x().pow(self.i as f64)*(1f64 - xi.x()).pow((self.n - self.i) as f64);
         let den = (fact(self.i)*fact(self.n - self.i)) as f64;
         return Point::point1d(num/den);
+    }
+}
+
+impl Bernstein {
+    ///
+    /// Creates a bernstein basis polynomial.
+    /// 
+    pub fn create(n: u32, i: u32) -> Option<Bernstein> {
+        if i > n {
+            log::warn!("Index cannot be grater than degree");
+            return None;
+        }
+        Some(Bernstein { n: n, i: i })
     }
 }
