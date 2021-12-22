@@ -37,7 +37,9 @@ pub fn show_bezier_demo_1()
     let axes2d1 = fg.axes2d()
         .set_pos_grid(2, 1, 0)
         .set_y_grid(true)
-        .set_x_grid(true);
+        .set_x_grid(true)
+        .set_x_label("x", &[])
+        .set_y_label("y", &[]);
     let cpoints = vec![
         RealPoint::point2d(0f64, 0f64),
         RealPoint::point2d(1f64, 1f64),
@@ -56,7 +58,9 @@ pub fn show_bezier_demo_1()
     let axes2d2 = fg.axes2d()
         .set_pos_grid(2, 1, 1)
         .set_y_grid(true)
-        .set_x_grid(true);
+        .set_x_grid(true)
+        .set_x_label("ξ", &[])
+        .set_y_label("υ", &[]);
     let deg = n - 1;
     let hsl = HslProvider { count: deg + 1 };
     for i in 0..(deg + 1) {

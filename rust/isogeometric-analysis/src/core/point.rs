@@ -22,12 +22,14 @@
 
 use super::RowVector;
 use super::MatElement;
+use super::RectMatrix;
 
 ///
 /// Represents a point.
 ///
 #[derive(Debug)]
 #[derive(Eq)]
+#[derive(Clone)]
 pub struct Point<T: MatElement> {
     pub vector: RowVector<T>
 }
@@ -57,6 +59,15 @@ impl<T: MatElement> Point<T> {
     pub fn point3d(x: T, y: T, z: T) -> Point<T> {
         Point {
             vector: RowVector::from_vec(&[x, y, z])
+        }
+    }
+
+    ///
+    /// Builds a point from a matrix.
+    /// 
+    pub fn from_matrix(m: RectMatrix<T>) -> Point<T> {
+        Point {
+            vector: m.row(0)
         }
     }
 

@@ -414,6 +414,7 @@ impl<T: Float + Signed + Clone + MulAssign + AddAssign + PartialOrd + Display + 
 /// 
 #[derive(Debug)]
 #[derive(Eq)]
+#[derive(Clone)]
 pub struct RowVector<T: MatElement> {
     pub matrix: RectMatrix<T>
 }

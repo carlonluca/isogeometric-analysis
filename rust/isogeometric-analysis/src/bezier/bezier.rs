@@ -24,6 +24,7 @@ use crate::core::fact;
 use crate::core::Point;
 use crate::core::RealPoint;
 use crate::core::Evaluatable;
+use crate::core::MatElement;
 use num::traits::Pow;
 
 ///
@@ -39,6 +40,16 @@ impl Evaluatable<f64, f64> for BezierCurve {
     /// parametric space.
     /// 
     fn evaluate(&self, xi: &RealPoint) -> RealPoint {
+        self.evaluate_direct(xi)
+    }
+}
+
+impl BezierCurve {
+    ///
+    /// Computes the value of the Bezier curve in xi using the direct algorithm. This
+    /// technique is not numerically stable.
+    /// 
+    pub fn evaluate_direct(&self, xi: &RealPoint) -> RealPoint {
         let mut x = 0f64;
         let mut y = 0f64;
         let mut z = 0f64;
@@ -51,6 +62,22 @@ impl Evaluatable<f64, f64> for BezierCurve {
         }
 
         return Point::point3d(x, y, z);
+    }
+
+    pub fn evaluate_de_casteljau(&self, xi: &RealPoint) -> RealPoint {
+        let n = self.p.len() - 1;
+        let mut q = Vec::<RealPoint>::new();
+        for i in 0..(n + 1) {
+            q.push(self.p[i].clone());
+        }
+        for k in 1..(n + 1) {
+            for i in 0..(n - k + 1) {
+                let m = q[i].vector.matrix.clone()*(1f64 - xi.x()) + q[i + 1].vector.matrix.clone()*xi.x();
+                q[i] = Point::from_matrix(m);
+            }
+        }
+
+        return q[0].clone();
     }
 }
 
