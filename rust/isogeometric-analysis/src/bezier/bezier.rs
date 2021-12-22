@@ -48,9 +48,9 @@ impl Evaluatable<f64, f64> for BezierCurve {
                 n: n as u32 - 1u32,
                 i: i as u32
             };
-            x = x + bernstein.evaluate(&RealPoint::point1d(xi.x().clone())).x()*self.p[i].x();
-            y = y + bernstein.evaluate(&RealPoint::point1d(xi.x().clone())).x()*self.p[i].y();
-            z = z + bernstein.evaluate(&RealPoint::point1d(xi.x().clone())).x()*self.p[i].z();
+            x = x + bernstein.evaluate(&RealPoint::point1d(xi.x())).x()*self.p[i].x();
+            y = y + bernstein.evaluate(&RealPoint::point1d(xi.x())).x()*self.p[i].y();
+            z = z + bernstein.evaluate(&RealPoint::point1d(xi.x())).x()*self.p[i].z();
         }
 
         return Point::point3d(x, y, z);
