@@ -30,7 +30,7 @@ use num::traits::Pow;
 /// Implements Bezier curves and surfaces.
 /// 
 pub struct BezierCurve {
-    p: Vec<RealPoint>
+    pub p: Vec<RealPoint>
 }
 
 impl Evaluatable<f64, f64> for BezierCurve {
@@ -44,13 +44,10 @@ impl Evaluatable<f64, f64> for BezierCurve {
         let mut z = 0f64;
         let n = self.p.len();
         for i in 0..n {
-            let bernstein = Bernstein {
-                n: n as u32 - 1u32,
-                i: i as u32
-            };
-            x = x + bernstein.evaluate(&RealPoint::point1d(xi.x())).x()*self.p[i].x();
-            y = y + bernstein.evaluate(&RealPoint::point1d(xi.x())).x()*self.p[i].y();
-            z = z + bernstein.evaluate(&RealPoint::point1d(xi.x())).x()*self.p[i].z();
+            let bernstein = Bernstein::create((n - 1) as u32, i as u32).unwrap();
+            x = x + bernstein.evaluate(&xi).x()*self.p[i].x();
+            y = y + bernstein.evaluate(&xi).x()*self.p[i].y();
+            z = z + bernstein.evaluate(&xi).x()*self.p[i].z();
         }
 
         return Point::point3d(x, y, z);
