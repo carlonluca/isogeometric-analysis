@@ -25,7 +25,8 @@ use time_test::time_test;
 ///
 /// Measures time for unit tests.
 /// 
-pub fn measure_time(desc: &str, f: impl Fn()) {
+pub fn measure_time(desc: &str, f: impl Fn())
+{
     time_test!(desc);
     f();
 }
