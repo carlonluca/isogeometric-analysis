@@ -31,6 +31,38 @@ use gnuplot::{Figure, Caption, Color, AxesCommon};
 /// 
 pub fn show_bezier_demo_1()
 {
+    let cpoints = vec![
+        RealPoint::point2d(0f64, 0f64),
+        RealPoint::point2d(1f64, 1f64),
+        RealPoint::point2d(2f64, 0.5f64),
+        RealPoint::point2d(3f64, 0.5f64),
+        RealPoint::point2d(0.6f64, 1.5f64),
+        RealPoint::point2d(1.5f64, 0f64)
+    ];
+    show_bezier_demo(cpoints);
+}
+
+///
+/// Shows the second demo of a Bezier curve.
+/// 
+pub fn show_bezier_demo_2()
+{
+    let cpoints = vec![
+        RealPoint::point3d(0f64, 0f64, 0f64),
+        RealPoint::point3d(1f64, 1f64, 1f64),
+        RealPoint::point3d(2f64, 0.5f64, 0f64),
+        RealPoint::point3d(3f64, 0.5f64, 0f64),
+        RealPoint::point3d(0.5f64, 1.5f64, 0f64),
+        RealPoint::point3d(1.5f64, 0f64, 1f64)
+    ];
+    show_bezier_demo(cpoints);
+}
+
+///
+/// Shows a Bezier curve with its bernstein basis polynomials.
+/// 
+pub fn show_bezier_demo(cpoints: Vec<RealPoint>)
+{
     let mut fg = Figure::new();
 
     // Draw the Bezier curve.
@@ -40,14 +72,6 @@ pub fn show_bezier_demo_1()
         .set_x_grid(true)
         .set_x_label("x", &[])
         .set_y_label("y", &[]);
-    let cpoints = vec![
-        RealPoint::point2d(0f64, 0f64),
-        RealPoint::point2d(1f64, 1f64),
-        RealPoint::point2d(2f64, 0.5f64),
-        RealPoint::point2d(3f64, 0.5f64),
-        RealPoint::point2d(0.6f64, 1.5f64),
-        RealPoint::point2d(1.5f64, 0f64)
-    ];
     let n = cpoints.len() as u32;
     let bez = BezierCurve { p: cpoints };
     let (_xpoints, ypoints) = Evaluator::evaluate_r_to_r3(&bez, &0f64, &1f64, &100);

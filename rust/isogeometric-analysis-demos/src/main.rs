@@ -39,4 +39,9 @@ fn main() {
         bezier::show_bezier_demo_1();
         return;
     }
+
+    if opt.bezier2 {
+        bezier::show_bezier_demo_2();
+        return;
+    }
 }
