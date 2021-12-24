@@ -32,6 +32,7 @@ use std::ops::Mul;
 #[derive(Debug)]
 #[derive(Eq)]
 #[derive(Clone)]
+#[derive(Copy)]
 pub struct Point<T: MatElement> {
     pub x: T,
     pub y: T,

@@ -25,6 +25,7 @@ use crate::core::Point;
 use crate::core::RealPoint;
 use crate::core::Evaluatable;
 use num::traits::Pow;
+use unroll::unroll_for_loops;
 
 ///
 /// Implements Bezier curves and surfaces.
@@ -47,7 +48,8 @@ impl BezierCurve {
     ///
     /// Computes the value of the Bezier curve in xi using the direct algorithm. This
     /// technique is not numerically stable.
-    /// 
+    ///
+    #[unroll_for_loops]
     pub fn evaluate_direct(&self, xi: &RealPoint) -> RealPoint {
         let mut x = 0f64;
         let mut y = 0f64;
@@ -65,20 +67,21 @@ impl BezierCurve {
 
     ///
     /// Computes the value of the Bezier curve in xi using the De Casteljau's algorithm.
-    /// 
+    ///
+    #[unroll_for_loops]
     pub fn evaluate_de_casteljau(&self, xi: &RealPoint) -> RealPoint {
         let n = self.p.len() - 1;
         let mut q = Vec::<RealPoint>::new();
         for i in 0..(n + 1) {
-            q.push(self.p[i].clone());
+            q.push(self.p[i]);
         }
         for k in 1..(n + 1) {
             for i in 0..(n - k + 1) {
-                q[i] = q[i].clone()*(1f64 - xi.x()) + q[i + 1].clone()*xi.x();
+                q[i] = q[i]*(1f64 - xi.x()) + q[i + 1]*xi.x();
             }
         }
 
-        return q[0].clone();
+        return q[0];
     }
 }
 
