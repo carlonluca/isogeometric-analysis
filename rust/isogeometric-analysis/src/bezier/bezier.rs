@@ -70,15 +70,11 @@ impl BezierCurve {
         let n = self.p.len() - 1;
         let mut q = Vec::<RealPoint>::new();
         for i in 0..(n + 1) {
-            let p = &self.p[i];
-            q.push(RealPoint::point3d(p.x(), p.y(), p.z()));
+            q.push(self.p[i].clone());
         }
         for k in 1..(n + 1) {
             for i in 0..(n - k + 1) {
-                let x = q[i].x()*(1f64 - xi.x()) + q[i + 1].x()*xi.x();
-                let y = q[i].y()*(1f64 - xi.x()) + q[i + 1].y()*xi.x();
-                let z = q[i].z()*(1f64 - xi.x()) + q[i + 1].z()*xi.x();
-                q[i] = RealPoint::point3d(x, y, z);
+                q[i] = q[i].clone()*(1f64 - xi.x()) + q[i + 1].clone()*xi.x();
             }
         }
 

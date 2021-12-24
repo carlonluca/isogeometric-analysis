@@ -77,7 +77,7 @@ pub fn show_bezier_demo(cpoints: Vec<RealPoint>)
     let bez = BezierCurve { p: cpoints };
     let before = Instant::now();
     let (_xpoints, ypoints) = Evaluator::evaluate_r_to_r3(&bez, &0f64, &1f64, &100);
-    log::info!("Bezier curve computed in: {} ms", before.elapsed().as_millis());
+    log::info!("Bezier curve computed in: {} μs", before.elapsed().as_micros());
     let (xvalues, yvalues, _zvalues) = Evaluator::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
     axes2d1.lines(&xvalues, &yvalues, &[Caption(""), Color("orange")]);
 
