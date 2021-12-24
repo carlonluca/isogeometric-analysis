@@ -25,6 +25,7 @@ use isogeometric_analysis::core::Evaluator;
 use isogeometric_analysis::core::HslProvider;
 use isogeometric_analysis::core::RealPoint;
 use gnuplot::{Figure, Caption, Color, AxesCommon};
+use std::time::Instant;
 
 ///
 /// Shows the first demo of a Bezier curve.
@@ -74,7 +75,9 @@ pub fn show_bezier_demo(cpoints: Vec<RealPoint>)
         .set_y_label("y", &[]);
     let n = cpoints.len() as u32;
     let bez = BezierCurve { p: cpoints };
+    let before = Instant::now();
     let (_xpoints, ypoints) = Evaluator::evaluate_r_to_r3(&bez, &0f64, &1f64, &100);
+    log::info!("Bezier curve computed in: {} ms", before.elapsed().as_millis());
     let (xvalues, yvalues, _zvalues) = Evaluator::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
     axes2d1.lines(&xvalues, &yvalues, &[Caption(""), Color("orange")]);
 
