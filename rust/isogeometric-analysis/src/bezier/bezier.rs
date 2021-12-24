@@ -68,23 +68,21 @@ impl BezierCurve {
     /// 
     pub fn evaluate_de_casteljau(&self, xi: &RealPoint) -> RealPoint {
         let n = self.p.len() - 1;
-        let mut qx = Vec::<f64>::new();
-        let mut qy = Vec::<f64>::new();
-        let mut qz = Vec::<f64>::new();
+        let mut q = Vec::<RealPoint>::new();
         for i in 0..(n + 1) {
-            qx.push(self.p[i].x());
-            qy.push(self.p[i].y());
-            qz.push(self.p[i].z());
+            let p = &self.p[i];
+            q.push(RealPoint::point3d(p.x(), p.y(), p.z()));
         }
         for k in 1..(n + 1) {
             for i in 0..(n - k + 1) {
-                qx[i] = qx[i]*(1f64 - xi.x()) + qx[i + 1]*xi.x();
-                qy[i] = qy[i]*(1f64 - xi.x()) + qy[i + 1]*xi.x();
-                qz[i] = qz[i]*(1f64 - xi.x()) + qz[i + 1]*xi.x();
+                let x = q[i].x()*(1f64 - xi.x()) + q[i + 1].x()*xi.x();
+                let y = q[i].y()*(1f64 - xi.x()) + q[i + 1].y()*xi.x();
+                let z = q[i].z()*(1f64 - xi.x()) + q[i + 1].z()*xi.x();
+                q[i] = RealPoint::point3d(x, y, z);
             }
         }
 
-        return RealPoint::point3d(qx[0], qy[0], qz[0]);
+        return q[0].clone();
     }
 }
 

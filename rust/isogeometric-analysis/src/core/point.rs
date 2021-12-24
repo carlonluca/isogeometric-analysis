@@ -20,9 +20,11 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-use super::RowVector;
 use super::MatElement;
 use super::RectMatrix;
+use std::ops::Add;
+use std::ops::Sub;
+use std::ops::Mul;
 
 ///
 /// Represents a point.
@@ -31,7 +33,10 @@ use super::RectMatrix;
 #[derive(Eq)]
 #[derive(Clone)]
 pub struct Point<T: MatElement> {
-    pub vector: RowVector<T>
+    pub x: T,
+    pub y: T,
+    pub z: T,
+    dim: u8
 }
 
 impl<T: MatElement> Point<T> {
@@ -40,7 +45,10 @@ impl<T: MatElement> Point<T> {
     /// 
     pub fn point1d(x: T) -> Point<T> {
         Point {
-            vector: RowVector::from_vec(&[x])
+            x: x,
+            y: T::zero(),
+            z: T::zero(),
+            dim: 1
         }
     }
 
@@ -49,7 +57,10 @@ impl<T: MatElement> Point<T> {
     /// 
     pub fn point2d(x: T, y: T) -> Point<T> {
         Point {
-            vector: RowVector::from_vec(&[x, y])
+            x: x,
+            y: y,
+            z: T::zero(),
+            dim: 2
         }
     }
 
@@ -58,7 +69,10 @@ impl<T: MatElement> Point<T> {
     /// 
     pub fn point3d(x: T, y: T, z: T) -> Point<T> {
         Point {
-            vector: RowVector::from_vec(&[x, y, z])
+            x: x,
+            y: y,
+            z: z,
+            dim: 3
         }
     }
 
@@ -66,8 +80,18 @@ impl<T: MatElement> Point<T> {
     /// Builds a point from a matrix.
     /// 
     pub fn from_matrix(m: RectMatrix<T>) -> Point<T> {
+        let x = m.value(0, 0);
+        let y;
+        let z;
+        if m.cols() > 1 { y = m.value(0, 1); }
+        else { y = T::zero(); }
+        if m.cols() > 2 { z = m.value(0, 2); }
+        else { z = T::zero() }
         Point {
-            vector: m.row(0)
+            x: x,
+            y: y,
+            z: z,
+            dim: m.cols() as u8
         }
     }
 
@@ -75,36 +99,41 @@ impl<T: MatElement> Point<T> {
     /// Returns the x coord if it exists or zero.
     ///
     pub fn x(&self) -> T {
-        self.element_if_exists(0)
+        self.x.clone()
     }
 
     ///
     /// Returns the y coord if it exists or zero.
     ///
     pub fn y(&self) -> T {
-        self.element_if_exists(1)
+        self.y.clone()
     }
 
     ///
     /// Returns the z coord if it exists or zero.
     ///
     pub fn z(&self) -> T {
-        self.element_if_exists(2)
+        self.z.clone()
     }
 
     ///
     /// Returns the dimension of the space in which the point is included.
     /// 
-    pub fn dim(&self) -> usize {
-        self.vector.length()
+    pub fn dim(&self) -> u8 {
+        self.dim
     }
 
     ///
     /// Returns the idx-th element or zero.
     ///
-    fn element_if_exists(&self, idx: usize) -> T {
-        return if self.vector.length() > idx {
-            self.vector.value(idx)
+    pub fn value(&self, idx: u8) -> T {
+        return if self.dim > idx {
+            match idx {
+                0 => self.x(),
+                1 => self.y(),
+                2 => self.z(),
+                _ => T::zero()
+            }
         }
         else {
             T::zero()
@@ -114,7 +143,57 @@ impl<T: MatElement> Point<T> {
 
 impl<T: MatElement> PartialEq for Point<T> {
     fn eq(&self, other: &Self) -> bool {
-        self.vector == other.vector
+        self.x == other.x && self.y == other.y && self.z == other.z
+    }
+}
+
+impl<T: MatElement> Add for Point<T> {
+    type Output = Self;
+
+    ///
+    /// Adds another matrix.
+    ///
+    fn add(self, other: Self) -> Self {
+        if self.dim != other.dim { panic!() }
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+            dim: self.dim
+        }
+    }
+}
+
+impl<T: MatElement> Sub for Point<T> {
+    type Output = Self;
+
+    ///
+    /// Subtracts another matrix.
+    /// 
+    fn sub(self, other: Self) -> Self::Output {
+        if self.dim != other.dim { panic!() }
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+            dim: self.dim
+        }
+    }
+}
+
+impl<T: MatElement> Mul<T> for Point<T> {
+    type Output = Self;
+
+    ///
+    /// Multiplication by a scalar.
+    /// 
+    fn mul(self, scalar: T) -> Self::Output {
+        Self {
+            x: self.x*scalar.clone(),
+            y: self.y*scalar.clone(),
+            z: self.z*scalar.clone(),
+            dim: self.dim
+        }
     }
 }
 

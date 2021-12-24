@@ -82,9 +82,9 @@ impl Evaluator {
                 let mut yvalues = Vec::new();
                 let mut zvalues = Vec::new();
                 for i in 0..*c {
-                    xvalues.push(x[i].vector.value(mapx));
-                    yvalues.push(y[i].vector.value(mapy));
-                    zvalues.push(z[i].vector.value(mapz));
+                    xvalues.push(x[i].value(mapx as u8));
+                    yvalues.push(y[i].value(mapy as u8));
+                    zvalues.push(z[i].value(mapz as u8));
                 }
 
                 return (xvalues, yvalues, zvalues);
