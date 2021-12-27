@@ -76,7 +76,7 @@ pub fn show_bezier_demo(cpoints: Vec<RealPoint>)
     let n = cpoints.len() as u32;
     let bez = BezierCurve { p: cpoints };
     let before = Instant::now();
-    let (_xpoints, ypoints) = Evaluator::evaluate_r_to_r3(&bez, &0f64, &1f64, &100);
+    let (_xpoints, ypoints) = Evaluator::evaluate_r_to_r3(&bez, &0f64, &1f64, &1000);
     log::info!("Bezier curve computed in: {} μs", before.elapsed().as_micros());
     let (xvalues, yvalues, _zvalues) = Evaluator::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
     axes2d1.lines(&xvalues, &yvalues, &[Caption(""), Color("orange")]);
@@ -92,7 +92,7 @@ pub fn show_bezier_demo(cpoints: Vec<RealPoint>)
     let hsl = HslProvider { count: deg + 1 };
     for i in 0..(deg + 1) {
         let b = Bernstein::create(deg, i).unwrap();
-        let (xpoints, ypoints) = Evaluator::evaluate_r_to_r3(&b, &0f64, &1f64, &100);
+        let (xpoints, ypoints) = Evaluator::evaluate_r_to_r3(&b, &0f64, &1f64, &1000);
         let (xvalues, yvalues, _zvalues) = Evaluator::split_coords(0, &xpoints, 0, &ypoints, 0, &xpoints);
         let caption = format!("B_{{{}}}^{{{}}}", i, deg);
         let color_hex = hsl.hex_color_for_index(i);
