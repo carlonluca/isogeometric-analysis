@@ -45,9 +45,10 @@ export class BezierCurve {
         let z = 0
         let n = this.controlPoints.length
         for (let i = 0; i < n; i++) {
-            x = x + bernstein(i, n - 1, xi)*this.controlPoints[i].x()
-            y = y + bernstein(i, n - 1, xi)*this.controlPoints[i].y()
-            z = z + bernstein(i, n - 1, xi)*this.controlPoints[i].z()
+            let b = bernstein(i, n - 1, xi)
+            x = x + b*this.controlPoints[i].x()
+            y = y + b*this.controlPoints[i].y()
+            z = z + b*this.controlPoints[i].z()
         }
 
         return new Point(x, y, z)
