@@ -30,9 +30,10 @@ import { bernstein } from "./bernstein"
  * @param plot
  */
 export let drawBezierCurve = (controlPoints: Point[], threed: boolean, drawControlPoints: boolean, plot: string, bernsteinPlot: string = null) => {
+    const start = new Date().getTime()
     const bezier = new BezierCurve(controlPoints)
     // @ts-expect-error
-    const xiValues = math.range(0, 1, 0.001).toArray()
+    const xiValues = math.range(0, 1, 0.0001).toArray()
     let xValues = []
     let yValues = []
     let zValues = []
@@ -42,6 +43,8 @@ export let drawBezierCurve = (controlPoints: Point[], threed: boolean, drawContr
         yValues.push(p.y())
         zValues.push(p.z())
     })
+    console.log("Bezier computation took: " + (new Date().getTime() - start) + " ms")
+
     const plotType = threed ? "scatter3d" : "scatter"
     const trace1 = {
         x: xValues,
