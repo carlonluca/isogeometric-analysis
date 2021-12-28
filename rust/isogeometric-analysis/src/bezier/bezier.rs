@@ -51,19 +51,15 @@ impl BezierCurve {
     ///
     #[unroll_for_loops]
     pub fn evaluate_direct(&self, xi: &RealPoint) -> RealPoint {
-        let mut x = 0f64;
-        let mut y = 0f64;
-        let mut z = 0f64;
         let n = self.p.len();
+        let mut p = RealPoint::point3d(0f64, 0f64, 0f64);
         for i in 0..n {
             let bernstein = Bernstein::create((n - 1) as u32, i as u32).unwrap();
             let bout = bernstein.evaluate(&xi).x();
-            x = x + bout*self.p[i].x();
-            y = y + bout*self.p[i].y();
-            z = z + bout*self.p[i].z();
+            p = p + self.p[i]*bout;
         }
 
-        return Point::point3d(x, y, z);
+        return p;
     }
 
     ///

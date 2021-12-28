@@ -33,12 +33,12 @@ use std::time::Instant;
 pub fn show_bezier_demo_1()
 {
     let cpoints = vec![
-        RealPoint::point2d(0f64, 0f64),
-        RealPoint::point2d(1f64, 1f64),
-        RealPoint::point2d(2f64, 0.5f64),
-        RealPoint::point2d(3f64, 0.5f64),
-        RealPoint::point2d(0.6f64, 1.5f64),
-        RealPoint::point2d(1.5f64, 0f64)
+        RealPoint::point3d(0f64, 0f64, 0f64),
+        RealPoint::point3d(1f64, 1f64, 0f64),
+        RealPoint::point3d(2f64, 0.5f64, 0f64),
+        RealPoint::point3d(3f64, 0.5f64, 0f64),
+        RealPoint::point3d(0.6f64, 1.5f64, 0f64),
+        RealPoint::point3d(1.5f64, 0f64, 0f64)
     ];
     show_bezier_demo(cpoints);
 }
