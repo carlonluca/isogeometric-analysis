@@ -40,7 +40,7 @@ impl Evaluatable<f64, f64> for BezierCurve {
     /// parametric space.
     /// 
     fn evaluate(&self, xi: &RealPoint) -> RealPoint {
-        self.evaluate_de_casteljau(xi)
+        self.evaluate_direct(xi)
     }
 }
 
@@ -57,9 +57,10 @@ impl BezierCurve {
         let n = self.p.len();
         for i in 0..n {
             let bernstein = Bernstein::create((n - 1) as u32, i as u32).unwrap();
-            x = x + bernstein.evaluate(&xi).x()*self.p[i].x();
-            y = y + bernstein.evaluate(&xi).x()*self.p[i].y();
-            z = z + bernstein.evaluate(&xi).x()*self.p[i].z();
+            let bout = bernstein.evaluate(&xi).x();
+            x = x + bout*self.p[i].x();
+            y = y + bout*self.p[i].y();
+            z = z + bout*self.p[i].z();
         }
 
         return Point::point3d(x, y, z);
