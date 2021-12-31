@@ -61,29 +61,29 @@ impl Bernstein {
 ///
 /// Implements Bezier curves and surfaces.
 /// 
-pub struct BezierCurve {
-    pub p: Vec<RealPoint<2>>
+pub struct BezierCurve<const SIZE: usize> {
+    pub p: Vec<RealPoint<SIZE>>
 }
 
-impl Evaluatable<f64, f64, 1, 2> for BezierCurve {
+impl<const SIZE: usize> Evaluatable<f64, f64, 1, SIZE> for BezierCurve<SIZE> {
     ///
     /// Evaluates the Bezier curve in point xi. Point xi is intended in the
     /// parametric space.
     /// 
-    fn evaluate(&self, xi: &RealPoint<1>) -> RealPoint<2> {
+    fn evaluate(&self, xi: &RealPoint<1>) -> RealPoint<SIZE> {
         self.evaluate_direct(xi)
     }
 }
 
-impl BezierCurve {
+impl<const SIZE: usize> BezierCurve<SIZE> {
     ///
     /// Computes the value of the Bezier curve in xi using the direct algorithm. This
     /// technique is not numerically stable.
     ///
     #[unroll_for_loops]
-    pub fn evaluate_direct(&self, input: &RealPoint<1>) -> RealPoint<2> {
+    pub fn evaluate_direct(&self, input: &RealPoint<1>) -> RealPoint<SIZE> {
         let n = self.p.len();
-        let mut p = RealPoint::<2>::origin();
+        let mut p = RealPoint::<SIZE>::origin();
         for i in 0..n {
             let bernstein = Bernstein::create((n - 1) as u32, i as u32).unwrap();
             let bout = bernstein.evaluate(&input).x();
@@ -97,9 +97,9 @@ impl BezierCurve {
     /// Computes the value of the Bezier curve in xi using the De Casteljau's algorithm.
     ///
     #[unroll_for_loops]
-    pub fn evaluate_de_casteljau(&self, xi: &RealPoint<1>) -> RealPoint<2> {
+    pub fn evaluate_de_casteljau(&self, xi: &RealPoint<1>) -> RealPoint<SIZE> {
         let n = self.p.len() - 1;
-        let mut q = Vec::<RealPoint<2>>::new();
+        let mut q = Vec::<RealPoint<SIZE>>::new();
         for i in 0..(n + 1) {
             q.push(self.p[i]);
         }
