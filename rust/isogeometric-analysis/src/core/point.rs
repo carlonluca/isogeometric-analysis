@@ -21,7 +21,6 @@
  */
 
 use super::MatElement;
-use super::RectMatrix;
 use std::ops::Add;
 use std::ops::Sub;
 use std::ops::Mul;
@@ -33,54 +32,69 @@ use std::ops::Mul;
 #[derive(Eq)]
 #[derive(Clone)]
 #[derive(Copy)]
-pub struct Point<T: MatElement> {
-    pub x: T,
-    pub y: T,
-    pub z: T,
-    dim: u8
+pub struct Point<T: MatElement, const SIZE: usize> {
+    data: [T; SIZE]
 }
 
-impl<T: MatElement> Point<T> {
+///
+/// Represents a point in ℝ^3.
+/// 
+pub type RealPoint<const SIZE: usize> = Point<f64, SIZE>;
+
+///
+/// Represents a point with integer coords.
+/// 
+pub type IntPoint<const SIZE: usize> = Point<i32, SIZE>;
+
+pub type RealPoint1d = RealPoint<1>;
+pub type RealPoint2d = RealPoint<2>;
+pub type RealPoint3d = RealPoint<3>;
+
+impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     ///
     /// Creates a point on a straight line.
     /// 
-    pub fn point1d(x: T) -> Point<T> {
+    pub fn point1d(x: T) -> Point<T, 1> {
         Point {
-            x: x,
-            y: T::zero(),
-            z: T::zero(),
-            dim: 1
+            data: [x]
         }
     }
 
     ///
     /// Creates a point in the 2D space.
     /// 
-    pub fn point2d(x: T, y: T) -> Point<T> {
+    pub fn point2d(x: T, y: T) -> Point<T, 2> {
         Point {
-            x: x,
-            y: y,
-            z: T::zero(),
-            dim: 2
+            data: [x, y]
         }
     }
 
     ///
     /// Creates a point in the 3D space.
     /// 
-    pub fn point3d(x: T, y: T, z: T) -> Point<T> {
+    pub fn point3d(x: T, y: T, z: T) -> Point<T, 3> {
         Point {
-            x: x,
-            y: y,
-            z: z,
-            dim: 3
+            data: [x, y, z]
         }
+    }
+
+    pub fn origin() -> Point<T, SIZE> {
+        Point {
+            data: [T::zero(); SIZE]
+        }
+    }
+
+    ///
+    /// Returns the dimension of the space containing this point.
+    /// 
+    pub fn dim(&self) -> usize {
+        self.data.len()
     }
 
     ///
     /// Builds a point from a matrix.
     /// 
-    pub fn from_matrix(m: RectMatrix<T>) -> Point<T> {
+    /*pub fn from_matrix(m: RectMatrix<T>) -> Point<T> {
         let x = m.value(0, 0);
         let y;
         let z;
@@ -94,45 +108,17 @@ impl<T: MatElement> Point<T> {
             z: z,
             dim: m.cols() as u8
         }
-    }
-
-    ///
-    /// Returns the x coord if it exists or zero.
-    ///
-    pub fn x(&self) -> T {
-        self.x.clone()
-    }
-
-    ///
-    /// Returns the y coord if it exists or zero.
-    ///
-    pub fn y(&self) -> T {
-        self.y.clone()
-    }
-
-    ///
-    /// Returns the z coord if it exists or zero.
-    ///
-    pub fn z(&self) -> T {
-        self.z.clone()
-    }
-
-    ///
-    /// Returns the dimension of the space in which the point is included.
-    /// 
-    pub fn dim(&self) -> u8 {
-        self.dim
-    }
+    }*/
 
     ///
     /// Returns the idx-th element or zero.
     ///
     pub fn value(&self, idx: u8) -> T {
-        return if self.dim > idx {
+        return if self.dim() > idx as usize {
             match idx {
-                0 => self.x(),
-                1 => self.y(),
-                2 => self.z(),
+                0 => self.data[0],
+                1 => self.data[1],
+                2 => self.data[2],
                 _ => T::zero()
             }
         }
@@ -142,79 +128,94 @@ impl<T: MatElement> Point<T> {
     }
 }
 
-impl<T: MatElement> PartialEq for Point<T> {
+impl<T: MatElement> Point<T, 1> {
+    pub fn x(&self) -> T { self.data[0] }
+    pub fn set_x(&mut self, x: T) { self.data[0] = x; }
+}
+
+impl<T: MatElement> Point<T, 2> {
+    pub fn x(&self) -> T { self.data[0] }
+    pub fn set_x(&mut self, x: T) { self.data[0] = x; }
+    pub fn y(&self) -> T { self.data[1] }
+    pub fn set_y(&mut self, y: T) { self.data[1] = y; }
+}
+
+impl<T: MatElement> Point<T, 3> {
+    pub fn x(&self) -> T { self.data[0] }
+    pub fn set_x(&mut self, x: T) { self.data[0] = x; }
+    pub fn y(&self) -> T { self.data[1] }
+    pub fn set_y(&mut self, y: T) { self.data[1] = y; }
+    pub fn z(&self) -> T { self.data[2] }
+    pub fn set_z(&mut self, z: T) { self.data[2] = z; }
+}
+
+impl<T: MatElement, const SIZE: usize> PartialEq for Point<T, SIZE> {
     fn eq(&self, other: &Self) -> bool {
-        self.x == other.x && self.y == other.y && self.z == other.z
+        self.data == other.data
     }
 }
 
-impl<T: MatElement> Add for Point<T> {
+impl<T: MatElement, const SIZE: usize> Add for Point<T, SIZE> {
     type Output = Self;
 
     ///
     /// Adds another matrix.
     ///
     fn add(self, other: Self) -> Self {
-        if self.dim != other.dim { panic!() }
+        if self.dim() != other.dim() { panic!() }
+        let mut data = self.data.clone();
+        for i in 0..(data.len()) {
+            data[i] += other.data[i];
+        }
         Self {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
-            dim: self.dim
+            data: data
         }
     }
 }
 
-impl<T: MatElement> Sub for Point<T> {
+impl<T: MatElement, const SIZE: usize> Sub for Point<T, SIZE> {
     type Output = Self;
 
     ///
     /// Subtracts another matrix.
     /// 
     fn sub(self, other: Self) -> Self::Output {
-        if self.dim != other.dim { panic!() }
+        if self.dim() != other.dim() { panic!() }
+        let mut data = self.data.clone();
+        for i in 0..(data.len()) {
+            data[i] -= other.data[i];
+        }
         Self {
-            x: self.x + other.x,
-            y: self.y + other.y,
-            z: self.z + other.z,
-            dim: self.dim
+            data: data
         }
     }
 }
 
-impl<T: MatElement> Mul<T> for Point<T> {
+impl<T: MatElement, const SIZE: usize> Mul<T> for Point<T, SIZE> {
     type Output = Self;
 
     ///
     /// Multiplication by a scalar.
     /// 
     fn mul(self, scalar: T) -> Self::Output {
+        let mut data = self.data.clone();
+        for i in 0..data.len() {
+            data[i] *= scalar;
+        }
         Self {
-            x: self.x*scalar.clone(),
-            y: self.y*scalar.clone(),
-            z: self.z*scalar.clone(),
-            dim: self.dim
+            data: data
         }
     }
 }
 
-///
-/// Represents a point with integer coords.
-/// 
-pub type IntPoint = Point<i32>;
-
-///
-/// Represents a point in ℝ^3.
-/// 
-pub type RealPoint = Point<f64>;
-
 #[cfg(test)]
 mod tests {
-    use crate::core::Point;
+    use crate::core::RealPoint;
+    use crate::core::IntPoint;
 
     #[test]
     fn test_eq() {
-        assert_eq!(Point::point2d(6, 5), Point::point2d(6, 5));
-        assert_eq!(Point::point2d(56.7, 12.3), Point::point2d(56.7, 12.3));
+        assert_eq!(IntPoint::<2>::point2d(6, 5), IntPoint::<2>::point2d(6, 5));
+        assert_eq!(RealPoint::<2>::point2d(56.7, 12.3), RealPoint::<2>::point2d(56.7, 12.3));
     }
 }

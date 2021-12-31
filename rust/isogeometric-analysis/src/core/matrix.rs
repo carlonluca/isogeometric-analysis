@@ -24,17 +24,16 @@ use array2d::Array2D;
 use std::ops::Add;
 use std::ops::Sub;
 use std::ops::Mul;
-use std::ops::{MulAssign, AddAssign};
+use std::ops::{MulAssign, AddAssign, SubAssign};
 use std::clone::Clone;
 use std::fmt::Display;
 use super::size::Size;
 use super::point::IntPoint;
-use num::traits::{Signed, Float};
-use num::traits::{cast::FromPrimitive};
+use num::traits::{Signed};
 use log;
 
-pub trait MatElement: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display {}
-impl<T> MatElement for T where T: Signed + Clone + MulAssign + AddAssign + PartialOrd + Display { }
+pub trait MatElement: Signed + Clone + MulAssign + AddAssign + SubAssign + PartialOrd + Display + Copy {}
+impl<T> MatElement for T where T: Signed + Clone + MulAssign + AddAssign + SubAssign + PartialOrd + Display + Copy { }
 
 #[derive(Debug)]
 #[derive(Eq)]
@@ -244,7 +243,7 @@ impl<T: MatElement> RectMatrix<T> {
     ///
     /// Crops the matrix.
     /// 
-    pub fn rect(&self, top_left: IntPoint, bottom_right: IntPoint) -> RectMatrix<T> {
+    pub fn rect(&self, top_left: IntPoint<2>, bottom_right: IntPoint<2>) -> RectMatrix<T> {
         let cols = bottom_right.x() - top_left.x() + 1;
         let rows = bottom_right.y() - top_left.y() + 1;
         let mut mat = RectMatrix::zeros(rows as usize, cols as usize);
@@ -393,12 +392,12 @@ impl<T: MatElement> RectMatrix<T> {
     }
 }
 
-impl<T: Float + Signed + Clone + MulAssign + AddAssign + PartialOrd + Display + FromPrimitive> RectMatrix<T> {
+impl RectMatrix<f64> {
     ///
     /// Rounds all the values in the matrix.
     /// 
-    pub fn round(&mut self, decimals: i32) -> &RectMatrix<T> {
-        let ten = T::from_f64(10f64).unwrap();
+    pub fn round(&mut self, decimals: i32) -> &RectMatrix<f64> {
+        let ten = 10f64;
         let factor = ten.powi(decimals);
         for i in 0..self.rows() {
             for j in 0..self.cols() {
@@ -408,6 +407,7 @@ impl<T: Float + Signed + Clone + MulAssign + AddAssign + PartialOrd + Display + 
         self
     }
 }
+
 
 ///
 /// Represents a row.
@@ -742,8 +742,8 @@ mod tests {
             vec![8f64, 7f64]
         ]);
         assert_eq!(m1.rect(
-            IntPoint::point2d(1, 1),
-            IntPoint::point2d(2, 2)),
+            IntPoint::<2>::point2d(1, 1),
+            IntPoint::<2>::point2d(2, 2)),
             m2);
     }
 
