@@ -27,7 +27,28 @@ pub fn fact(n: u32) -> i64 {
     if n == 0 || n == 1 {
         return 1i64;
     }
+    if n == 2 { return 2; }
+    if n == 3 { return 6; }
+    if n == 4 { return 24; }
+    if n == 5 { return 120; }
+    if n == 6 { return 720; }
+    if n == 7 { return 5040; }
+    if n == 8 { return 40320; }
     return (n as i64)*fact(n - 1);
+}
+
+///
+/// Computes the factorial.
+/// 
+pub fn fact_iterative(n: u32) -> i64 {
+    if n == 0 || n == 1 {
+        return 1i64;
+    }
+    let mut res: i64 = n as i64;
+    for i in 2..(n as i64) {
+        res *= i;
+    }
+    return res;
 }
 
 #[cfg(test)]
