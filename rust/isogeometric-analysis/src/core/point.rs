@@ -21,9 +21,9 @@
  */
 
 use super::MatElement;
-use std::ops::Add;
-use std::ops::Sub;
-use std::ops::Mul;
+use std::ops::{Add, AddAssign};
+use std::ops::{Sub, SubAssign};
+use std::ops::{Mul, MulAssign};
 
 ///
 /// Represents a point.
@@ -173,6 +173,14 @@ impl<T: MatElement, const SIZE: usize> Add for Point<T, SIZE> {
     }
 }
 
+impl<T: MatElement, const SIZE: usize> AddAssign for Point<T, SIZE> {
+    fn add_assign(&mut self, rhs: Point<T, SIZE>) {
+        for i in 0..self.data.len() {
+            self.data[i] *= rhs.data[i];
+        }
+    }
+}
+
 impl<T: MatElement, const SIZE: usize> Sub for Point<T, SIZE> {
     type Output = Self;
 
@@ -191,6 +199,14 @@ impl<T: MatElement, const SIZE: usize> Sub for Point<T, SIZE> {
     }
 }
 
+impl<T: MatElement, const SIZE: usize> SubAssign for Point<T, SIZE> {
+    fn sub_assign(&mut self, rhs: Point<T, SIZE>) {
+        for i in 0..self.data.len() {
+            self.data[i] -= rhs.data[i];
+        }
+    }
+}
+
 impl<T: MatElement, const SIZE: usize> Mul<T> for Point<T, SIZE> {
     type Output = Self;
 
@@ -204,6 +220,14 @@ impl<T: MatElement, const SIZE: usize> Mul<T> for Point<T, SIZE> {
         }
         Self {
             data: data
+        }
+    }
+}
+
+impl<T: MatElement, const SIZE: usize> MulAssign<T> for Point<T, SIZE> {
+    fn mul_assign(&mut self, rhs: T) {
+        for i in 0..self.data.len() {
+            self.data[i] *= rhs;
         }
     }
 }

@@ -21,7 +21,7 @@
  */
 
 use crate::core::fact;
-use crate::core::RealPoint;
+use crate::core::{RealPoint, RealPoint1d};
 use crate::core::Evaluatable;
 use num::traits::Pow;
 use unroll::unroll_for_loops;
@@ -87,7 +87,7 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
         for i in 0..n {
             let bernstein = Bernstein::create((n - 1) as u32, i as u32).unwrap();
             let bout = bernstein.evaluate(&input).x();
-            p = p + self.p[i]*bout;
+            p += self.p[i]*bout;
         }
 
         return p;
@@ -97,7 +97,7 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
     /// Computes the value of the Bezier curve in xi using the De Casteljau's algorithm.
     ///
     #[unroll_for_loops]
-    pub fn evaluate_de_casteljau(&self, xi: &RealPoint<1>) -> RealPoint<SIZE> {
+    pub fn evaluate_de_casteljau(&self, xi: &RealPoint1d) -> RealPoint<SIZE> {
         let n = self.p.len() - 1;
         let mut q = Vec::<RealPoint<SIZE>>::new();
         for i in 0..(n + 1) {
