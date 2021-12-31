@@ -43,6 +43,16 @@ impl Evaluatable<f64, f64, 1, 1> for Bernstein {
         let den = (fact(self.i)*fact(self.n - self.i)) as f64;
         RealPoint::<1>::point1d(num/den)
     }
+
+    ///
+    /// Evaluate without creating a new object.
+    /// 
+    fn evaluate_fill(&self, input: &RealPoint1d, mut output: RealPoint1d) -> RealPoint1d {
+        let num = (fact(self.n) as f64)*input.x().pow(self.i as f64)*(1f64 - input.x()).pow((self.n - self.i) as f64);
+        let den = (fact(self.i)*fact(self.n - self.i)) as f64;
+        output.set_x(num/den);
+        output
+    }
 }
 
 impl Bernstein {
@@ -71,7 +81,12 @@ impl<const SIZE: usize> Evaluatable<f64, f64, 1, SIZE> for BezierCurve<SIZE> {
     /// parametric space.
     /// 
     fn evaluate(&self, xi: &RealPoint<1>) -> RealPoint<SIZE> {
-        self.evaluate_direct(xi)
+        let output = RealPoint::<SIZE>::origin();
+        self.evaluate_direct(xi, output)
+    }
+
+    fn evaluate_fill(&self, input: &RealPoint1d, output: RealPoint<SIZE>) -> RealPoint<SIZE> {
+        self.evaluate_direct(input, output)
     }
 }
 
@@ -81,16 +96,17 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
     /// technique is not numerically stable.
     ///
     #[unroll_for_loops]
-    pub fn evaluate_direct(&self, input: &RealPoint<1>) -> RealPoint<SIZE> {
+    pub fn evaluate_direct(&self, input: &RealPoint<1>, mut output: RealPoint<SIZE>) -> RealPoint<SIZE> {
         let n = self.p.len();
-        let mut p = RealPoint::<SIZE>::origin();
+        let tmp = RealPoint1d::origin();
+        output.reset();
         for i in 0..n {
             let bernstein = Bernstein::create((n - 1) as u32, i as u32).unwrap();
-            let bout = bernstein.evaluate(&input).x();
-            p += self.p[i]*bout;
+            let bout = bernstein.evaluate_fill(&input, tmp).x();
+            output += self.p[i]*bout;
         }
 
-        return p;
+        return output;
     }
 
     ///

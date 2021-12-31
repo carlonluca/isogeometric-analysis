@@ -92,6 +92,15 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     }
 
     ///
+    /// Sets all values to zero.
+    /// 
+    pub fn reset(&mut self) {
+        for i in 0..self.data.len() {
+            self.data[i] = T::zero();
+        }
+    }
+
+    ///
     /// Builds a point from a matrix.
     /// 
     /*pub fn from_matrix(m: RectMatrix<T>) -> Point<T> {

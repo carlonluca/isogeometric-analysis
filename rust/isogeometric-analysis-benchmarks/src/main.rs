@@ -27,7 +27,7 @@ use std::time::Instant;
 fn main() {
     env_logger::init();
 
-    let iterations = 20;
+    let iterations = 200;
 
     { // Bezier
         let cpoints = vec![

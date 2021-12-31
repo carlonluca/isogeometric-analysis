@@ -34,6 +34,7 @@ pub use self::matrix::RowVector;
 pub use self::matrix::ColVector;
 pub use self::matrix::MatElement;
 pub use self::factorial::fact;
+pub use self::factorial::fact_iterative;
 pub use self::utils::measure_time;
 pub use self::evaluate::Evaluatable;
 pub use self::evaluate::Evaluator;
