@@ -23,7 +23,7 @@
 use isogeometric_analysis::bezier::{Bernstein, BezierCurve};
 use isogeometric_analysis::core::Evaluator;
 use isogeometric_analysis::core::HslProvider;
-use isogeometric_analysis::core::RealPoint;
+use isogeometric_analysis::core::{RealPoint, RealPoint2d, RealPoint3d};
 use gnuplot::{Figure, Caption, Color, AxesCommon};
 use std::time::Instant;
 
@@ -33,12 +33,12 @@ use std::time::Instant;
 pub fn show_bezier_demo_1()
 {
     let cpoints = vec![
-        RealPoint::point3d(0f64, 0f64, 0f64),
-        RealPoint::point3d(1f64, 1f64, 0f64),
-        RealPoint::point3d(2f64, 0.5f64, 0f64),
-        RealPoint::point3d(3f64, 0.5f64, 0f64),
-        RealPoint::point3d(0.6f64, 1.5f64, 0f64),
-        RealPoint::point3d(1.5f64, 0f64, 0f64)
+        RealPoint2d::point2d(0f64, 0f64),
+        RealPoint2d::point2d(1f64, 1f64),
+        RealPoint2d::point2d(2f64, 0.5f64),
+        RealPoint2d::point2d(3f64, 0.5f64),
+        RealPoint2d::point2d(0.6f64, 1.5f64),
+        RealPoint2d::point2d(1.5f64, 0f64)
     ];
     show_bezier_demo(cpoints);
 }
@@ -49,12 +49,12 @@ pub fn show_bezier_demo_1()
 pub fn show_bezier_demo_2()
 {
     let cpoints = vec![
-        RealPoint::point3d(0f64, 0f64, 0f64),
-        RealPoint::point3d(1f64, 1f64, 1f64),
-        RealPoint::point3d(2f64, 0.5f64, 0f64),
-        RealPoint::point3d(3f64, 0.5f64, 0f64),
-        RealPoint::point3d(0.5f64, 1.5f64, 0f64),
-        RealPoint::point3d(1.5f64, 0f64, 1f64)
+        RealPoint3d::point3d(0f64, 0f64, 0f64),
+        RealPoint3d::point3d(1f64, 1f64, 1f64),
+        RealPoint3d::point3d(2f64, 0.5f64, 0f64),
+        RealPoint3d::point3d(3f64, 0.5f64, 0f64),
+        RealPoint3d::point3d(0.5f64, 1.5f64, 0f64),
+        RealPoint3d::point3d(1.5f64, 0f64, 1f64)
     ];
     show_bezier_demo(cpoints);
 }
@@ -62,7 +62,7 @@ pub fn show_bezier_demo_2()
 ///
 /// Shows a Bezier curve with its bernstein basis polynomials.
 /// 
-pub fn show_bezier_demo(cpoints: Vec<RealPoint>)
+pub fn show_bezier_demo<const SIZE: usize>(cpoints: Vec<RealPoint<SIZE>>)
 {
     let mut fg = Figure::new();
 
@@ -76,9 +76,9 @@ pub fn show_bezier_demo(cpoints: Vec<RealPoint>)
     let n = cpoints.len() as u32;
     let bez = BezierCurve { p: cpoints };
     let before = Instant::now();
-    let (_xpoints, ypoints) = Evaluator::evaluate_r_to_r3(&bez, &0f64, &1f64, &1000);
+    let (_xpoints, ypoints) = Evaluator::<SIZE, SIZE>::evaluate_r_to_r3(&bez, &0f64, &1f64, &1000);
     log::info!("Bezier curve computed in: {} μs", before.elapsed().as_micros());
-    let (xvalues, yvalues, _zvalues) = Evaluator::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
+    let (xvalues, yvalues, _zvalues) = Evaluator::<1, SIZE>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
     axes2d1.lines(&xvalues, &yvalues, &[Caption(""), Color("orange")]);
 
     // Draw the bernstein polynomials.
@@ -92,8 +92,8 @@ pub fn show_bezier_demo(cpoints: Vec<RealPoint>)
     let hsl = HslProvider { count: deg + 1 };
     for i in 0..(deg + 1) {
         let b = Bernstein::create(deg, i).unwrap();
-        let (xpoints, ypoints) = Evaluator::evaluate_r_to_r3(&b, &0f64, &1f64, &1000);
-        let (xvalues, yvalues, _zvalues) = Evaluator::split_coords(0, &xpoints, 0, &ypoints, 0, &xpoints);
+        let (xpoints, ypoints) = Evaluator::<1, 1>::evaluate_r_to_r3(&b, &0f64, &1f64, &1000);
+        let (xvalues, yvalues, _zvalues) = Evaluator::<1, 1>::split_coords(0, &xpoints, 0, &ypoints, 0, &xpoints);
         let caption = format!("B_{{{}}}^{{{}}}", i, deg);
         let color_hex = hsl.hex_color_for_index(i);
         let color = Color(color_hex.as_str());

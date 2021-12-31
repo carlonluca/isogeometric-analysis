@@ -27,22 +27,25 @@ use crate::core::MatElement;
 
 ///
 /// Generic interface for an evaluatable element.
-/// 
-pub trait Evaluatable<I: MatElement, O: MatElement> {
-    fn evaluate(&self, p: &Point<I>) -> Point<O>;
+///
+pub trait Evaluatable<I: MatElement, O: MatElement, const DIMDOM: usize, const DIMCOD: usize> {
+    ///
+    /// Evaluates the function.
+    /// 
+    fn evaluate(&self, i: &Point<I, DIMDOM>) -> Point<O, DIMCOD>;
 }
 
 ///
 /// This class is used to automate computations for curves.
 /// 
-pub struct Evaluator {}
+pub struct Evaluator<const DIMIN: usize, const DIMOUT: usize> {}
 
-impl Evaluator {
+impl<const DIMIN: usize, const DIMOUT: usize> Evaluator<DIMIN, DIMOUT> {
     ///
     /// Computes a geometric element for a sequence of points.
     /// 
-    pub fn evaluate(element: &impl Evaluatable<f64, f64>, values: &Vec<RealPoint>) -> Vec<RealPoint> {
-        let mut ret: Vec<RealPoint> = Vec::new();
+    pub fn evaluate(element: &impl Evaluatable<f64, f64, DIMIN, DIMOUT>, values: &Vec<RealPoint<DIMIN>>) -> Vec<RealPoint<DIMOUT>> {
+        let mut ret: Vec<RealPoint<DIMOUT>> = Vec::new();
         for p in values.iter() {
             ret.push(element.evaluate(p));
         }
@@ -52,16 +55,16 @@ impl Evaluator {
     ///
     /// Evalutes a geometric element for an interval of elements of R.
     /// 
-    pub fn evaluate_r_to_r3(element: &impl Evaluatable<f64, f64>, from: &f64, to: &f64, count: &i64) -> (Vec<RealPoint>, Vec<RealPoint>) {
+    pub fn evaluate_r_to_r3(element: &impl Evaluatable<f64, f64, 1, DIMOUT>, from: &f64, to: &f64, count: &i64) -> (Vec<RealPoint<1>>, Vec<RealPoint<DIMOUT>>) {
         let rv: RowVector<f64> = RowVector::<f64>::evenly_spaced(from, to, count);
         let values = rv.to_vec();
-        let mut input: Vec<RealPoint> = Vec::new();
+        let mut input: Vec<RealPoint<1>> = Vec::new();
         for v in values {
-            let p = Point::point1d(v);
+            let p = Point::<f64, 1>::point1d(v);
             input.push(p);
         }
 
-        let mut output: Vec<RealPoint> = Vec::new();
+        let mut output: Vec<RealPoint<DIMOUT>> = Vec::new();
         for p in &input {
             output.push(element.evaluate(&p));
         }
@@ -72,7 +75,7 @@ impl Evaluator {
     ///
     /// Rearranges coords in arrays.
     /// 
-    pub fn split_coords<T: MatElement>(mapx: usize, x: &Vec<Point<T>>, mapy: usize, y: &Vec<Point<T>>, mapz: usize, z: &Vec<Point<T>>) -> (Vec<T>, Vec<T>, Vec<T>) {
+    pub fn split_coords<T: MatElement>(mapx: usize, x: &Vec<Point<T, DIMOUT>>, mapy: usize, y: &Vec<Point<T, DIMOUT>>, mapz: usize, z: &Vec<Point<T, DIMOUT>>) -> (Vec<T>, Vec<T>, Vec<T>) {
         let sizes = vec![x.len(), y.len(), z.len()];
         let count = sizes.iter().min().clone();
         match count {
@@ -102,29 +105,27 @@ mod tests {
     fn test() {
         env_logger::init();
         let xvalues = vec![
-            RealPoint::point1d(0f64),
-            RealPoint::point1d(1f64),
-            RealPoint::point1d(2f64)
+            RealPoint::<1>::point1d(0f64),
+            RealPoint::<1>::point1d(1f64),
+            RealPoint::<1>::point1d(2f64)
         ];
         let yvalues = vec![
-            RealPoint::point1d(3f64),
-            RealPoint::point1d(4f64),
-            RealPoint::point1d(5f64)
+            RealPoint::<1>::point1d(3f64),
+            RealPoint::<1>::point1d(4f64),
+            RealPoint::<1>::point1d(5f64)
         ];
         let zvalues = vec![
-            RealPoint::point1d(6f64),
-            RealPoint::point1d(7f64),
-            RealPoint::point1d(8f64)
+            RealPoint::<1>::point1d(6f64),
+            RealPoint::<1>::point1d(7f64),
+            RealPoint::<1>::point1d(8f64)
         ];
-        let (x, y, z) = Evaluator::split_coords(0, &xvalues, 0, &yvalues, 0, &zvalues);
+        let (x, y, z) = Evaluator::<1, 1>::split_coords(0, &xvalues, 0, &yvalues, 0, &zvalues);
         assert_eq!(x.len(), 3);
         assert_eq!(y.len(), 3);
         assert_eq!(z.len(), 3);
-        log::info!("Adding: {}", x[1]);
         assert_eq!(x[0], 0f64);
         assert_eq!(x[1], 1f64);
         assert_eq!(x[2], 2f64);
-        log::info!("Adding: {}", y[0]);
         assert_eq!(y[0], 3f64);
         assert_eq!(y[1], 4f64);
         assert_eq!(y[2], 5f64);

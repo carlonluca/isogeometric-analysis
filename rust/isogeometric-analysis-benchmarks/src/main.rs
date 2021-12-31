@@ -20,7 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-use isogeometric_analysis::core::{RealPoint, Evaluator};
+use isogeometric_analysis::core::{RealPoint2d, Evaluator};
 use isogeometric_analysis::bezier::{BezierCurve, Bernstein};
 use std::time::Instant;
 
@@ -31,17 +31,17 @@ fn main() {
 
     { // Bezier
         let cpoints = vec![
-            RealPoint::point3d(0f64, 0f64, 0f64),
-            RealPoint::point3d(1f64, 1f64, 0f64),
-            RealPoint::point3d(2f64, 0.5f64, 0f64),
-            RealPoint::point3d(3f64, 0.5f64, 0f64),
-            RealPoint::point3d(0.6f64, 1.5f64, 0f64),
-            RealPoint::point3d(1.5f64, 0f64, 0f64)
+            RealPoint2d::point2d(0f64, 0f64),
+            RealPoint2d::point2d(1f64, 1f64),
+            RealPoint2d::point2d(2f64, 0.5f64),
+            RealPoint2d::point2d(3f64, 0.5f64),
+            RealPoint2d::point2d(0.6f64, 1.5f64),
+            RealPoint2d::point2d(1.5f64, 0f64)
         ];
         let bez = BezierCurve { p: cpoints };
         let before = Instant::now();
         for _i in 0..iterations {
-            let (_xpoints, _ypoints) = Evaluator::evaluate_r_to_r3(&bez, &0f64, &1f64, &10000);
+            let (_xpoints, _ypoints) = Evaluator::<2, 2>::evaluate_r_to_r3(&bez, &0f64, &1f64, &10000);
         }
         log::info!("Bezier curve computed on 10000 points in: {} μs", before.elapsed().as_micros()/iterations);
     }
@@ -50,7 +50,7 @@ fn main() {
         let b = Bernstein::create(5, 2).unwrap();
         let before = Instant::now();
         for _i in 0..iterations {
-            let (_xpoints, _ypoints) = Evaluator::evaluate_r_to_r3(&b, &0f64, &1f64, &10000);
+            let (_xpoints, _ypoints) = Evaluator::<1, 1>::evaluate_r_to_r3(&b, &0f64, &1f64, &10000);
         }
         log::info!("Bernstein polynomial B_2^5 curve computed on 10000 points in: {} μs", before.elapsed().as_micros()/iterations);
     }
