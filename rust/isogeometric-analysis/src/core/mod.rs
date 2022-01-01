@@ -1,4 +1,4 @@
-/**
+/*
  * Project: Approximation and Finite Elements in Isogeometric Problems
  * Author:  Luca Carlon
  * Date:    2021.11.01
@@ -28,7 +28,6 @@ pub use self::point::RealPoint2d;
 pub use self::point::RealPoint3d;
 pub use self::point::Point;
 pub use self::range::IntRange;
-pub use self::equatable::Equatable;
 pub use self::matrix::RectMatrix;
 pub use self::matrix::RowVector;
 pub use self::matrix::ColVector;
@@ -42,7 +41,6 @@ pub use self::color::HslProvider;
 mod size;
 mod point;
 mod range;
-mod equatable;
 mod matrix;
 mod factorial;
 mod utils;

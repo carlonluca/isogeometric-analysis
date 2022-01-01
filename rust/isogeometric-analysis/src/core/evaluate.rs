@@ -1,4 +1,4 @@
-/**
+/*
  * Project: Approximation and Finite Elements in Isogeometric Problems
  * Author:  Luca Carlon
  * Date:    2021.12.11
