@@ -29,6 +29,13 @@ use unroll::unroll_for_loops;
 ///
 /// Represents a Bernstein basis polynomial.
 /// 
+/// # Example
+/// 
+/// ```rust
+/// let b = Bernstein::create(5, 2).unwrap();
+/// let (xpoints, ypoints) = Evaluator::<1, 1>::evaluate_r_to_r3(&b, &0f64, &1f64, &10000);
+/// ```
+/// 
 pub struct Bernstein {
     n: u32,
     i: u32
@@ -57,7 +64,7 @@ impl Evaluatable<f64, f64, 1, 1> for Bernstein {
 
 impl Bernstein {
     ///
-    /// Creates a bernstein basis polynomial.
+    /// Creates the `i`-th bernstein basis polynomial of degree `n`.
     /// 
     pub fn create(n: u32, i: u32) -> Option<Bernstein> {
         if i > n {

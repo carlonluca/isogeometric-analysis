@@ -26,7 +26,7 @@ use crate::core::RowVector;
 use crate::core::MatElement;
 
 ///
-/// Generic interface for an evaluatable element.
+/// Generic interface for an evaluatable element from ℝ^DIMDOM to ℝ^DIMCOD.
 ///
 pub trait Evaluatable<I: MatElement, O: MatElement, const DIMDOM: usize, const DIMCOD: usize> {
     ///
