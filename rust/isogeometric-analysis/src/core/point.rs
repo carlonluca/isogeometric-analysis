@@ -185,7 +185,7 @@ impl<T: MatElement, const SIZE: usize> Add for Point<T, SIZE> {
 impl<T: MatElement, const SIZE: usize> AddAssign for Point<T, SIZE> {
     fn add_assign(&mut self, rhs: Point<T, SIZE>) {
         for i in 0..self.data.len() {
-            self.data[i] *= rhs.data[i];
+            self.data[i] += rhs.data[i];
         }
     }
 }
