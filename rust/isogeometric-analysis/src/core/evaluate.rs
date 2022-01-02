@@ -59,9 +59,9 @@ impl<const DIMIN: usize, const DIMOUT: usize> Evaluator<DIMIN, DIMOUT> {
     }
 
     ///
-    /// Evalutes a geometric element for an interval of elements of R.
+    /// Evalutes a parametric element as a map from ℝ to ℝ^DIMOUT.
     /// 
-    pub fn evaluate_r_to_r3(element: &impl Evaluatable<f64, f64, 1, DIMOUT>, from: &f64, to: &f64, count: &i64) -> (Vec<RealPoint<1>>, Vec<RealPoint<DIMOUT>>) {
+    pub fn evaluate_parametric(element: &impl Evaluatable<f64, f64, 1, DIMOUT>, from: &f64, to: &f64, count: &i64) -> (Vec<RealPoint<1>>, Vec<RealPoint<DIMOUT>>) {
         let rv: RowVector<f64> = RowVector::<f64>::evenly_spaced(from, to, count);
         let values = rv.to_vec();
         let mut input: Vec<RealPoint<1>> = Vec::new();

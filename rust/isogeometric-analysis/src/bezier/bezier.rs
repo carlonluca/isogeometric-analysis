@@ -35,7 +35,7 @@ use unroll::unroll_for_loops;
 /// use isogeometric_analysis::bezier::Bernstein;
 /// use isogeometric_analysis::core::Evaluator;
 /// let b = Bernstein::create(5, 2).unwrap();
-/// let (xpoints, ypoints) = Evaluator::<1, 1>::evaluate_r_to_r3(&b, &0f64, &1f64, &10000);
+/// let (xpoints, ypoints) = Evaluator::<1, 1>::evaluate_parametric(&b, &0f64, &1f64, &10000);
 /// ```
 /// 
 pub struct Bernstein {
