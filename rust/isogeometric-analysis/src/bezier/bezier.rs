@@ -112,7 +112,7 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
         for i in 0..n {
             let bernstein = Bernstein::create((n - 1) as u32, i as u32).unwrap();
             let bout = bernstein.evaluate_fill(&input, &mut tmp).x();
-            output += self.p[i]*bout;
+            *output += self.p[i]*bout;
         }
 
         return output;
