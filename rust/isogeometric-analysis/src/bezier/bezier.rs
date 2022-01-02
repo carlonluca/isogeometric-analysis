@@ -32,6 +32,8 @@ use unroll::unroll_for_loops;
 /// # Example
 /// 
 /// ```rust
+/// use isogeometric_analysis::bezier::Bernstein;
+/// use isogeometric_analysis::core::Evaluator;
 /// let b = Bernstein::create(5, 2).unwrap();
 /// let (xpoints, ypoints) = Evaluator::<1, 1>::evaluate_r_to_r3(&b, &0f64, &1f64, &10000);
 /// ```
@@ -54,7 +56,7 @@ impl Evaluatable<f64, f64, 1, 1> for Bernstein {
     ///
     /// Evaluate without creating a new object.
     /// 
-    fn evaluate_fill(&self, input: &RealPoint1d, mut output: RealPoint1d) -> RealPoint1d {
+    fn evaluate_fill<'a>(&self, input: &RealPoint1d, output: &'a mut RealPoint1d) -> &'a mut RealPoint1d {
         let num = (fact(self.n) as f64)*input.x().pow(self.i as f64)*(1f64 - input.x()).pow((self.n - self.i) as f64);
         let den = (fact(self.i)*fact(self.n - self.i)) as f64;
         output.set_x(num/den);
@@ -88,11 +90,11 @@ impl<const SIZE: usize> Evaluatable<f64, f64, 1, SIZE> for BezierCurve<SIZE> {
     /// parametric space.
     /// 
     fn evaluate(&self, xi: &RealPoint<1>) -> RealPoint<SIZE> {
-        let output = RealPoint::<SIZE>::origin();
-        self.evaluate_direct(xi, output)
+        let mut output = RealPoint::<SIZE>::origin();
+        self.evaluate_direct(&xi, &mut output).clone()
     }
 
-    fn evaluate_fill(&self, input: &RealPoint1d, output: RealPoint<SIZE>) -> RealPoint<SIZE> {
+    fn evaluate_fill<'a>(&self, input: &RealPoint1d, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
         self.evaluate_direct(input, output)
     }
 }
@@ -103,13 +105,13 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
     /// technique is not numerically stable.
     ///
     #[unroll_for_loops]
-    pub fn evaluate_direct(&self, input: &RealPoint<1>, mut output: RealPoint<SIZE>) -> RealPoint<SIZE> {
+    pub fn evaluate_direct<'a>(&self, input: &RealPoint<1>, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
         let n = self.p.len();
-        let tmp = RealPoint1d::origin();
+        let mut tmp = RealPoint1d::origin();
         output.reset();
         for i in 0..n {
             let bernstein = Bernstein::create((n - 1) as u32, i as u32).unwrap();
-            let bout = bernstein.evaluate_fill(&input, tmp).x();
+            let bout = bernstein.evaluate_fill(&input, &mut tmp).x();
             output += self.p[i]*bout;
         }
 

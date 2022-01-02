@@ -38,7 +38,7 @@ pub trait Evaluatable<I: MatElement, O: MatElement, const DIMDOM: usize, const D
     /// Evaluates the function and assigns the values to an existing point
     /// object.
     /// 
-    fn evaluate_fill(&self, i: &Point<I, DIMDOM>, o: Point<O, DIMCOD>) -> Point<O, DIMCOD>;
+    fn evaluate_fill<'a>(&self, i: &Point<I, DIMDOM>, o: &'a mut Point<O, DIMCOD>) -> &'a mut Point<O, DIMCOD>;
 }
 
 ///
@@ -71,9 +71,9 @@ impl<const DIMIN: usize, const DIMOUT: usize> Evaluator<DIMIN, DIMOUT> {
         }
 
         let mut output: Vec<RealPoint<DIMOUT>> = Vec::new();
-        let tmp = RealPoint::<DIMOUT>::origin();
+        let mut tmp = RealPoint::<DIMOUT>::origin();
         for p in &input {
-            output.push(element.evaluate_fill(&p, tmp));
+            output.push(element.evaluate_fill(&p, &mut tmp).clone());
         }
 
         return (input, output);
