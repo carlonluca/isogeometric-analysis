@@ -22,4 +22,5 @@
 
 pub use self::bezier::Bernstein;
 pub use self::bezier::BezierCurve;
+pub use self::bezier::BezierSurf;
 mod bezier;

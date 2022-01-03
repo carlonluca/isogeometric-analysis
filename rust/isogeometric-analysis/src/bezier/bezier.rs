@@ -21,10 +21,11 @@
  */
 
 use crate::core::fact;
-use crate::core::{RealPoint, RealPoint1d};
+use crate::core::{RealPoint, RealPoint1d, RealPoint3d};
 use crate::core::Evaluatable;
 use num::traits::Pow;
 use unroll::unroll_for_loops;
+use array2d::Array2D;
 
 ///
 /// Represents a Bernstein basis polynomial.
@@ -44,15 +45,6 @@ pub struct Bernstein {
 }
 
 impl Evaluatable<f64, f64, 1, 1> for Bernstein {
-    ///
-    /// Evaluates the function.
-    /// 
-    fn evaluate(&self, i: &RealPoint<1>) -> RealPoint<1> {
-        let num = (fact(self.n) as f64)*i.x().pow(self.i as f64)*(1f64 - i.x()).pow((self.n - self.i) as f64);
-        let den = (fact(self.i)*fact(self.n - self.i)) as f64;
-        RealPoint::<1>::point1d(num/den)
-    }
-
     ///
     /// Evaluate without creating a new object.
     /// 
@@ -86,16 +78,10 @@ pub struct BezierCurve<const SIZE: usize> {
 
 impl<const SIZE: usize> Evaluatable<f64, f64, 1, SIZE> for BezierCurve<SIZE> {
     ///
-    /// Evaluates the Bezier curve in point xi. Point xi is intended in the
-    /// parametric space.
+    /// Evaluates the Bezier curve in point xi. Point xi exists in the parametric space.
     /// 
-    fn evaluate(&self, xi: &RealPoint<1>) -> RealPoint<SIZE> {
-        let mut output = RealPoint::<SIZE>::origin();
-        self.evaluate_direct(&xi, &mut output).clone()
-    }
-
-    fn evaluate_fill<'a>(&self, input: &RealPoint1d, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
-        self.evaluate_direct(input, output)
+    fn evaluate_fill<'a>(&self, xi: &RealPoint1d, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
+        self.evaluate_direct(xi, output)
     }
 }
 
@@ -136,4 +122,32 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
 
         return q[0];
     }
+
+    ///
+    /// Returns the degree of the Bezier curve.
+    /// 
+    pub fn degree(&self) -> u32 {
+        (self.p.len() - 1) as u32
+    }
 }
+
+///
+/// Represents a Bezier surface.
+/// 
+pub struct BezierSurf {
+    pub data: Array2D<RealPoint3d>
+}
+
+impl BezierSurf {
+    ///
+    /// Returns the degree on the Xi axis.
+    /// 
+    pub fn degree_xi(&self) -> u32 { (self.data.row_len() - 1) as u32 }
+
+    ///
+    /// Returns the degree on the Eta axis.
+    /// 
+    pub fn degree_eta(&self) -> u32 { (self.data.column_len() - 1) as u32 }
+}
+
+

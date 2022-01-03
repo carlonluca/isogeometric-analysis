@@ -32,7 +32,10 @@ pub trait Evaluatable<I: MatElement, O: MatElement, const DIMDOM: usize, const D
     ///
     /// Evaluates the function.
     /// 
-    fn evaluate(&self, i: &Point<I, DIMDOM>) -> Point<O, DIMCOD>;
+    fn evaluate(&self, i: &Point<I, DIMDOM>) -> Point<O, DIMCOD> {
+        let mut output = Point::<O, DIMCOD>::origin();
+        self.evaluate_fill(&i, &mut output).clone()
+    }
 
     ///
     /// Evaluates the function and assigns the values to an existing point
