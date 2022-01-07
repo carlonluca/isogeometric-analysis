@@ -27,13 +27,14 @@ use std::ops::Mul;
 use std::ops::{MulAssign, AddAssign, SubAssign};
 use std::clone::Clone;
 use std::fmt::Display;
+use std::fmt::Debug;
 use super::size::Size;
 use super::point::IntPoint;
 use num::traits::{Signed};
 use log;
 
-pub trait MatElement: Signed + Clone + MulAssign + AddAssign + SubAssign + PartialOrd + Display + Copy {}
-impl<T> MatElement for T where T: Signed + Clone + MulAssign + AddAssign + SubAssign + PartialOrd + Display + Copy { }
+pub trait MatElement: Signed + Clone + MulAssign + AddAssign + SubAssign + PartialOrd + Display + Copy + Debug {}
+impl<T> MatElement for T where T: Signed + Clone + MulAssign + AddAssign + SubAssign + PartialOrd + Display + Copy + Debug { }
 
 #[derive(Debug)]
 #[derive(Eq)]

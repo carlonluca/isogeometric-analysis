@@ -40,6 +40,11 @@ impl IntRange {
     pub fn includes(&self, value: i32) -> bool { value >= self.a && value <= self.b }
 }
 
+pub struct RealRange {
+    pub a: f64,
+    pub b: f64
+}
+
 #[cfg(test)]
 mod tests {
     use crate::core::IntRange;

@@ -24,6 +24,9 @@ use super::MatElement;
 use std::ops::{Add, AddAssign};
 use std::ops::{Sub, SubAssign};
 use std::ops::{Mul, MulAssign};
+use std::fmt::Display;
+use std::fmt::Formatter;
+use std::fmt::Result;
 
 ///
 /// Represents a point.
@@ -34,6 +37,12 @@ use std::ops::{Mul, MulAssign};
 #[derive(Copy)]
 pub struct Point<T: MatElement, const SIZE: usize> {
     data: [T; SIZE]
+}
+
+impl<T: MatElement, const SIZE: usize> Display for Point<T, SIZE> {
+    fn fmt(&self, f: &mut Formatter) -> Result {
+        write!(f, "{:?}", self.data)
+    }
 }
 
 ///
@@ -239,6 +248,18 @@ impl<T: MatElement, const SIZE: usize> MulAssign<T> for Point<T, SIZE> {
             self.data[i] *= rhs;
         }
     }
+}
+
+pub fn p1(x: f64) -> Point<f64, 1> {
+    Point { data: [x] }
+}
+
+pub fn p2(x: f64, y: f64) -> Point<f64, 2> {
+    Point { data: [x, y] }
+}
+
+pub fn p3(x: f64, y: f64, z: f64) -> Point<f64, 3> {
+    Point { data: [x, y, z] }
 }
 
 #[cfg(test)]

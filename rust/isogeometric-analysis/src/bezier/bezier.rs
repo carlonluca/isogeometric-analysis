@@ -21,7 +21,7 @@
  */
 
 use crate::core::fact;
-use crate::core::{RealPoint, RealPoint1d, RealPoint3d};
+use crate::core::{RealPoint, RealPoint1d, RealPoint2d, RealPoint3d};
 use crate::core::Evaluatable;
 use num::traits::Pow;
 use unroll::unroll_for_loops;
@@ -36,7 +36,7 @@ use array2d::Array2D;
 /// use isogeometric_analysis::bezier::Bernstein;
 /// use isogeometric_analysis::core::Evaluator;
 /// let b = Bernstein::create(5, 2).unwrap();
-/// let (xpoints, ypoints) = Evaluator::<1, 1>::evaluate_parametric(&b, &0f64, &1f64, &10000);
+/// let (xpoints, ypoints) = Evaluator::<1, 1>::evaluate_parametric_range1d(&b, &0f64, &1f64, &10000);
 /// ```
 /// 
 pub struct Bernstein {
@@ -142,12 +142,38 @@ impl BezierSurf {
     ///
     /// Returns the degree on the Xi axis.
     /// 
-    pub fn degree_xi(&self) -> u32 { (self.data.row_len() - 1) as u32 }
+    pub fn degree_xi(&self) -> u32 { (self.data.column_len() - 1) as u32 }
 
     ///
     /// Returns the degree on the Eta axis.
     /// 
-    pub fn degree_eta(&self) -> u32 { (self.data.column_len() - 1) as u32 }
+    pub fn degree_eta(&self) -> u32 { (self.data.row_len() - 1) as u32 }
 }
 
+impl Evaluatable<f64, f64, 2, 3> for BezierSurf {
+    ///
+    /// Evaluates the Bezier curve in point xi. Point xi exists in the parametric space.
+    /// 
+    fn evaluate_fill<'a>(&self, xi: &RealPoint2d, output: &'a mut RealPoint3d) -> &'a mut RealPoint3d {
+        output.reset();
+        let n = self.degree_xi();
+        let m = self.degree_eta();
+        let mut tmpinputi = RealPoint1d::origin();
+        let mut tmpinputj = RealPoint1d::origin();
+        let mut tmpi = RealPoint1d::origin();
+        let mut tmpj = RealPoint1d::origin();
+        for i in 0..=n {
+            for j in 0..=m {
+                let bin = Bernstein { n: n, i: i };
+                let bjm = Bernstein { n: m, i: j };
+                tmpinputi.set_x(xi.x());
+                tmpinputj.set_x(xi.y());
+                bin.evaluate_fill(&tmpinputi, &mut tmpi);
+                bjm.evaluate_fill(&tmpinputj, &mut tmpj);
+                *output += self.data[(i as usize, j as usize)]*tmpi.x()*tmpj.x();
+            }
+        }
 
+        return output;
+    }
+}

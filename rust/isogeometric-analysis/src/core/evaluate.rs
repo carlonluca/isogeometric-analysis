@@ -20,10 +20,11 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-use crate::core::RealPoint;
+use crate::core::{RealPoint, RealPoint2d};
 use crate::core::Point;
 use crate::core::RowVector;
 use crate::core::MatElement;
+use crate::core::RealRange;
 
 ///
 /// Generic interface for an evaluatable element from ℝ^DIMDOM to ℝ^DIMCOD.
@@ -64,13 +65,32 @@ impl<const DIMIN: usize, const DIMOUT: usize> Evaluator<DIMIN, DIMOUT> {
     ///
     /// Evalutes a parametric element as a map from ℝ to ℝ^DIMOUT.
     /// 
-    pub fn evaluate_parametric(element: &impl Evaluatable<f64, f64, 1, DIMOUT>, from: &f64, to: &f64, count: &i64) -> (Vec<RealPoint<1>>, Vec<RealPoint<DIMOUT>>) {
+    pub fn evaluate_parametric_range1d(element: &impl Evaluatable<f64, f64, 1, DIMOUT>, from: &f64, to: &f64, count: &i64) -> (Vec<RealPoint<1>>, Vec<RealPoint<DIMOUT>>) {
         let rv: RowVector<f64> = RowVector::<f64>::evenly_spaced(from, to, count);
         let values = rv.to_vec();
         let mut input: Vec<RealPoint<1>> = Vec::new();
         for v in values {
             let p = Point::<f64, 1>::point1d(v);
             input.push(p);
+        }
+
+        let mut output: Vec<RealPoint<DIMOUT>> = Vec::new();
+        let mut tmp = RealPoint::<DIMOUT>::origin();
+        for p in &input {
+            output.push(element.evaluate_fill(&p, &mut tmp).clone());
+        }
+
+        return (input, output);
+    }
+
+    pub fn evaluate_parametric_range2d(element: &impl Evaluatable<f64, f64, 2, DIMOUT>, r1: &RealRange, r2: &RealRange, count: &i64) -> (Vec<RealPoint2d>, Vec<RealPoint<DIMOUT>>) {
+        let r1seq = RowVector::<f64>::evenly_spaced(&r1.a, &r1.b, count).to_vec();
+        let r2seq = RowVector::<f64>::evenly_spaced(&r2.a, &r2.b, count).to_vec();
+        let mut input = Vec::<RealPoint2d>::new();
+        for i in &r1seq {
+            for j in &r2seq {
+                input.push(RealPoint2d::point2d(*i, *j));
+            }
         }
 
         let mut output: Vec<RealPoint<DIMOUT>> = Vec::new();

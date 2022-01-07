@@ -28,7 +28,9 @@ struct Opt {
     #[structopt(long, help = "Show the Bezier demo 1")]
     bezier1: bool,
     #[structopt(long, help = "Show the Bezier demo 2")]
-    bezier2: bool
+    bezier2: bool,
+    #[structopt(long, help = "Show the Bezier surface demo 1")]
+    bezierSurf1: bool
 }
 
 fn main() {
@@ -36,12 +38,17 @@ fn main() {
 
     let opt = Opt::from_args();
     if opt.bezier1 {
-        bezier::show_bezier_demo_1();
+        bezier::show_bezier_curve_demo_1();
         return;
     }
 
     if opt.bezier2 {
-        bezier::show_bezier_demo_2();
+        bezier::show_bezier_curve_demo_2();
+        return;
+    }
+
+    if opt.bezierSurf1 {
+        bezier::show_bezier_surf_demo_1();
         return;
     }
 }
