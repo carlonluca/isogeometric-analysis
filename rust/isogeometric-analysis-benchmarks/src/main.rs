@@ -41,7 +41,7 @@ fn main() {
         let bez = BezierCurve { p: cpoints };
         let before = Instant::now();
         for _i in 0..iterations {
-            let (_xpoints, _ypoints) = Evaluator::<2, 2>::evaluate_parametric(&bez, &0f64, &1f64, &10000);
+            let (_xpoints, _ypoints) = Evaluator::<2, 2>::evaluate_parametric_range1d(&bez, &0f64, &1f64, &10000);
         }
         log::info!("Bezier curve computed on 10000 points in: {} μs", before.elapsed().as_micros()/iterations);
     }
@@ -50,7 +50,7 @@ fn main() {
         let b = Bernstein::create(5, 2).unwrap();
         let before = Instant::now();
         for _i in 0..iterations {
-            let (_xpoints, _ypoints) = Evaluator::<1, 1>::evaluate_parametric(&b, &0f64, &1f64, &10000);
+            let (_xpoints, _ypoints) = Evaluator::<1, 1>::evaluate_parametric_range1d(&b, &0f64, &1f64, &10000);
         }
         log::info!("Bernstein polynomial B_2^5 curve computed on 10000 points in: {} μs", before.elapsed().as_micros()/iterations);
     }

@@ -30,7 +30,9 @@ struct Opt {
     #[structopt(long, help = "Show the Bezier demo 2")]
     bezier2: bool,
     #[structopt(long, help = "Show the Bezier surface demo 1")]
-    bezierSurf1: bool
+    bezier_surf1: bool,
+    #[structopt(long, help = "Multiplot")]
+    multiplot: bool
 }
 
 fn main() {
@@ -38,17 +40,17 @@ fn main() {
 
     let opt = Opt::from_args();
     if opt.bezier1 {
-        bezier::show_bezier_curve_demo_1();
+        bezier::show_bezier_curve_demo_1(opt.multiplot);
         return;
     }
 
     if opt.bezier2 {
-        bezier::show_bezier_curve_demo_2();
+        bezier::show_bezier_curve_demo_2(opt.multiplot);
         return;
     }
 
-    if opt.bezierSurf1 {
-        bezier::show_bezier_surf_demo_1();
+    if opt.bezier_surf1 {
+        bezier::show_bezier_surf_demo_1(opt.multiplot);
         return;
     }
 }
