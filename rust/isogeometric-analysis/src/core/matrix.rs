@@ -38,17 +38,18 @@ impl<T> MatElement for T where T: Signed + Clone + MulAssign + AddAssign + SubAs
 
 #[derive(Debug)]
 #[derive(Eq)]
-pub struct RectMatrix<T: MatElement> {
-    data: Array2D<T>
+#[derive(Clone)]
+pub struct RectMatrix<T: MatElement, const ROWS: usize, const COLS: usize> {
+    data: [[T; COLS]; ROWS]
 }
 
-impl<T: MatElement> PartialEq for RectMatrix<T> {
+impl<T: MatElement, const ROWS: usize, const COLS: usize> PartialEq for RectMatrix<T, ROWS, COLS> {
     fn eq(&self, other: &Self) -> bool {
         self.data == other.data
     }
 }
 
-impl<T: MatElement> Add for RectMatrix<T> {
+impl<T: MatElement, const ROWS: usize, const COLS: usize> Add for RectMatrix<T, ROWS, COLS> {
     type Output = Self;
 
     ///
@@ -59,7 +60,7 @@ impl<T: MatElement> Add for RectMatrix<T> {
     }
 }
 
-impl<T: MatElement> Sub for RectMatrix<T> {
+impl<T: MatElement, const ROWS: usize, const COLS: usize> Sub for RectMatrix<T, ROWS, COLS> {
     type Output = Self;
 
     ///
@@ -70,7 +71,7 @@ impl<T: MatElement> Sub for RectMatrix<T> {
     }
 }
 
-impl<T: MatElement> Mul<T> for RectMatrix<T> {
+impl<T: MatElement, const ROWS: usize, const COLS: usize> Mul<T> for RectMatrix<T, ROWS, COLS> {
     type Output = Self;
 
     ///
@@ -80,20 +81,20 @@ impl<T: MatElement> Mul<T> for RectMatrix<T> {
         let mut ret = self.clone();
         for i in 0..self.rows() {
             for j in 0..self.cols() {
-                ret.data[(i, j)] *= scalar.clone();
+                ret.data[i][j] *= scalar;
             }
         }
         return ret;
     }
 }
 
-impl<T: MatElement> Mul<RectMatrix<T>> for RectMatrix<T> {
-    type Output = Self;
+impl<T: MatElement, const ROWS: usize, const COLS: usize, const COLSOUT: usize> Mul<RectMatrix<T, COLS, COLSOUT>> for RectMatrix<T, ROWS, COLS> {
+    type Output = RectMatrix<T, COLS, COLSOUT>;
 
     ///
     /// Multiplication by another matrix.
     /// 
-    fn mul(self, other: Self) -> Self {
+    fn mul(self, other: Self) -> Self::Output {
         if self.cols() != other.rows() {
             panic!();
         }
@@ -103,7 +104,7 @@ impl<T: MatElement> Mul<RectMatrix<T>> for RectMatrix<T> {
             for j in 0..self.cols() {
                 let mut e = T::zero();
                 for p in 0..self.cols() {
-                    e += self.data[(i, p)].clone()*other.data[(p, j)].clone();
+                    e += self.data[i][p]*other.data[p][j];
                 }
                 res.data[(i, j)] = e;
             }
@@ -113,7 +114,7 @@ impl<T: MatElement> Mul<RectMatrix<T>> for RectMatrix<T> {
     }
 }
 
-impl<T: MatElement> Clone for RectMatrix<T> {
+impl<T: MatElement, const ROWS: usize, const COLS: usize> Clone for RectMatrix<T, ROWS, COLS> {
     ///
     /// Clones this matrix.
     /// 
@@ -124,11 +125,11 @@ impl<T: MatElement> Clone for RectMatrix<T> {
     }
 }
 
-impl<T: MatElement> RectMatrix<T> {
+impl<T: MatElement, const ROWS: usize, const COLS: usize> RectMatrix<T, ROWS, COLS> {
     ///
     /// Constructs a matrix from data. Ownership is transferred.
     /// 
-    pub fn from_array(data: Array2D<T>) -> RectMatrix<T> {
+    pub fn from_array(data: [[T; COLS]; ROWS]) -> RectMatrix<T, ROWS, COLS> {
         RectMatrix { data: data }
     }
 
@@ -136,36 +137,29 @@ impl<T: MatElement> RectMatrix<T> {
     /// Constructs a matrix from data. Ownership is not transferred and
     /// the array is copied.
     /// 
-    pub fn from_array_ref(data: &Array2D<T>) -> RectMatrix<T> {
+    pub fn from_array_ref(data: &[[T; COLS]; ROWS]) -> RectMatrix<T, ROWS, COLS> {
         RectMatrix { data: data.clone() }
-    }
-
-    ///
-    /// Builds a matrix from an array of vectors.
-    /// 
-    pub fn from_vec(data: &[Vec<T>]) -> RectMatrix<T> {
-        RectMatrix { data: Array2D::from_rows(data) }
     }
 
     ///
     /// Returns the value.
     /// 
     pub fn value(&self, row: usize, col: usize) -> T {
-        self.data[(row, col)].clone()
+        self.data[row][col]
     }
 
     ///
     /// Sets a value.
     /// 
     pub fn set_value(&mut self, row: usize, col: usize, value: T) {
-        self.data[(row, col)] = value
+        self.data[row][col] = value;
     }
 
     ///
     /// Returns the number of rows.
     /// 
     pub fn rows(&self) -> usize {
-        self.data.num_rows()
+        self.data.len()
     }
 
     ///
