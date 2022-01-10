@@ -106,7 +106,7 @@ impl<T: MatElement, const ROWS: usize, const COLS: usize, const COLSOUT: usize> 
                 for p in 0..self.cols() {
                     e += self.data[i][p]*other.data[p][j];
                 }
-                res.data[(i, j)] = e;
+                res.data[i][j] = e;
             }
         }
 
@@ -165,24 +165,27 @@ impl<T: MatElement, const ROWS: usize, const COLS: usize> RectMatrix<T, ROWS, CO
     ///
     /// Returns the i-th row.
     /// 
-    pub fn row(&self, i: usize) -> RowVector<T> {
+    pub fn row(&self, i: usize) -> RowVector<T, COLS> {
         // TODO: Optimize
-        RowVector::from_vec(&self.data.as_rows()[i])
+        RowVector::from_vec(&self.data[i])
     }
 
     ///
     /// Returns the number of columns.
     /// 
     pub fn cols(&self) -> usize {
-        self.data.num_columns()
+        self.data[0].len()
     }
 
     ///
     /// Returns the i-th column.
     /// 
-    pub fn col(&self, i: usize) -> ColVector<T> {
-        // TODO: Optimize
-        ColVector::from_vec(&self.data.as_columns()[i])
+    pub fn col(&self, i: usize) -> ColVector<T, ROWS> {
+        let v = Vec::new();
+        for i in 0..self.rows() {
+            v.push(i);
+        }
+        return ColVector::from_vec(v.to_vec());
     }
     
     ///
