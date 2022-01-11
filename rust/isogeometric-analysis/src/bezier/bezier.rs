@@ -155,6 +155,15 @@ impl Evaluatable<f64, f64, 2, 3> for BezierSurf {
     /// Evaluates the Bezier curve in point xi. Point xi exists in the parametric space.
     /// 
     fn evaluate_fill<'a>(&self, xi: &RealPoint2d, output: &'a mut RealPoint3d) -> &'a mut RealPoint3d {
+        self.evaluate_direct(xi, output)
+    }
+}
+
+impl BezierSurf {
+    ///
+    /// Evaluates a Bezier surface by using the definition.
+    /// 
+    pub fn evaluate_direct<'a>(&self, xi: &RealPoint2d, output: &'a mut RealPoint3d) -> &'a mut RealPoint3d {
         output.reset();
         let n = self.degree_xi();
         let m = self.degree_eta();
@@ -171,6 +180,28 @@ impl Evaluatable<f64, f64, 2, 3> for BezierSurf {
                 bin.evaluate_fill(&tmpinputi, &mut tmpi);
                 bjm.evaluate_fill(&tmpinputj, &mut tmpj);
                 *output += self.data[(i as usize, j as usize)]*tmpi.x()*tmpj.x();
+            }
+        }
+
+        return output;
+    }
+
+    ///
+    /// Evaluates a Bezier surface by using the De Casteljau's algorithm.
+    /// 
+    pub fn evaluate_de_casteljau<'a>(&self, xi: &RealPoint2d, output: &'a mut RealPoint3d) -> &'a mut RealPoint3d {
+        output.reset();
+        let n = self.degree_xi();
+        let m = self.degree_eta();
+        for i in 0..=n {
+            let bezcurve1 = BezierCurve::<3> {
+                p: self.data.as_rows()[i as usize].clone()
+            };
+            for j in 0..=m {
+                let q = bezcurve1.evaluate_de_casteljau(&RealPoint::point1d(xi.x()));
+                let bezcurve2 = BezierCurve::<3> {
+                    p: 
+                }
             }
         }
 
