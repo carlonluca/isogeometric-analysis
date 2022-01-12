@@ -155,7 +155,7 @@ impl Evaluatable<f64, f64, 2, 3> for BezierSurf {
     /// Evaluates the Bezier curve in point xi. Point xi exists in the parametric space.
     /// 
     fn evaluate_fill<'a>(&self, xi: &RealPoint2d, output: &'a mut RealPoint3d) -> &'a mut RealPoint3d {
-        self.evaluate_direct(xi, output)
+        self.evaluate_de_casteljau(xi, output)
     }
 }
 
@@ -192,18 +192,24 @@ impl BezierSurf {
     pub fn evaluate_de_casteljau<'a>(&self, xi: &RealPoint2d, output: &'a mut RealPoint3d) -> &'a mut RealPoint3d {
         output.reset();
         let n = self.degree_xi();
-        let m = self.degree_eta();
+        let eta = RealPoint1d::point1d(xi.y());
+        let xi = RealPoint1d::point1d(xi.x());
+        let mut q = Vec::<RealPoint3d>::new();
         for i in 0..=n {
             let bezcurve1 = BezierCurve::<3> {
                 p: self.data.as_rows()[i as usize].clone()
             };
-            for j in 0..=m {
-                let q = bezcurve1.evaluate_de_casteljau(&RealPoint::point1d(xi.x()));
-                let bezcurve2 = BezierCurve::<3> {
-                    p: 
-                }
-            }
+            q.push(bezcurve1.evaluate_de_casteljau(&eta));
         }
+
+        let bezcurve2 = BezierCurve::<3> {
+            p: q
+        };
+        let res = bezcurve2.evaluate_de_casteljau(&xi);
+        
+        output.set_x(res.x());
+        output.set_y(res.y());
+        output.set_z(res.z());
 
         return output;
     }
