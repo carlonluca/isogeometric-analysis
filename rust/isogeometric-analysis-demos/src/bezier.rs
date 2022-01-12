@@ -111,7 +111,6 @@ pub fn show_bezier_curve_demo<const SIZE: usize>(cpoints: Vec<RealPoint<SIZE>>, 
 pub fn show_bezier_surf_demo(cpoints: Array2D<RealPoint3d>, multiplot: bool)
 {
     let mut fg = Figure::new();
-    fg.set_terminal("qt", "");
 
     // Draw the Bezier surface.
     let axes2d1 = fg.axes3d()
