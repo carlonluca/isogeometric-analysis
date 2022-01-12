@@ -196,15 +196,11 @@ impl BezierSurf {
         let xi = RealPoint1d::point1d(xi.x());
         let mut q = Vec::<RealPoint3d>::new();
         for i in 0..=n {
-            let bezcurve1 = BezierCurve::<3> {
-                p: self.data.as_rows()[i as usize].clone()
-            };
+            let bezcurve1 = BezierCurve::<3> { p: self.data.as_rows()[i as usize].clone() };
             q.push(bezcurve1.evaluate_de_casteljau(&eta));
         }
 
-        let bezcurve2 = BezierCurve::<3> {
-            p: q
-        };
+        let bezcurve2 = BezierCurve::<3> { p: q };
         let res = bezcurve2.evaluate_de_casteljau(&xi);
         
         output.set_x(res.x());
