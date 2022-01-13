@@ -58,6 +58,7 @@ pub type IntPoint<const SIZE: usize> = Point<i32, SIZE>;
 pub type RealPoint1d = RealPoint<1>;
 pub type RealPoint2d = RealPoint<2>;
 pub type RealPoint3d = RealPoint<3>;
+pub type RealPoint4d = RealPoint<4>;
 
 impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     ///
@@ -143,6 +144,46 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
         else {
             T::zero()
         }
+    }
+
+    pub fn set_value(&mut self, idx: usize, val: T) -> &mut Self {
+        if self.dim() > idx {
+            self.data[idx] = val;
+        }
+        self
+    }
+}
+
+impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
+    ///
+    /// Converts this point to a corresponding point in homogeneous coordinates on the plane w.
+    ///
+    pub fn to_homogeneous<const HOMSIZE: usize>(&self, w: T) -> Point<T, HOMSIZE> {
+        if HOMSIZE != SIZE + 1 {
+            panic!();
+        }
+        let mut res = Point::<T, HOMSIZE>::origin();
+        for i in 0..self.dim() {
+            res.set_value(i, self.data[i]*w);
+        }
+        *res.set_value(self.dim(), w)
+    }
+
+    ///
+    /// Converts this point to a corresponding point in cartesian coordinates.
+    /// 
+    pub fn to_cartesian<const CARTSIZE: usize>(&self) -> Point<T, CARTSIZE> {
+        if CARTSIZE != SIZE - 1 {
+            panic!()
+        }
+        if self.data[self.dim() - 1] == T::zero() {
+            panic!("Invalid plane")
+        }
+        let mut res = Point::<T, CARTSIZE>::origin();
+        for i in 0..res.dim() {
+            res.data[i] = self.data[i]/self.data[self.dim() - 1];
+        }
+        res
     }
 }
 
@@ -264,12 +305,14 @@ pub fn p3(x: f64, y: f64, z: f64) -> Point<f64, 3> {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::RealPoint;
+    use crate::core::{RealPoint, RealPoint2d, RealPoint3d};
     use crate::core::IntPoint;
 
     #[test]
     fn test_eq() {
         assert_eq!(IntPoint::<2>::point2d(6, 5), IntPoint::<2>::point2d(6, 5));
         assert_eq!(RealPoint::<2>::point2d(56.7, 12.3), RealPoint::<2>::point2d(56.7, 12.3));
+        assert_eq!(RealPoint2d::point2d(1.0, 2.0).to_homogeneous(1.1), RealPoint3d::point3d(1.1, 2.2, 1.1));
+        assert_eq!(RealPoint2d::point2d(1.0, 2.0).to_homogeneous::<3>(1.1).to_cartesian(), RealPoint2d::point2d(1.0, 2.0));
     }
 }
