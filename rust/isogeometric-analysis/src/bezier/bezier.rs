@@ -163,7 +163,7 @@ impl BezierSurf {
     ///
     /// Evaluates a Bezier surface by using the definition.
     /// 
-    pub fn evaluate_direct<'a>(&self, xi: &RealPoint2d, output: &'a mut RealPoint3d) -> &'a mut RealPoint3d {
+    pub fn evaluate_direct<'a>(&self, input: &RealPoint2d, output: &'a mut RealPoint3d) -> &'a mut RealPoint3d {
         output.reset();
         let n = self.degree_xi();
         let m = self.degree_eta();
@@ -175,8 +175,8 @@ impl BezierSurf {
             for j in 0..=m {
                 let bin = Bernstein { n: n, i: i };
                 let bjm = Bernstein { n: m, i: j };
-                tmpinputi.set_x(xi.x());
-                tmpinputj.set_x(xi.y());
+                tmpinputi.set_x(input.x());
+                tmpinputj.set_x(input.y());
                 bin.evaluate_fill(&tmpinputi, &mut tmpi);
                 bjm.evaluate_fill(&tmpinputj, &mut tmpj);
                 *output += self.data[(i as usize, j as usize)]*tmpi.x()*tmpj.x();
@@ -189,11 +189,11 @@ impl BezierSurf {
     ///
     /// Evaluates a Bezier surface by using the De Casteljau's algorithm.
     /// 
-    pub fn evaluate_de_casteljau<'a>(&self, xi: &RealPoint2d, output: &'a mut RealPoint3d) -> &'a mut RealPoint3d {
+    pub fn evaluate_de_casteljau<'a>(&self, input: &RealPoint2d, output: &'a mut RealPoint3d) -> &'a mut RealPoint3d {
         output.reset();
         let n = self.degree_xi();
-        let eta = RealPoint1d::point1d(xi.y());
-        let xi = RealPoint1d::point1d(xi.x());
+        let eta = RealPoint1d::point1d(input.y());
+        let xi = RealPoint1d::point1d(input.x());
         let mut q = Vec::<RealPoint3d>::new();
         for i in 0..=n {
             let bezcurve1 = BezierCurve::<3> { p: self.data.as_rows()[i as usize].clone() };
