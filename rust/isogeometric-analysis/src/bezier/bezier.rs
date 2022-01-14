@@ -21,7 +21,7 @@
  */
 
 use crate::core::fact;
-use crate::core::{RealPoint, RealPoint1d, RealPoint2d, RealPoint3d};
+use crate::core::{RealPoint, RealPoint1d, RealPoint2d};
 use crate::core::Evaluatable;
 use num::traits::Pow;
 use unroll::unroll_for_loops;
@@ -134,11 +134,11 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
 ///
 /// Represents a Bezier surface.
 /// 
-pub struct BezierSurf {
-    pub data: Array2D<RealPoint3d>
+pub struct BezierSurf<const S: usize> {
+    pub data: Array2D<RealPoint<S>>
 }
 
-impl BezierSurf {
+impl<const S: usize> BezierSurf<S> {
     ///
     /// Returns the degree on the Xi axis.
     /// 
@@ -150,20 +150,20 @@ impl BezierSurf {
     pub fn degree_eta(&self) -> u32 { (self.data.row_len() - 1) as u32 }
 }
 
-impl Evaluatable<f64, f64, 2, 3> for BezierSurf {
+impl<const S: usize> Evaluatable<f64, f64, 2, S> for BezierSurf<S> {
     ///
     /// Evaluates the Bezier curve in point xi. Point xi exists in the parametric space.
     /// 
-    fn evaluate_fill<'a>(&self, xi: &RealPoint2d, output: &'a mut RealPoint3d) -> &'a mut RealPoint3d {
-        self.evaluate_de_casteljau(xi, output)
+    fn evaluate_fill<'a>(&self, input: &RealPoint2d, output: &'a mut RealPoint<S>) -> &'a mut RealPoint<S> {
+        self.evaluate_de_casteljau(input, output)
     }
 }
 
-impl BezierSurf {
+impl<const S: usize> BezierSurf<S> {
     ///
     /// Evaluates a Bezier surface by using the definition.
     /// 
-    pub fn evaluate_direct<'a>(&self, input: &RealPoint2d, output: &'a mut RealPoint3d) -> &'a mut RealPoint3d {
+    pub fn evaluate_direct<'a>(&self, input: &RealPoint2d, output: &'a mut RealPoint<S>) -> &'a mut RealPoint<S> {
         output.reset();
         let n = self.degree_xi();
         let m = self.degree_eta();
@@ -189,23 +189,23 @@ impl BezierSurf {
     ///
     /// Evaluates a Bezier surface by using the De Casteljau's algorithm.
     /// 
-    pub fn evaluate_de_casteljau<'a>(&self, input: &RealPoint2d, output: &'a mut RealPoint3d) -> &'a mut RealPoint3d {
+    pub fn evaluate_de_casteljau<'a>(&self, input: &RealPoint2d, output: &'a mut RealPoint<S>) -> &'a mut RealPoint<S> {
         output.reset();
         let n = self.degree_xi();
         let eta = RealPoint1d::point1d(input.y());
         let xi = RealPoint1d::point1d(input.x());
-        let mut q = Vec::<RealPoint3d>::new();
+        let mut q = Vec::<RealPoint<S>>::new();
         for i in 0..=n {
-            let bezcurve1 = BezierCurve::<3> { p: self.data.as_rows()[i as usize].clone() };
+            let bezcurve1 = BezierCurve::<S> { p: self.data.as_rows()[i as usize].clone() };
             q.push(bezcurve1.evaluate_de_casteljau(&eta));
         }
 
-        let bezcurve2 = BezierCurve::<3> { p: q };
+        let bezcurve2 = BezierCurve::<S> { p: q };
         let res = bezcurve2.evaluate_de_casteljau(&xi);
-        
-        output.set_x(res.x());
-        output.set_y(res.y());
-        output.set_z(res.z());
+
+        for i in 0..output.dim() {
+            output.set_value(i, res.value(i));
+        }
 
         return output;
     }

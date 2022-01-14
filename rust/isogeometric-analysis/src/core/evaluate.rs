@@ -115,9 +115,9 @@ impl<const DIMIN: usize, const DIMOUT: usize> Evaluator<DIMIN, DIMOUT> {
                 let mut yvalues = Vec::new();
                 let mut zvalues = Vec::new();
                 for i in 0..*c {
-                    xvalues.push(x[i].value(mapx as u8));
-                    yvalues.push(y[i].value(mapy as u8));
-                    zvalues.push(z[i].value(mapz as u8));
+                    xvalues.push(x[i].value(mapx));
+                    yvalues.push(y[i].value(mapy));
+                    zvalues.push(z[i].value(mapz));
                 }
 
                 return (xvalues, yvalues, zvalues);

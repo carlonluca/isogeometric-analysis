@@ -132,14 +132,9 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     ///
     /// Returns the idx-th element or zero.
     ///
-    pub fn value(&self, idx: u8) -> T {
+    pub fn value(&self, idx: usize) -> T {
         return if self.dim() > idx as usize {
-            match idx {
-                0 => self.data[0],
-                1 => self.data[1],
-                2 => self.data[2],
-                _ => T::zero()
-            }
+            self.data[idx]
         }
         else {
             T::zero()

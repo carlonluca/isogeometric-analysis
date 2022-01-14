@@ -26,6 +26,7 @@ pub use self::point::RealPoint;
 pub use self::point::RealPoint1d;
 pub use self::point::RealPoint2d;
 pub use self::point::RealPoint3d;
+pub use self::point::RealPoint4d;
 pub use self::point::Point;
 pub use self::point::{p1, p2, p3};
 pub use self::range::IntRange;
