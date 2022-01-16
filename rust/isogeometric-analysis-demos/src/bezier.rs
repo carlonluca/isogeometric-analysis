@@ -20,7 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-use isogeometric_analysis::bezier::{Bernstein, BezierCurve, BezierSurf};
+use isogeometric_analysis::bezier::{Bernstein, BezierCurve, BezierSurf, BezierCircle};
 use isogeometric_analysis::core::Evaluator;
 use isogeometric_analysis::core::HslProvider;
 use isogeometric_analysis::core::{RealPoint, RealPoint3d};
@@ -98,6 +98,32 @@ pub fn show_bezier_curve_demo<const SIZE: usize>(cpoints: Vec<RealPoint<SIZE>>, 
     if multiplot {
         show_bernstein(fg.axes2d(), n - 1, 1);
     }
+
+    match fg.show() {
+        Err(_e) => { log::warn!("Could not show plot") },
+        Ok(_v) => {}
+    }
+}
+
+pub fn show_ratbezier_curve_demo() {
+    let mut fg = Figure::new();
+
+    // Draw the Bezier curve.
+    let axes2d1 = fg.axes2d()
+        .set_y_grid(true)
+        .set_x_grid(true)
+        .set_x_label("x", &[])
+        .set_y_label("y", &[]);
+
+    let bez = BezierCircle {
+        radius: 3,
+        segments: 3
+    }.compute();
+    let before = Instant::now();
+    let (_xpoints, ypoints) = Evaluator::<1, 2>::evaluate_parametric_range1d(&bez, &0f64, &1f64, &10);
+    log::info!("Bezier curve computed in: {} μs", before.elapsed().as_micros());
+    let (xvalues, yvalues, _zvalues) = Evaluator::<1, 2>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
+    axes2d1.lines(&xvalues, &yvalues, &[Caption("R. Bezier"), Color("orange")]);
 
     match fg.show() {
         Err(_e) => { log::warn!("Could not show plot") },

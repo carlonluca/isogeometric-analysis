@@ -141,23 +141,36 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
         }
     }
 
+    ///
+    /// Sets the coordinate of the point.
+    /// 
     pub fn set_value(&mut self, idx: usize, val: T) -> &mut Self {
         if self.dim() > idx {
             self.data[idx] = val;
         }
         self
     }
+
+    ///
+    /// Clones this point to another one.
+    /// 
+    pub fn clone_to(&self, dest: &mut Point<T, SIZE>) {
+        for i in 0..self.data.len() {
+            dest.data[i] = self.data[i];
+        }
+    }
 }
 
 impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
+    #![feature(generic_const_exprs)]
     ///
     /// Converts this point to a corresponding point in homogeneous coordinates on the plane w.
     ///
     pub fn to_homogeneous<const HOMSIZE: usize>(&self, w: T) -> Point<T, HOMSIZE> {
-        if HOMSIZE != SIZE + 1 {
+        let mut res = Point::<T, HOMSIZE>::origin();
+        if res.dim() != self.dim() + 1 {
             panic!();
         }
-        let mut res = Point::<T, HOMSIZE>::origin();
         for i in 0..self.dim() {
             res.set_value(i, self.data[i]*w);
         }

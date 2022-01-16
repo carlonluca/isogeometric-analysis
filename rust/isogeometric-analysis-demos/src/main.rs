@@ -31,6 +31,8 @@ struct Opt {
     bezier2: bool,
     #[structopt(long, help = "Show the Bezier surface demo 1")]
     bezier_surf1: bool,
+    #[structopt(long, help = "Show a circle drawn with a rational bezier curve")]
+    ratbezier_circle1: bool,
     #[structopt(long, help = "Multiplot")]
     multiplot: bool
 }
@@ -51,6 +53,11 @@ fn main() {
 
     if opt.bezier_surf1 {
         bezier::show_bezier_surf_demo_1(opt.multiplot);
+        return;
+    }
+
+    if opt.ratbezier_circle1 {
+        bezier::show_ratbezier_curve_demo();
         return;
     }
 }

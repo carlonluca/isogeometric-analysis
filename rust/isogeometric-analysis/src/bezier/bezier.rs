@@ -210,3 +210,97 @@ impl<const S: usize> BezierSurf<S> {
         return output;
     }
 }
+
+///
+/// Implementation of a rational Bezier curve.
+/// 
+pub struct RatBezierCurve<const S: usize, const H: usize> {
+    p: Vec<RealPoint<S>>,
+    weights: Vec<f64>,
+    pw: Vec<RealPoint<H>>,
+    bez: BezierCurve<S>
+}
+
+impl<const S: usize, const H: usize> RatBezierCurve<S, H> {
+    ///
+    /// Creates a new rational Bezier curve by passing control points and weights.
+    /// 
+    pub fn create(p: Vec<RealPoint<S>>, weights: Vec<f64>) -> RatBezierCurve<S, H> {
+        if p.len() != weights.len() {
+            panic!()
+        }
+        let mut pw = Vec::<RealPoint<H>>::new();
+        for i in 0..p.len() {
+            pw.push(p[i].to_homogeneous::<H>(weights[i]));
+        }
+
+        // FIXME: do I really need two clones here?
+        RatBezierCurve::<S, H> {
+            p: p,
+            weights: weights,
+            pw: pw.clone(),
+            bez: BezierCurve::<H> {
+                p: pw.clone()
+            }
+        }
+    }
+}
+
+impl<const S: usize, const H: usize> Evaluatable<f64, f64, 1, S> for RatBezierCurve<S, H> {
+    ///
+    /// Evaluates the Bezier curve in point xi. Point xi exists in the parametric space.
+    /// 
+    fn evaluate_fill<'a>(&self, input: &RealPoint1d, output: &'a mut RealPoint<S>) -> &'a mut RealPoint<S> {
+        let cw = self.bez.evaluate_de_casteljau(input).to_cartesian();
+        cw.clone_to(output);
+        output
+    }
+}
+
+///
+/// Struct to compute a circle with rational bezier curves.
+/// 
+pub struct BezierCircle {
+    pub radius: u32,
+    pub segments: u32
+}
+
+impl BezierCircle {
+    ///
+    /// Returns the number of points for this circle.
+    /// 
+    pub fn points(&self) -> u32 {
+        self.segments*2 + 1
+    }
+
+    pub fn compute(&self) -> RatBezierCurve::<2, 3> {
+        let r = self.radius as f64;
+        let n = self.segments as f64;
+        let alpha = 360.0/(2.0*n);
+        let outerr = r/alpha.sin();
+        let mut cpoints = Vec::<RealPoint2d>::new();
+        let mut weights = Vec::<f64>::new();
+        for i in 0..=self.segments {
+            let p;
+            let w;
+            if i%2 == 0 {
+                p = RealPoint2d::point2d(
+                    r*(2.0*(i as f64)*alpha).sin(),
+                    -r*(2.0*(i as f64)*alpha).cos()
+                );
+                w = 1.0;
+            }
+            else {
+                p = RealPoint2d::point2d(
+                    outerr*((2.0*(i as f64) + 1.0)*alpha).sin(),
+                    -outerr*((2.0*(i as f64) + 1.0)*alpha).cos()
+                );
+                w = 0.5;
+            }
+            cpoints.push(p);
+            weights.push(w);
+        }
+
+        RatBezierCurve::<2, 3>::create(cpoints, weights)
+    }
+}
