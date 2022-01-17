@@ -162,7 +162,6 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
 }
 
 impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
-    #![feature(generic_const_exprs)]
     ///
     /// Converts this point to a corresponding point in homogeneous coordinates on the plane w.
     ///

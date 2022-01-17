@@ -21,10 +21,9 @@
  */
 
 use crate::core::fact;
-use crate::core::{RealPoint, RealPoint1d, RealPoint2d};
+use crate::core::{RealPoint, RealPoint1d, RealPoint2d, p2};
 use crate::core::Evaluatable;
 use num::traits::Pow;
-use unroll::unroll_for_loops;
 use array2d::Array2D;
 
 ///
@@ -90,7 +89,6 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
     /// Computes the value of the Bezier curve in xi using the direct algorithm. This
     /// technique is not numerically stable.
     ///
-    #[unroll_for_loops]
     pub fn evaluate_direct<'a>(&self, input: &RealPoint<1>, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
         let n = self.p.len();
         let mut tmp = RealPoint1d::origin();
@@ -107,7 +105,6 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
     ///
     /// Computes the value of the Bezier curve in xi using the De Casteljau's algorithm.
     ///
-    #[unroll_for_loops]
     pub fn evaluate_de_casteljau(&self, xi: &RealPoint1d) -> RealPoint<SIZE> {
         let n = self.p.len() - 1;
         let mut q = Vec::<RealPoint<SIZE>>::new();
@@ -128,6 +125,13 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
     /// 
     pub fn degree(&self) -> u32 {
         (self.p.len() - 1) as u32
+    }
+
+    ///
+    /// Returns a copy of the control points.
+    /// 
+    pub fn control_points(&self) -> &Vec<RealPoint<SIZE>> {
+        &self.p
     }
 }
 
@@ -218,7 +222,7 @@ pub struct RatBezierCurve<const S: usize, const H: usize> {
     p: Vec<RealPoint<S>>,
     weights: Vec<f64>,
     pw: Vec<RealPoint<H>>,
-    bez: BezierCurve<S>
+    bez: BezierCurve<H>
 }
 
 impl<const S: usize, const H: usize> RatBezierCurve<S, H> {
@@ -273,6 +277,9 @@ impl BezierCircle {
         self.segments*2 + 1
     }
 
+    ///
+    /// Computes the rational Bezier curve that will draw the requested circle.
+    /// 
     pub fn compute(&self) -> RatBezierCurve::<2, 3> {
         let r = self.radius as f64;
         let n = self.segments as f64;
@@ -302,5 +309,56 @@ impl BezierCircle {
         }
 
         RatBezierCurve::<2, 3>::create(cpoints, weights)
+    }
+}
+
+///
+/// This struct can be used to build a sample Bezier curve for debugging.
+/// 
+pub struct BezierCurveDemo1 {}
+
+impl BezierCurveDemo1 {
+    ///
+    /// Returns the BezierCurve.
+    /// 
+    pub fn create() -> BezierCurve<2> {
+        BezierCurve {
+            p: vec![
+                p2(0f64, 0f64),
+                p2(1f64, 1f64),
+                p2(2f64, 0.5f64),
+                p2(3f64, 0.5f64),
+                p2(0.6f64, 1.5f64),
+                p2(1.5f64, 0f64)
+            ]
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::bezier::RatBezierCurve;
+    use crate::bezier::BezierCurveDemo1;
+    use crate::core::RealPoint1d;
+    use crate::core::RealPoint2d;
+    use crate::core::Evaluatable;
+
+    #[test]
+    fn test_eq() {
+        let demo1 = BezierCurveDemo1::create();
+        let mut w = Vec::<f64>::new();
+        for _i in 0..demo1.control_points().len() {
+            w.push(1.0);
+        }
+        let demorat1 = RatBezierCurve::<2, 3>::create(demo1.control_points().clone(), w);
+        for i in 0..=100 {
+            let input = RealPoint1d::point1d((i as f64)/100f64);
+            let mut outputrat = RealPoint2d::origin();
+            let mut output = RealPoint2d::origin();
+            demorat1.evaluate_fill(&input, &mut outputrat);
+            demo1.evaluate_fill(&input, &mut output);
+
+            log::info!("Values: {}, {}", output, outputrat);
+        }
     }
 }
