@@ -342,6 +342,8 @@ mod tests {
     use crate::core::RealPoint1d;
     use crate::core::RealPoint2d;
     use crate::core::Evaluatable;
+    use float_cmp::approx_eq;
+    use float_cmp::ApproxEq;
 
     #[test]
     fn test_eq() {
@@ -357,6 +359,7 @@ mod tests {
             let mut output = RealPoint2d::origin();
             demorat1.evaluate_fill(&input, &mut outputrat);
             demo1.evaluate_fill(&input, &mut output);
+            approx_eq!(RealPoint2d, output, outputrat);
 
             log::info!("Values: {}, {}", output, outputrat);
         }

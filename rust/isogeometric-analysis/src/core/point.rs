@@ -27,6 +27,7 @@ use std::ops::{Mul, MulAssign};
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
+use float_cmp::ApproxEq;
 
 ///
 /// Represents a point.
@@ -295,6 +296,20 @@ impl<T: MatElement, const SIZE: usize> MulAssign<T> for Point<T, SIZE> {
         for i in 0..self.data.len() {
             self.data[i] *= rhs;
         }
+    }
+}
+
+impl<'a, M: Copy + Default, F: MatElement + ApproxEq<Margin=M>, const SIZE: usize> ApproxEq for &'a Point<F, SIZE> {
+    type Margin = M;
+
+    fn approx_eq<T: Into<Self::Margin>>(self, other: Self, margin: T) -> bool {
+        let margin = margin.into();
+        for i in 0..self.data.len() {
+            if !self.data[i].approx_eq(other.data[i], margin) {
+                return false;
+            }
+        }
+        return true;
     }
 }
 
