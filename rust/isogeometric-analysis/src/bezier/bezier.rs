@@ -299,15 +299,17 @@ impl BezierCircle {
 
             log::info!("P: {}", p);
 
-            p = RealPoint2d::point2d(
-                outerr*((2.0*(i as f64) + 1.0)*alpha).sin(),
-                -1.0*outerr*((2.0*(i as f64) + 1.0)*alpha).cos()
-            );
-            w = 0.5;
-            cpoints.push(p);
-            weights.push(w);
+            if i < self.segments {
+                p = RealPoint2d::point2d(
+                    outerr*((2.0*(i as f64) + 1.0)*alpha).sin(),
+                    -1.0*outerr*((2.0*(i as f64) + 1.0)*alpha).cos()
+                );
+                w = 0.5;
+                cpoints.push(p);
+                weights.push(w);
 
-            log::info!("P: {}", p);
+                log::info!("P: {}", p);
+            }
             
         }
 
