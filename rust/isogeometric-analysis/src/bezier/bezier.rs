@@ -23,6 +23,7 @@
 use crate::core::fact;
 use crate::core::{RealPoint, RealPoint1d, RealPoint2d, p2};
 use crate::core::Evaluatable;
+use std::f64::consts::PI;
 use num::traits::Pow;
 use array2d::Array2D;
 
@@ -283,29 +284,31 @@ impl BezierCircle {
     pub fn compute(&self) -> RatBezierCurve::<2, 3> {
         let r = self.radius as f64;
         let n = self.segments as f64;
-        let alpha = 360.0/(2.0*n);
-        let outerr = r/alpha.sin();
+        let alpha = 2.0*PI/(2.0*n);
+        let outerr = r/alpha.cos();
         let mut cpoints = Vec::<RealPoint2d>::new();
         let mut weights = Vec::<f64>::new();
         for i in 0..=self.segments {
-            let p;
-            let w;
-            if i%2 == 0 {
-                p = RealPoint2d::point2d(
-                    r*(2.0*(i as f64)*alpha).sin(),
-                    -r*(2.0*(i as f64)*alpha).cos()
-                );
-                w = 1.0;
-            }
-            else {
-                p = RealPoint2d::point2d(
-                    outerr*((2.0*(i as f64) + 1.0)*alpha).sin(),
-                    -outerr*((2.0*(i as f64) + 1.0)*alpha).cos()
-                );
-                w = 0.5;
-            }
+            let mut p = RealPoint2d::point2d(
+                r*(2.0*(i as f64)*alpha).sin(),
+                -1.0*r*(2.0*(i as f64)*alpha).cos()
+            );
+            let mut w = 1.0;
             cpoints.push(p);
             weights.push(w);
+
+            log::info!("P: {}", p);
+
+            p = RealPoint2d::point2d(
+                outerr*((2.0*(i as f64) + 1.0)*alpha).sin(),
+                -1.0*outerr*((2.0*(i as f64) + 1.0)*alpha).cos()
+            );
+            w = 0.5;
+            cpoints.push(p);
+            weights.push(w);
+
+            log::info!("P: {}", p);
+            
         }
 
         RatBezierCurve::<2, 3>::create(cpoints, weights)

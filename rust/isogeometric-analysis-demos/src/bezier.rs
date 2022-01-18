@@ -120,7 +120,7 @@ pub fn show_ratbezier_curve_demo() {
         segments: 3
     }.compute();
     let before = Instant::now();
-    let (_xpoints, ypoints) = Evaluator::<1, 2>::evaluate_parametric_range1d(&bez, &0f64, &1f64, &10);
+    let (_xpoints, ypoints) = Evaluator::<1, 2>::evaluate_parametric_range1d(&bez, &0f64, &1f64, &1000);
     log::info!("Bezier curve computed in: {} μs", before.elapsed().as_micros());
     let (xvalues, yvalues, _zvalues) = Evaluator::<1, 2>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
     axes2d1.lines(&xvalues, &yvalues, &[Caption("R. Bezier"), Color("orange")]);
