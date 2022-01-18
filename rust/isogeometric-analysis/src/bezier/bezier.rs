@@ -237,6 +237,7 @@ impl<const S: usize, const H: usize> RatBezierCurve<S, H> {
         let mut pw = Vec::<RealPoint<H>>::new();
         for i in 0..p.len() {
             pw.push(p[i].to_homogeneous::<H>(weights[i]));
+            log::info!("I: {}", p[i].to_homogeneous::<H>(weights[i]));
         }
 
         // FIXME: do I really need two clones here?
@@ -256,8 +257,11 @@ impl<const S: usize, const H: usize> Evaluatable<f64, f64, 1, S> for RatBezierCu
     /// Evaluates the Bezier curve in point xi. Point xi exists in the parametric space.
     /// 
     fn evaluate_fill<'a>(&self, input: &RealPoint1d, output: &'a mut RealPoint<S>) -> &'a mut RealPoint<S> {
-        let cw = self.bez.evaluate_de_casteljau(input).to_cartesian();
-        cw.clone_to(output);
+        let mut cw = RealPoint::<H>::origin();
+        self.bez.evaluate_direct(&input, &mut cw);
+        let c = cw.to_cartesian();
+        c.clone_to(output);
+        log::info!("Pw: {} -> {} -> {}", cw, c, output);
         output
     }
 }

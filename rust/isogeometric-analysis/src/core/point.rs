@@ -181,9 +181,6 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     /// Converts this point to a corresponding point in cartesian coordinates.
     /// 
     pub fn to_cartesian<const CARTSIZE: usize>(&self) -> Point<T, CARTSIZE> {
-        if CARTSIZE != SIZE - 1 {
-            panic!()
-        }
         if self.data[self.dim() - 1] == T::zero() {
             panic!("Invalid plane")
         }

@@ -124,6 +124,8 @@ pub fn show_ratbezier_curve_demo() {
     log::info!("Bezier curve computed in: {} μs", before.elapsed().as_micros());
     let (xvalues, yvalues, _zvalues) = Evaluator::<1, 2>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
     axes2d1.lines(&xvalues, &yvalues, &[Caption("R. Bezier"), Color("orange")]);
+    let (cpx, cpy, _cpz) = Evaluator::<1, 2>::split_coords(0, &bez.p, 1, &bez.p, 2, &bez.p);
+    axes2d1.lines(&cpx, &cpy, &[Caption("R. Bezier"), Color("black")]);
 
     match fg.show() {
         Err(_e) => { log::warn!("Could not show plot") },
