@@ -329,7 +329,7 @@ pub fn p3(x: f64, y: f64, z: f64) -> Point<f64, 3> {
 mod tests {
     use crate::core::{RealPoint, RealPoint2d, RealPoint3d};
     use crate::core::IntPoint;
-    use float_cmp::{ApproxEq, approx_eq};
+    use float_cmp::approx_eq;
 
     #[test]
     fn test_eq() {
