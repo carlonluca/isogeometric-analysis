@@ -299,7 +299,7 @@ impl<T: MatElement, const SIZE: usize> MulAssign<T> for Point<T, SIZE> {
     }
 }
 
-impl<'a, M: Copy + Default, F: MatElement + ApproxEq<Margin=M>, const SIZE: usize> ApproxEq for &'a Point<F, SIZE> {
+impl<M: Copy + Default, F: MatElement + ApproxEq<Margin=M>, const SIZE: usize> ApproxEq for Point<F, SIZE> {
     type Margin = M;
 
     fn approx_eq<T: Into<Self::Margin>>(self, other: Self, margin: T) -> bool {
@@ -329,6 +329,7 @@ pub fn p3(x: f64, y: f64, z: f64) -> Point<f64, 3> {
 mod tests {
     use crate::core::{RealPoint, RealPoint2d, RealPoint3d};
     use crate::core::IntPoint;
+    use float_cmp::{ApproxEq, approx_eq};
 
     #[test]
     fn test_eq() {
@@ -336,5 +337,6 @@ mod tests {
         assert_eq!(RealPoint::<2>::point2d(56.7, 12.3), RealPoint::<2>::point2d(56.7, 12.3));
         assert_eq!(RealPoint2d::point2d(1.0, 2.0).to_homogeneous(1.1), RealPoint3d::point3d(1.1, 2.2, 1.1));
         assert_eq!(RealPoint2d::point2d(1.0, 2.0).to_homogeneous::<3>(1.1).to_cartesian(), RealPoint2d::point2d(1.0, 2.0));
+        assert!(approx_eq!(RealPoint2d, RealPoint2d::point2d(2.0/2.0, 2.0), RealPoint2d::point2d(1.0, 2.0)));
     }
 }

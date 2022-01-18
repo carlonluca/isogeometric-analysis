@@ -219,9 +219,9 @@ impl<const S: usize> BezierSurf<S> {
 /// Implementation of a rational Bezier curve.
 /// 
 pub struct RatBezierCurve<const S: usize, const H: usize> {
-    p: Vec<RealPoint<S>>,
-    weights: Vec<f64>,
-    pw: Vec<RealPoint<H>>,
+    pub p: Vec<RealPoint<S>>,
+    pub weights: Vec<f64>,
+    pub pw: Vec<RealPoint<H>>,
     bez: BezierCurve<H>
 }
 
@@ -342,8 +342,7 @@ mod tests {
     use crate::core::RealPoint1d;
     use crate::core::RealPoint2d;
     use crate::core::Evaluatable;
-    use float_cmp::approx_eq;
-    use float_cmp::ApproxEq;
+    use float_cmp::assert_approx_eq;
 
     #[test]
     fn test_eq() {
@@ -359,9 +358,7 @@ mod tests {
             let mut output = RealPoint2d::origin();
             demorat1.evaluate_fill(&input, &mut outputrat);
             demo1.evaluate_fill(&input, &mut output);
-            approx_eq!(RealPoint2d, output, outputrat);
-
-            log::info!("Values: {}, {}", output, outputrat);
+            assert_approx_eq!(RealPoint2d, output, outputrat);
         }
     }
 }
