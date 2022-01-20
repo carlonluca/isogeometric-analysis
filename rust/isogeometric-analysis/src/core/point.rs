@@ -27,6 +27,7 @@ use std::ops::{Mul, MulAssign};
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
+use float_cmp::ApproxEq;
 
 ///
 /// Represents a point.
@@ -141,11 +142,23 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
         }
     }
 
+    ///
+    /// Sets the coordinate of the point.
+    /// 
     pub fn set_value(&mut self, idx: usize, val: T) -> &mut Self {
         if self.dim() > idx {
             self.data[idx] = val;
         }
         self
+    }
+
+    ///
+    /// Clones this point to another one.
+    /// 
+    pub fn clone_to(&self, dest: &mut Point<T, SIZE>) {
+        for i in 0..self.data.len() {
+            dest.data[i] = self.data[i];
+        }
     }
 }
 
@@ -154,10 +167,10 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     /// Converts this point to a corresponding point in homogeneous coordinates on the plane w.
     ///
     pub fn to_homogeneous<const HOMSIZE: usize>(&self, w: T) -> Point<T, HOMSIZE> {
-        if HOMSIZE != SIZE + 1 {
+        let mut res = Point::<T, HOMSIZE>::origin();
+        if res.dim() != self.dim() + 1 {
             panic!();
         }
-        let mut res = Point::<T, HOMSIZE>::origin();
         for i in 0..self.dim() {
             res.set_value(i, self.data[i]*w);
         }
@@ -168,9 +181,6 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     /// Converts this point to a corresponding point in cartesian coordinates.
     /// 
     pub fn to_cartesian<const CARTSIZE: usize>(&self) -> Point<T, CARTSIZE> {
-        if CARTSIZE != SIZE - 1 {
-            panic!()
-        }
         if self.data[self.dim() - 1] == T::zero() {
             panic!("Invalid plane")
         }
@@ -286,6 +296,20 @@ impl<T: MatElement, const SIZE: usize> MulAssign<T> for Point<T, SIZE> {
     }
 }
 
+impl<M: Copy + Default, F: MatElement + ApproxEq<Margin=M>, const SIZE: usize> ApproxEq for Point<F, SIZE> {
+    type Margin = M;
+
+    fn approx_eq<T: Into<Self::Margin>>(self, other: Self, margin: T) -> bool {
+        let margin = margin.into();
+        for i in 0..self.data.len() {
+            if !self.data[i].approx_eq(other.data[i], margin) {
+                return false;
+            }
+        }
+        return true;
+    }
+}
+
 pub fn p1(x: f64) -> Point<f64, 1> {
     Point { data: [x] }
 }
@@ -302,6 +326,7 @@ pub fn p3(x: f64, y: f64, z: f64) -> Point<f64, 3> {
 mod tests {
     use crate::core::{RealPoint, RealPoint2d, RealPoint3d};
     use crate::core::IntPoint;
+    use float_cmp::approx_eq;
 
     #[test]
     fn test_eq() {
@@ -309,5 +334,6 @@ mod tests {
         assert_eq!(RealPoint::<2>::point2d(56.7, 12.3), RealPoint::<2>::point2d(56.7, 12.3));
         assert_eq!(RealPoint2d::point2d(1.0, 2.0).to_homogeneous(1.1), RealPoint3d::point3d(1.1, 2.2, 1.1));
         assert_eq!(RealPoint2d::point2d(1.0, 2.0).to_homogeneous::<3>(1.1).to_cartesian(), RealPoint2d::point2d(1.0, 2.0));
+        assert!(approx_eq!(RealPoint2d, RealPoint2d::point2d(2.0/2.0, 2.0), RealPoint2d::point2d(1.0, 2.0)));
     }
 }

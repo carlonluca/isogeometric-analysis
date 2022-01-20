@@ -23,4 +23,7 @@
 pub use self::bezier::Bernstein;
 pub use self::bezier::BezierCurve;
 pub use self::bezier::BezierSurf;
+pub use self::bezier::RatBezierCurve;
+pub use self::bezier::BezierCircle;
+pub use self::bezier::BezierCurveDemo1;
 mod bezier;

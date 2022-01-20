@@ -25,12 +25,16 @@ use structopt::StructOpt;
 #[derive(Debug, StructOpt)]
 #[structopt(name = "isogeometric-analysis-demos", about = "A demo for the isogeometric_analysis crate")]
 struct Opt {
-    #[structopt(long, help = "Show the Bezier demo 1")]
+    #[structopt(long, help = "Shows the Bezier demo 1")]
     bezier1: bool,
-    #[structopt(long, help = "Show the Bezier demo 2")]
+    #[structopt(long, help = "Shows the Bezier demo 2")]
     bezier2: bool,
-    #[structopt(long, help = "Show the Bezier surface demo 1")]
+    #[structopt(long, help = "Shows the Bezier surface demo 1")]
     bezier_surf1: bool,
+    #[structopt(long, help = "Shows a circle drawn with a rational bezier curve")]
+    ratbezier_circle1: bool,
+    #[structopt(long, help = "Shows an arc")]
+    ratbezier_arc1: bool,
     #[structopt(long, help = "Multiplot")]
     multiplot: bool
 }
@@ -51,6 +55,16 @@ fn main() {
 
     if opt.bezier_surf1 {
         bezier::show_bezier_surf_demo_1(opt.multiplot);
+        return;
+    }
+
+    if opt.ratbezier_circle1 {
+        bezier::show_ratbezier_circle_demo();
+        return;
+    }
+
+    if opt.ratbezier_arc1 {
+        bezier::show_ratbezier_arc_demo();
         return;
     }
 }
