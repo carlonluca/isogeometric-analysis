@@ -26,7 +26,7 @@ use isogeometric_analysis::core::HslProvider;
 use isogeometric_analysis::core::{RealPoint, RealPoint2d, RealPoint3d};
 use isogeometric_analysis::core::RealRange;
 use isogeometric_analysis::core::{p2, p3};
-use gnuplot::{Figure, Caption, Color, AxesCommon, Axes2D};
+use gnuplot::{Figure, Caption, Color, LineStyle, AxesCommon, Axes2D, DashType};
 use std::time::Instant;
 use array2d::Array2D;
 
@@ -148,7 +148,7 @@ pub fn show_ratbezier_arc_demo() {
     }
 }
 
-pub fn show_ratbezier_curve_demo() {
+pub fn show_ratbezier_circle_demo() {
     let mut fg = Figure::new();
 
     // Draw the Bezier curve.
@@ -158,17 +158,20 @@ pub fn show_ratbezier_curve_demo() {
         .set_x_label("x", &[])
         .set_y_label("y", &[]);
 
-    let bez = BezierCircle {
+    let curves = BezierCircle {
         radius: 3,
         segments: 3
     }.compute();
     let before = Instant::now();
-    let (_xpoints, ypoints) = Evaluator::<1, 2>::evaluate_parametric_range1d(&bez, &0f64, &1f64, &1000);
-    log::info!("Bezier curve computed in: {} μs", before.elapsed().as_micros());
-    let (xvalues, yvalues, _zvalues) = Evaluator::<1, 2>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
-    axes2d1.lines(&xvalues, &yvalues, &[Caption("R. Bezier"), Color("orange")]);
-    let (cpx, cpy, _cpz) = Evaluator::<1, 2>::split_coords(0, &bez.p, 1, &bez.p, 2, &bez.p);
-    axes2d1.lines(&cpx, &cpy, &[Caption("R. Bezier"), Color("black")]);
+
+    for curve in curves {
+        let (_xpoints, ypoints) = Evaluator::<1, 2>::evaluate_parametric_range1d(&curve, &0f64, &1f64, &1000);
+        log::info!("Bezier curve computed in: {} μs", before.elapsed().as_micros());
+        let (xvalues, yvalues, _zvalues) = Evaluator::<1, 2>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
+        axes2d1.lines(&xvalues, &yvalues, &[Caption("R. Bezier"), Color("orange")]);
+        let (cpx, cpy, _cpz) = Evaluator::<1, 2>::split_coords(0, &curve.p, 1, &curve.p, 2, &curve.p);
+        axes2d1.lines(&cpx, &cpy, &[Caption("Control points"), Color("black"), LineStyle(DashType::Dot)]);
+    }
 
     match fg.show() {
         Err(_e) => { log::warn!("Could not show plot") },

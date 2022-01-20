@@ -285,7 +285,7 @@ impl BezierCircle {
     ///
     /// Computes the rational Bezier curve that will draw the requested circle.
     /// 
-    pub fn compute(&self) -> RatBezierCurve::<2, 3> {
+    pub fn compute(&self) -> Vec<RatBezierCurve::<2, 3>> {
         let r = self.radius as f64;
         let n = self.segments as f64;
         let alpha = 2.0*PI/(2.0*n);
@@ -314,10 +314,24 @@ impl BezierCircle {
 
                 log::info!("P: {}", p);
             }
-            
         }
 
-        RatBezierCurve::<2, 3>::create(cpoints, weights)
+        let mut idx = 0;
+        let mut curves = Vec::new();
+        for _i in 0..self.segments {
+            let cpoints_ = vec![
+                cpoints[idx],
+                cpoints[idx + 1],
+                cpoints[idx + 2]
+            ];
+            let weights_ = vec![
+                1f64, 0.5f64, 1f64
+            ];
+            idx += 2;
+            curves.push(RatBezierCurve::<2, 3>::create(cpoints_, weights_));
+        }
+        
+        curves
     }
 }
 

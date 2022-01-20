@@ -59,7 +59,7 @@ fn main() {
     }
 
     if opt.ratbezier_circle1 {
-        bezier::show_ratbezier_curve_demo();
+        bezier::show_ratbezier_circle_demo();
         return;
     }
 
