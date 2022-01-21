@@ -26,7 +26,7 @@ use isogeometric_analysis::core::HslProvider;
 use isogeometric_analysis::core::{RealPoint, RealPoint2d, RealPoint3d};
 use isogeometric_analysis::core::RealRange;
 use isogeometric_analysis::core::{p2, p3};
-use gnuplot::{Figure, Caption, Color, LineStyle, AxesCommon, Axes2D, DashType};
+use gnuplot::{Figure, Caption, Color, LineStyle, AxesCommon, Axes2D, DashType, AutoOption, PlotOption};
 use std::time::Instant;
 use array2d::Array2D;
 
@@ -109,38 +109,39 @@ pub fn show_ratbezier_arc_demo() {
     let mut fg = Figure::new();
 
     // Draw the Bezier curve.
-    let axes2d1 = fg.axes2d()
+    let mut axes2d1 = fg.axes2d()
+        .set_aspect_ratio(AutoOption::Fix(1.0))
+        .set_x_range(AutoOption::Fix(-1.), AutoOption::Fix(2.))
+        .set_y_range(AutoOption::Fix(-1.), AutoOption::Fix(2.))
         .set_y_grid(true)
         .set_x_grid(true)
         .set_x_label("x", &[])
         .set_y_label("y", &[]);
+    
+    let cp = vec![
+        RealPoint2d::point2d(0f64, 1f64),
+        RealPoint2d::point2d(1f64, 1f64),
+        RealPoint2d::point2d(1f64, 0f64)
+    ];
 
     {
-        let bez = BezierCurve {
-            p: vec![
-                RealPoint2d::point2d(0f64, 1f64),
-                RealPoint2d::point2d(1f64, 1f64),
-                RealPoint2d::point2d(1f64, 0f64)
-            ]
-        };
+        let bez = BezierCurve { p: cp.clone() };
         let (_xpoints, ypoints) = Evaluator::<1, 2>::evaluate_parametric_range1d(&bez, &0f64, &1f64, &1000);
         let (xvalues, yvalues, _zvalues) = Evaluator::<1, 2>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
-        axes2d1.lines(&xvalues, &yvalues, &[Caption("Bezier"), Color("orange")]);
+        axes2d1.lines(&xvalues, &yvalues, &[Caption("Bezier"), Color("orange"), LineStyle(DashType::Dot)]);
     }
 
     {
         let bez = RatBezierCurve::<2, 3>::create(
-            vec![
-                RealPoint2d::point2d(0f64, 1f64),
-                RealPoint2d::point2d(1f64, 1f64),
-                RealPoint2d::point2d(1f64, 0f64)
-            ],
+            cp.clone(),
             vec![1f64, 2f64.sqrt()/2.0, 1f64]
         );
         let (_xpoints, ypoints) = Evaluator::<1, 2>::evaluate_parametric_range1d(&bez, &0f64, &1f64, &1000);
         let (xvalues, yvalues, _zvalues) = Evaluator::<1, 2>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
-        axes2d1.lines(&xvalues, &yvalues, &[Caption("Bezier"), Color("red")]);
+        axes2d1.lines(&xvalues, &yvalues, &[Caption("Rational Bezier"), Color("red")]);
     }
+
+    show_control_points(&mut axes2d1, &cp, true);
 
     match fg.show() {
         Err(_e) => { log::warn!("Could not show plot") },
@@ -152,7 +153,10 @@ pub fn show_ratbezier_circle_demo() {
     let mut fg = Figure::new();
 
     // Draw the Bezier curve.
-    let axes2d1 = fg.axes2d()
+    let mut axes2d1 = fg.axes2d()
+        .set_aspect_ratio(AutoOption::Fix(1.0))
+        .set_x_range(AutoOption::Fix(-7.), AutoOption::Fix(7.))
+        .set_y_range(AutoOption::Fix(-6.), AutoOption::Fix(8.))
         .set_y_grid(true)
         .set_x_grid(true)
         .set_x_label("x", &[])
@@ -164,13 +168,20 @@ pub fn show_ratbezier_circle_demo() {
     }.compute();
     let before = Instant::now();
 
-    for curve in curves {
-        let (_xpoints, ypoints) = Evaluator::<1, 2>::evaluate_parametric_range1d(&curve, &0f64, &1f64, &1000);
+    for i in 0..curves.len() {
+        let (_xpoints, ypoints) = Evaluator::<1, 2>::evaluate_parametric_range1d(&curves[i], &0f64, &1f64, &1000);
         log::info!("Bezier curve computed in: {} μs", before.elapsed().as_micros());
         let (xvalues, yvalues, _zvalues) = Evaluator::<1, 2>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
-        axes2d1.lines(&xvalues, &yvalues, &[Caption("R. Bezier"), Color("orange")]);
-        let (cpx, cpy, _cpz) = Evaluator::<1, 2>::split_coords(0, &curve.p, 1, &curve.p, 2, &curve.p);
-        axes2d1.lines(&cpx, &cpy, &[Caption("Control points"), Color("black"), LineStyle(DashType::Dot)]);
+        if i == 0 {
+            axes2d1.lines(&xvalues, &yvalues, &[Caption("R. Bezier"), Color("orange")]);
+        }
+        else {
+            axes2d1.lines(&xvalues, &yvalues, &[Color("orange")]);
+        }
+    }
+
+    for i in 0..curves.len() {
+        show_control_points(&mut axes2d1, &curves[i].p, i == 0);
     }
 
     match fg.show() {
@@ -215,6 +226,21 @@ pub fn show_bezier_surf_demo(cpoints: Array2D<RealPoint3d>, multiplot: bool)
         Err(_e) => { log::warn!("Could not show plot") },
         Ok(_v) => {}
     }
+}
+
+///
+/// Draws the control points.
+/// 
+pub fn show_control_points(axes: &mut Axes2D, cp: &Vec<RealPoint2d>, add_legend: bool) {
+    let (xpoints, ypoints, _) = Evaluator::<1, 2>::split_coords(0, &cp, 1, &cp, 2, &cp);
+    let mut p_options = vec![ Color("black"), PlotOption::PointSymbol('O') ];
+    let mut l_options = vec![ Color("black"), LineStyle(DashType::Dash) ];
+    if add_legend {
+        p_options.push(Caption("Control points"));
+        l_options.push(Caption("Control points"));
+    }
+    axes.points(&xpoints, &ypoints, &p_options);
+    axes.lines(&xpoints, &ypoints, &l_options);
 }
 
 ///

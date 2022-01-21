@@ -223,7 +223,7 @@ pub struct RatBezierCurve<const S: usize, const H: usize> {
     pub p: Vec<RealPoint<S>>,
     pub weights: Vec<f64>,
     pub pw: Vec<RealPoint<H>>,
-    bez: BezierCurve<H>
+    pub bez: BezierCurve<H>
 }
 
 impl<const S: usize, const H: usize> RatBezierCurve<S, H> {
