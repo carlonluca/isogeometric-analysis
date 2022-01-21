@@ -105,6 +105,9 @@ pub fn show_bezier_curve_demo<const SIZE: usize>(cpoints: Vec<RealPoint<SIZE>>, 
     }
 }
 
+///
+/// Draw an arc.
+/// 
 pub fn show_ratbezier_arc_demo() {
     let mut fg = Figure::new();
 
