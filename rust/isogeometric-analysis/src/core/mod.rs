@@ -32,6 +32,7 @@ pub use self::point::{p1, p2, p3};
 pub use self::range::IntRange;
 pub use self::range::RealRange;
 pub use self::matrix::RectMatrix;
+pub use self::matrix::RealRectMatrix;
 pub use self::matrix::RowVector;
 pub use self::matrix::ColVector;
 pub use self::matrix::MatElement;

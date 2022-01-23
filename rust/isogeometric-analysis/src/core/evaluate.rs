@@ -48,9 +48,9 @@ pub trait Evaluatable<I: MatElement, O: MatElement, const DIMDOM: usize, const D
 ///
 /// This class is used to automate computations for curves.
 /// 
-pub struct Evaluator<const DIMIN: usize, const DIMOUT: usize> {}
+pub struct Evaluator<const DIMIN: usize, const DIMOUT: usize, const C: usize> {}
 
-impl<const DIMIN: usize, const DIMOUT: usize> Evaluator<DIMIN, DIMOUT> {
+impl<const DIMIN: usize, const DIMOUT: usize, const C: usize> Evaluator<DIMIN, DIMOUT, C> {
     ///
     /// Computes a geometric element for a sequence of points.
     /// 
@@ -65,9 +65,9 @@ impl<const DIMIN: usize, const DIMOUT: usize> Evaluator<DIMIN, DIMOUT> {
     ///
     /// Evalutes a parametric element as a map from ℝ to ℝ^DIMOUT.
     /// 
-    pub fn evaluate_parametric_range1d(element: &impl Evaluatable<f64, f64, 1, DIMOUT>, from: &f64, to: &f64, count: &i64) -> (Vec<RealPoint<1>>, Vec<RealPoint<DIMOUT>>) {
-        let rv: RowVector<f64> = RowVector::<f64>::evenly_spaced(from, to, count);
-        let values = rv.to_vec();
+    pub fn evaluate_parametric_range1d(element: &impl Evaluatable<f64, f64, 1, DIMOUT>, from: &f64, to: &f64) -> (Vec<RealPoint<1>>, Vec<RealPoint<DIMOUT>>) {
+        let rv = RowVector::<f64, C>::evenly_spaced(from, to);
+        let values = rv.row_to_vec(0);
         let mut input: Vec<RealPoint<1>> = Vec::new();
         for v in values {
             let p = Point::<f64, 1>::point1d(v);
@@ -83,9 +83,9 @@ impl<const DIMIN: usize, const DIMOUT: usize> Evaluator<DIMIN, DIMOUT> {
         return (input, output);
     }
 
-    pub fn evaluate_parametric_range2d(element: &impl Evaluatable<f64, f64, 2, DIMOUT>, r1: &RealRange, r2: &RealRange, count: &i64) -> (Vec<RealPoint2d>, Vec<RealPoint<DIMOUT>>) {
-        let r1seq = RowVector::<f64>::evenly_spaced(&r1.a, &r1.b, count).to_vec();
-        let r2seq = RowVector::<f64>::evenly_spaced(&r2.a, &r2.b, count).to_vec();
+    pub fn evaluate_parametric_range2d(element: &impl Evaluatable<f64, f64, 2, DIMOUT>, r1: &RealRange, r2: &RealRange) -> (Vec<RealPoint2d>, Vec<RealPoint<DIMOUT>>) {
+        let r1seq = RowVector::<f64, C>::evenly_spaced(&r1.a, &r1.b).row_to_vec(0);
+        let r2seq = RowVector::<f64, C>::evenly_spaced(&r2.a, &r2.b).row_to_vec(0);
         let mut input = Vec::<RealPoint2d>::new();
         for i in &r1seq {
             for j in &r2seq {
@@ -149,7 +149,7 @@ mod tests {
             RealPoint::<1>::point1d(7f64),
             RealPoint::<1>::point1d(8f64)
         ];
-        let (x, y, z) = Evaluator::<1, 1>::split_coords(0, &xvalues, 0, &yvalues, 0, &zvalues);
+        let (x, y, z) = Evaluator::<1, 1, 1>::split_coords(0, &xvalues, 0, &yvalues, 0, &zvalues);
         assert_eq!(x.len(), 3);
         assert_eq!(y.len(), 3);
         assert_eq!(z.len(), 3);

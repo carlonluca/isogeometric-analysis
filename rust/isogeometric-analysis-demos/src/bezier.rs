@@ -89,9 +89,9 @@ pub fn show_bezier_curve_demo<const SIZE: usize>(cpoints: Vec<RealPoint<SIZE>>, 
     let n = cpoints.len() as u32;
     let bez = BezierCurve { p: cpoints };
     let before = Instant::now();
-    let (_xpoints, ypoints) = Evaluator::<SIZE, SIZE>::evaluate_parametric_range1d(&bez, &0f64, &1f64, &10);
+    let (_xpoints, ypoints) = Evaluator::<SIZE, SIZE, 10>::evaluate_parametric_range1d(&bez, &0f64, &1f64);
     log::info!("Bezier curve computed in: {} μs", before.elapsed().as_micros());
-    let (xvalues, yvalues, _zvalues) = Evaluator::<1, SIZE>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
+    let (xvalues, yvalues, _zvalues) = Evaluator::<1, SIZE, 0>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
     axes2d1.lines(&xvalues, &yvalues, &[Caption("Bezier"), Color("orange")]);
 
     // Draw the bernstein polynomials.
@@ -129,8 +129,8 @@ pub fn show_ratbezier_arc_demo() {
 
     {
         let bez = BezierCurve { p: cp.clone() };
-        let (_xpoints, ypoints) = Evaluator::<1, 2>::evaluate_parametric_range1d(&bez, &0f64, &1f64, &1000);
-        let (xvalues, yvalues, _zvalues) = Evaluator::<1, 2>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
+        let (_xpoints, ypoints) = Evaluator::<1, 2, 1000>::evaluate_parametric_range1d(&bez, &0f64, &1f64);
+        let (xvalues, yvalues, _zvalues) = Evaluator::<1, 2, 0>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
         axes2d1.lines(&xvalues, &yvalues, &[Caption("Bezier"), Color("orange"), LineStyle(DashType::Dot)]);
     }
 
@@ -139,8 +139,8 @@ pub fn show_ratbezier_arc_demo() {
             cp.clone(),
             vec![1f64, 2f64.sqrt()/2.0, 1f64]
         );
-        let (_xpoints, ypoints) = Evaluator::<1, 2>::evaluate_parametric_range1d(&bez, &0f64, &1f64, &1000);
-        let (xvalues, yvalues, _zvalues) = Evaluator::<1, 2>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
+        let (_xpoints, ypoints) = Evaluator::<1, 2, 1000>::evaluate_parametric_range1d(&bez, &0f64, &1f64);
+        let (xvalues, yvalues, _zvalues) = Evaluator::<1, 2, 0>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
         axes2d1.lines(&xvalues, &yvalues, &[Caption("Rational Bezier"), Color("red")]);
     }
 
@@ -172,9 +172,9 @@ pub fn show_ratbezier_circle_demo() {
     let before = Instant::now();
 
     for i in 0..curves.len() {
-        let (_xpoints, ypoints) = Evaluator::<1, 2>::evaluate_parametric_range1d(&curves[i], &0f64, &1f64, &1000);
+        let (_xpoints, ypoints) = Evaluator::<1, 2, 1000>::evaluate_parametric_range1d(&curves[i], &0f64, &1f64);
         log::info!("Bezier curve computed in: {} μs", before.elapsed().as_micros());
-        let (xvalues, yvalues, _zvalues) = Evaluator::<1, 2>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
+        let (xvalues, yvalues, _zvalues) = Evaluator::<1, 2, 0>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
         if i == 0 {
             axes2d1.lines(&xvalues, &yvalues, &[Caption("R. Bezier"), Color("orange")]);
         }
@@ -215,9 +215,9 @@ pub fn show_bezier_surf_demo(cpoints: Array2D<RealPoint3d>, multiplot: bool)
     let n = bez.degree_xi();
     let before = Instant::now();
     let r = RealRange { a: 0f64, b: 1f64 };
-    let (_xpoints, ypoints) = Evaluator::<2, 3>::evaluate_parametric_range2d(&bez, &r, &r, &100);
+    let (_xpoints, ypoints) = Evaluator::<2, 3, 100>::evaluate_parametric_range2d(&bez, &r, &r);
     log::info!("Bezier curve computed in: {} μs", before.elapsed().as_micros());
-    let (_xvalues, _yvalues, zvalues) = Evaluator::<2, 3>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
+    let (_xvalues, _yvalues, zvalues) = Evaluator::<2, 3, 0>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
     axes2d1.surface(zvalues, 100, 100, None, &[Caption(""), Color("orange")]);
 
     // Draw the bernstein polynomials.
@@ -235,7 +235,7 @@ pub fn show_bezier_surf_demo(cpoints: Array2D<RealPoint3d>, multiplot: bool)
 /// Draws the control points.
 /// 
 pub fn show_control_points(axes: &mut Axes2D, cp: &Vec<RealPoint2d>, add_legend: bool) {
-    let (xpoints, ypoints, _) = Evaluator::<1, 2>::split_coords(0, &cp, 1, &cp, 2, &cp);
+    let (xpoints, ypoints, _) = Evaluator::<1, 2, 0>::split_coords(0, &cp, 1, &cp, 2, &cp);
     let mut p_options = vec![ Color("black"), PlotOption::PointSymbol('O') ];
     let mut l_options = vec![ Color("black"), LineStyle(DashType::Dash) ];
     if add_legend {
@@ -260,8 +260,8 @@ pub fn show_bernstein(axes2d2: &mut Axes2D, deg: u32, cell_index: u32)
     let hsl = HslProvider { count: deg + 1 };
     for i in 0..(deg + 1) {
         let b = Bernstein::create(deg, i).unwrap();
-        let (xpoints, ypoints) = Evaluator::<1, 1>::evaluate_parametric_range1d(&b, &0f64, &1f64, &1000);
-        let (xvalues, yvalues, _zvalues) = Evaluator::<1, 1>::split_coords(0, &xpoints, 0, &ypoints, 0, &xpoints);
+        let (xpoints, ypoints) = Evaluator::<1, 1, 1000>::evaluate_parametric_range1d(&b, &0f64, &1f64);
+        let (xvalues, yvalues, _zvalues) = Evaluator::<1, 1, 0>::split_coords(0, &xpoints, 0, &ypoints, 0, &xpoints);
         let caption = format!("B_{{{}}}^{{{}}}", i, deg);
         let color_hex = hsl.hex_color_for_index(i);
         let color = Color(color_hex.as_str());

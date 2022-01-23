@@ -36,7 +36,7 @@ use array2d::Array2D;
 /// use isogeometric_analysis::bezier::Bernstein;
 /// use isogeometric_analysis::core::Evaluator;
 /// let b = Bernstein::create(5, 2).unwrap();
-/// let (xpoints, ypoints) = Evaluator::<1, 1>::evaluate_parametric_range1d(&b, &0f64, &1f64, &10000);
+/// let (xpoints, ypoints) = Evaluator::<1, 1, 1000>::evaluate_parametric_range1d(&b, &0f64, &1f64);
 /// ```
 /// 
 pub struct Bernstein {
