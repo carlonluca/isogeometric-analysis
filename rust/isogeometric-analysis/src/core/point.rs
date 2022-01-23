@@ -21,6 +21,7 @@
  */
 
 use super::MatElement;
+use crate::core::RowVector;
 use std::ops::{Add, AddAssign};
 use std::ops::{Sub, SubAssign};
 use std::ops::{Mul, MulAssign};
@@ -37,7 +38,7 @@ use float_cmp::ApproxEq;
 #[derive(Clone)]
 #[derive(Copy)]
 pub struct Point<T: MatElement, const SIZE: usize> {
-    data: [T; SIZE]
+    data: RowVector<T, SIZE>
 }
 
 impl<T: MatElement, const SIZE: usize> Display for Point<T, SIZE> {
@@ -67,7 +68,7 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     /// 
     pub fn point1d(x: T) -> Point<T, 1> {
         Point {
-            data: [x]
+            data: RowVector::row_from_vec(&[x])
         }
     }
 
@@ -76,7 +77,7 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     /// 
     pub fn point2d(x: T, y: T) -> Point<T, 2> {
         Point {
-            data: [x, y]
+            data: RowVector::row_from_vec(&[x, y])
         }
     }
 
@@ -85,13 +86,13 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     /// 
     pub fn point3d(x: T, y: T, z: T) -> Point<T, 3> {
         Point {
-            data: [x, y, z]
+            data: RowVector::row_from_vec(&[x, y, z])
         }
     }
 
     pub fn origin() -> Point<T, SIZE> {
         Point {
-            data: [T::zero(); SIZE]
+            data: RowVector::zeros()
         }
     }
 
@@ -99,16 +100,14 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     /// Returns the dimension of the space containing this point.
     /// 
     pub fn dim(&self) -> usize {
-        self.data.len()
+        self.data.cols()
     }
 
     ///
     /// Sets all values to zero.
     /// 
     pub fn reset(&mut self) {
-        for i in 0..self.data.len() {
-            self.data[i] = T::zero();
-        }
+        self.data.reset()
     }
 
     ///
@@ -135,7 +134,7 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     ///
     pub fn value(&self, idx: usize) -> T {
         return if self.dim() > idx as usize {
-            self.data[idx]
+            self.data.value(0, idx)
         }
         else {
             T::zero()
@@ -147,7 +146,7 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     /// 
     pub fn set_value(&mut self, idx: usize, val: T) -> &mut Self {
         if self.dim() > idx {
-            self.data[idx] = val;
+            self.data.set_value(0, idx, val);
         }
         self
     }
@@ -156,9 +155,7 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     /// Clones this point to another one.
     /// 
     pub fn clone_to(&self, dest: &mut Point<T, SIZE>) {
-        for i in 0..self.data.len() {
-            dest.data[i] = self.data[i];
-        }
+        dest.data = self.data.clone();
     }
 }
 
@@ -172,45 +169,46 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
             panic!();
         }
         for i in 0..self.dim() {
-            res.set_value(i, self.data[i]*w);
+            res.set_value(i, self.value(i)*w);
         }
-        *res.set_value(self.dim(), w)
+        res.set_value(self.dim(), w);
+        return res;
     }
 
     ///
     /// Converts this point to a corresponding point in cartesian coordinates.
     /// 
     pub fn to_cartesian<const CARTSIZE: usize>(&self) -> Point<T, CARTSIZE> {
-        if self.data[self.dim() - 1] == T::zero() {
+        if self.value(self.dim() - 1) == T::zero() {
             panic!("Invalid plane")
         }
         let mut res = Point::<T, CARTSIZE>::origin();
         for i in 0..res.dim() {
-            res.data[i] = self.data[i]/self.data[self.dim() - 1];
+            res.set_value(i, self.value(i)/self.value(self.dim() - 1));
         }
         res
     }
 }
 
 impl<T: MatElement> Point<T, 1> {
-    pub fn x(&self) -> T { self.data[0] }
-    pub fn set_x(&mut self, x: T) { self.data[0] = x; }
+    pub fn x(&self) -> T { self.value(0) }
+    pub fn set_x(&mut self, x: T) { self.set_value(0, x); }
 }
 
 impl<T: MatElement> Point<T, 2> {
-    pub fn x(&self) -> T { self.data[0] }
-    pub fn set_x(&mut self, x: T) { self.data[0] = x; }
-    pub fn y(&self) -> T { self.data[1] }
-    pub fn set_y(&mut self, y: T) { self.data[1] = y; }
+    pub fn x(&self) -> T { self.value(0) }
+    pub fn set_x(&mut self, x: T) { self.set_value(0, x); }
+    pub fn y(&self) -> T { self.value(1) }
+    pub fn set_y(&mut self, y: T) { self.set_value(1, y); }
 }
 
 impl<T: MatElement> Point<T, 3> {
-    pub fn x(&self) -> T { self.data[0] }
-    pub fn set_x(&mut self, x: T) { self.data[0] = x; }
-    pub fn y(&self) -> T { self.data[1] }
-    pub fn set_y(&mut self, y: T) { self.data[1] = y; }
-    pub fn z(&self) -> T { self.data[2] }
-    pub fn set_z(&mut self, z: T) { self.data[2] = z; }
+    pub fn x(&self) -> T { self.value(0) }
+    pub fn set_x(&mut self, x: T) { self.set_value(0, x); }
+    pub fn y(&self) -> T { self.value(1) }
+    pub fn set_y(&mut self, y: T) { self.set_value(1, y); }
+    pub fn z(&self) -> T { self.value(2) }
+    pub fn set_z(&mut self, z: T) { self.set_value(2, z); }
 }
 
 impl<T: MatElement, const SIZE: usize> PartialEq for Point<T, SIZE> {
@@ -227,10 +225,7 @@ impl<T: MatElement, const SIZE: usize> Add for Point<T, SIZE> {
     ///
     fn add(self, other: Self) -> Self {
         if self.dim() != other.dim() { panic!() }
-        let mut data = self.data.clone();
-        for i in 0..(data.len()) {
-            data[i] += other.data[i];
-        }
+        let data = self.data + other.data;
         Self {
             data: data
         }
@@ -239,9 +234,8 @@ impl<T: MatElement, const SIZE: usize> Add for Point<T, SIZE> {
 
 impl<T: MatElement, const SIZE: usize> AddAssign for Point<T, SIZE> {
     fn add_assign(&mut self, rhs: Point<T, SIZE>) {
-        for i in 0..self.data.len() {
-            self.data[i] += rhs.data[i];
-        }
+        if self.dim() != rhs.dim() { panic!() }
+        self.data += rhs.data;
     }
 }
 
@@ -253,10 +247,7 @@ impl<T: MatElement, const SIZE: usize> Sub for Point<T, SIZE> {
     /// 
     fn sub(self, other: Self) -> Self::Output {
         if self.dim() != other.dim() { panic!() }
-        let mut data = self.data.clone();
-        for i in 0..(data.len()) {
-            data[i] -= other.data[i];
-        }
+        let data = self.data - other.data;
         Self {
             data: data
         }
@@ -265,9 +256,8 @@ impl<T: MatElement, const SIZE: usize> Sub for Point<T, SIZE> {
 
 impl<T: MatElement, const SIZE: usize> SubAssign for Point<T, SIZE> {
     fn sub_assign(&mut self, rhs: Point<T, SIZE>) {
-        for i in 0..self.data.len() {
-            self.data[i] -= rhs.data[i];
-        }
+        if self.dim() != rhs.dim() { panic!() }
+        self.data -= rhs.data
     }
 }
 
@@ -278,10 +268,7 @@ impl<T: MatElement, const SIZE: usize> Mul<T> for Point<T, SIZE> {
     /// Multiplication by a scalar.
     /// 
     fn mul(self, scalar: T) -> Self::Output {
-        let mut data = self.data.clone();
-        for i in 0..data.len() {
-            data[i] *= scalar;
-        }
+        let data = self.data*scalar;
         Self {
             data: data
         }
@@ -290,9 +277,7 @@ impl<T: MatElement, const SIZE: usize> Mul<T> for Point<T, SIZE> {
 
 impl<T: MatElement, const SIZE: usize> MulAssign<T> for Point<T, SIZE> {
     fn mul_assign(&mut self, rhs: T) {
-        for i in 0..self.data.len() {
-            self.data[i] *= rhs;
-        }
+        self.data *= rhs;
     }
 }
 
@@ -300,26 +285,20 @@ impl<M: Copy + Default, F: MatElement + ApproxEq<Margin=M>, const SIZE: usize> A
     type Margin = M;
 
     fn approx_eq<T: Into<Self::Margin>>(self, other: Self, margin: T) -> bool {
-        let margin = margin.into();
-        for i in 0..self.data.len() {
-            if !self.data[i].approx_eq(other.data[i], margin) {
-                return false;
-            }
-        }
-        return true;
+        self.data.approx_eq(other.data, margin)
     }
 }
 
 pub fn p1(x: f64) -> Point<f64, 1> {
-    Point { data: [x] }
+    Point { data: RowVector::row_from_vec(&[x]) }
 }
 
 pub fn p2(x: f64, y: f64) -> Point<f64, 2> {
-    Point { data: [x, y] }
+    Point { data: RowVector::row_from_vec(&[x, y]) }
 }
 
 pub fn p3(x: f64, y: f64, z: f64) -> Point<f64, 3> {
-    Point { data: [x, y, z] }
+    Point { data: RowVector::row_from_vec(&[x, y, z]) }
 }
 
 #[cfg(test)]

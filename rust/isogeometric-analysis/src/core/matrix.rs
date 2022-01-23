@@ -29,6 +29,7 @@ use std::fmt::Display;
 use std::fmt::Debug;
 use super::size::Size;
 use num::traits::{Signed};
+use float_cmp::ApproxEq;
 use log;
 
 pub trait MatElement: Signed + Clone + MulAssign + AddAssign + SubAssign + PartialOrd + Display + Copy + Debug {}
@@ -36,6 +37,7 @@ impl<T> MatElement for T where T: Signed + Clone + MulAssign + AddAssign + SubAs
 
 #[derive(Debug)]
 #[derive(Eq)]
+#[derive(Copy)]
 pub struct RectMatrix<T: MatElement, const R: usize, const C: usize> {
     data: [[T; C]; R]
 }
@@ -45,6 +47,22 @@ pub type RealRectMatrix<const R: usize, const C: usize> = RectMatrix<f64, R, C>;
 impl<T: MatElement, const R: usize, const C: usize> PartialEq for RectMatrix<T, R, C> {
     fn eq(&self, other: &Self) -> bool {
         self.data == other.data
+    }
+}
+
+impl<M: Copy + Default, F: MatElement + ApproxEq<Margin=M>, const R: usize, const C: usize> ApproxEq for RectMatrix<F, R, C> {
+    type Margin = M;
+
+    fn approx_eq<T: Into<Self::Margin>>(self, other: Self, margin: T) -> bool {
+        let margin = margin.into();
+        for i in 0..self.data.len() {
+            for j in 0..self.data[i].len() {
+                if !self.data[i][j].approx_eq(other.data[i][j], margin) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
 
@@ -59,6 +77,17 @@ impl<T: MatElement, const R: usize, const C: usize> Add for RectMatrix<T, R, C> 
     }
 }
 
+impl<T: MatElement, const R: usize, const C: usize> AddAssign for RectMatrix<T, R, C> {
+    fn add_assign(&mut self, rhs: RectMatrix<T, R, C>) {
+        if R != rhs.rows() || C != rhs.cols() { panic!() }
+        for i in 0..self.rows() {
+            for j in 0..self.cols() {
+                self.data[i][j] += rhs.data[i][j];
+            }
+        }
+    }
+}
+
 impl<T: MatElement, const R: usize, const C: usize> Sub for RectMatrix<T, R, C> {
     type Output = Self;
 
@@ -67,6 +96,17 @@ impl<T: MatElement, const R: usize, const C: usize> Sub for RectMatrix<T, R, C> 
     /// 
     fn sub(self, other: Self) -> Self::Output {
         return self.mult_add(&other, T::one().neg());
+    }
+}
+
+impl<T: MatElement, const R: usize, const C: usize> SubAssign for RectMatrix<T, R, C> {
+    fn sub_assign(&mut self, rhs: RectMatrix<T, R, C>) {
+        if R != rhs.rows() || C != rhs.cols() { panic!() }
+        for i in 0..self.rows() {
+            for j in 0..self.cols() {
+                self.data[i][j] -= rhs.data[i][j];
+            }
+        }
     }
 }
 
@@ -84,6 +124,16 @@ impl<T: MatElement, const R: usize, const C: usize> Mul<T> for RectMatrix<T, R, 
             }
         }
         return ret;
+    }
+}
+
+impl<T: MatElement, const R: usize, const C: usize> MulAssign<T> for RectMatrix<T, R, C> {
+    fn mul_assign(&mut self, rhs: T) {
+        for i in 0..self.rows() {
+            for j in 0..self.cols() {
+                self.data[i][j] *= rhs;
+            }
+        }
     }
 }
 
@@ -360,6 +410,13 @@ impl<T: MatElement, const R: usize, const C: usize> RectMatrix<T, R, C> {
         RectMatrix::<T, R, C> {
             data: [[T::zero(); C]; R]
         }
+    }
+
+    ///
+    /// Reset all values to zero.
+    /// 
+    pub fn reset(&mut self) {
+        self.data = [[T::zero(); C]; R];
     }
 
     ///
