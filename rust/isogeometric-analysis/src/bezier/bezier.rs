@@ -285,7 +285,8 @@ impl BezierCircle {
     ///
     /// Computes the rational Bezier curve that will draw the requested circle.
     /// 
-    pub fn compute(&self) -> Vec<RatBezierCurve::<2, 3>> {
+    pub fn compute(&self) -> Option<Vec<RatBezierCurve::<2, 3>>> {
+        if self.segments < 2 { return None; }
         let r = self.radius as f64;
         let n = self.segments as f64;
         let alpha = 2.0*PI/(2.0*n);
@@ -301,18 +302,14 @@ impl BezierCircle {
             cpoints.push(p);
             weights.push(w);
 
-            log::info!("P: {}", p);
-
             if i < self.segments {
                 p = RealPoint2d::point2d(
                     outerr*((2.0*(i as f64) + 1.0)*alpha).sin(),
                     -1.0*outerr*((2.0*(i as f64) + 1.0)*alpha).cos()
                 );
-                w = 0.5;
+                w = alpha.cos();
                 cpoints.push(p);
                 weights.push(w);
-
-                log::info!("P: {}", p);
             }
         }
 
@@ -331,7 +328,7 @@ impl BezierCircle {
             curves.push(RatBezierCurve::<2, 3>::create(cpoints_, weights_));
         }
         
-        curves
+        return Some(curves);
     }
 }
 

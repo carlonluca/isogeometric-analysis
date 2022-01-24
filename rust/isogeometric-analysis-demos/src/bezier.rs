@@ -168,7 +168,7 @@ pub fn show_ratbezier_circle_demo() {
     let curves = BezierCircle {
         radius: 3,
         segments: 3
-    }.compute();
+    }.compute().unwrap();
     let before = Instant::now();
 
     for i in 0..curves.len() {
