@@ -25,6 +25,8 @@ use structopt::StructOpt;
 #[derive(Debug, StructOpt)]
 #[structopt(name = "isogeometric-analysis-demos", about = "A demo for the isogeometric_analysis crate")]
 struct Opt {
+    #[structopt(long, help = "Shows the Bernstein polynomials of degree 2")]
+    bernstein2: bool,
     #[structopt(long, help = "Shows the Bezier demo 1")]
     bezier1: bool,
     #[structopt(long, help = "Shows the Bezier demo 2")]
@@ -43,6 +45,11 @@ fn main() {
     env_logger::init();
 
     let opt = Opt::from_args();
+    if opt.bernstein2 {
+        bezier::show_bernstein_2();
+        return;
+    }
+
     if opt.bezier1 {
         bezier::show_bezier_curve_demo_1(opt.multiplot);
         return;

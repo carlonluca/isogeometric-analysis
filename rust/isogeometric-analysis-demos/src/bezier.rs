@@ -30,6 +30,27 @@ use gnuplot::{Figure, Caption, Color, LineStyle, AxesCommon, Axes2D, DashType, A
 use std::time::Instant;
 use array2d::Array2D;
 
+pub fn show_bernstein_2() {
+    let mut fg = Figure::new();
+
+    // Draw the Bezier curve.
+    let axes2d1 = fg.axes2d()
+        .set_aspect_ratio(AutoOption::Fix(1.0))
+        .set_x_range(AutoOption::Fix(0.), AutoOption::Fix(1.))
+        .set_y_range(AutoOption::Fix(0.), AutoOption::Fix(1.))
+        .set_y_grid(true)
+        .set_x_grid(true)
+        .set_x_label("x", &[])
+        .set_y_label("y", &[]);
+    
+    show_bernstein(axes2d1, 2, 0);
+
+    match fg.show() {
+        Err(_e) => { log::warn!("Could not show plot") },
+        Ok(_v) => {}
+    }
+}
+
 ///
 /// Shows the first demo of a Bezier curve.
 /// 
