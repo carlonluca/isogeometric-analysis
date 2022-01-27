@@ -387,18 +387,22 @@ mod tests {
 
     #[test]
     fn test_circle() {
-        let circle = BezierCircle {
-            radius: 3,
-            segments: 3
-        };
-        let ratbezs = circle.compute().unwrap();
-        for ratbez in ratbezs.iter() {
-            let mut computed = RealPoint2d::origin();
-            for i in 0..=10000 {
-                let input = RealPoint1d::point1d((i as f64)/100.);
-                ratbez.evaluate_fill(&input, &mut computed);
-                let dist = RealPoint2d::origin().dist(&computed);
-                assert_approx_eq!(f64, dist, 3f64, epsilon = 0.00000001);
+        for r in 0..7 {
+            for s in 3..10 {
+                let circle = BezierCircle {
+                    radius: r,
+                    segments: s
+                };
+                let ratbezs = circle.compute().unwrap();
+                for ratbez in ratbezs.iter() {
+                    let mut computed = RealPoint2d::origin();
+                    for i in 0..=1000 {
+                        let input = RealPoint1d::point1d((i as f64)/1000.);
+                        ratbez.evaluate_fill(&input, &mut computed);
+                        let dist = RealPoint2d::origin().dist(&computed);
+                        assert_approx_eq!(f64, dist, r as f64, epsilon = 0.00000001);
+                    }
+                }
             }
         }
     }
