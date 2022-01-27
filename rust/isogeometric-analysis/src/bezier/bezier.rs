@@ -361,6 +361,7 @@ impl BezierCurveDemo1 {
 mod tests {
     use crate::bezier::RatBezierCurve;
     use crate::bezier::BezierCurveDemo1;
+    use crate::bezier::BezierCircle;
     use crate::core::RealPoint1d;
     use crate::core::RealPoint2d;
     use crate::core::Evaluatable;
@@ -381,6 +382,24 @@ mod tests {
             demorat1.evaluate_fill(&input, &mut outputrat);
             demo1.evaluate_fill(&input, &mut output);
             assert_approx_eq!(RealPoint2d, output, outputrat);
+        }
+    }
+
+    #[test]
+    fn test_circle() {
+        let circle = BezierCircle {
+            radius: 3,
+            segments: 3
+        };
+        let ratbezs = circle.compute().unwrap();
+        for ratbez in ratbezs.iter() {
+            let mut computed = RealPoint2d::origin();
+            for i in 0..=10000 {
+                let input = RealPoint1d::point1d((i as f64)/100.);
+                ratbez.evaluate_fill(&input, &mut computed);
+                let dist = RealPoint2d::origin().dist(&computed);
+                assert_approx_eq!(f64, dist, 3f64, epsilon = 0.00000001);
+            }
         }
     }
 }
