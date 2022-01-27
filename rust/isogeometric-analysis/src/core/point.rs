@@ -28,6 +28,7 @@ use std::ops::{Mul, MulAssign};
 use std::fmt::Display;
 use std::fmt::Formatter;
 use std::fmt::Result;
+use num::traits::{pow, Float};
 use float_cmp::ApproxEq;
 
 ///
@@ -289,6 +290,19 @@ impl<M: Copy + Default, F: MatElement + ApproxEq<Margin=M>, const SIZE: usize> A
     }
 }
 
+impl<T: Float + MatElement, const SIZE: usize> Point<T, SIZE> {
+    ///
+    /// Returns the euclidean disance between the two points d(self, p2).
+    /// 
+    pub fn dist(&self, p2: Point<T, SIZE>) -> T {
+        let mut sum = T::zero();
+        for i in 0..SIZE {
+            sum += pow::<T>(self.value(i) - p2.value(i), 2);
+        }
+        sum.sqrt()
+    }
+}
+
 pub fn p1(x: f64) -> Point<f64, 1> {
     Point { data: RowVector::row_from_vec(&[x]) }
 }
@@ -303,7 +317,7 @@ pub fn p3(x: f64, y: f64, z: f64) -> Point<f64, 3> {
 
 #[cfg(test)]
 mod tests {
-    use crate::core::{RealPoint, RealPoint2d, RealPoint3d};
+    use crate::core::{RealPoint, RealPoint1d, RealPoint2d, RealPoint3d};
     use crate::core::IntPoint;
     use float_cmp::approx_eq;
 
@@ -314,5 +328,8 @@ mod tests {
         assert_eq!(RealPoint2d::point2d(1.0, 2.0).to_homogeneous(1.1), RealPoint3d::point3d(1.1, 2.2, 1.1));
         assert_eq!(RealPoint2d::point2d(1.0, 2.0).to_homogeneous::<3>(1.1).to_cartesian(), RealPoint2d::point2d(1.0, 2.0));
         assert!(approx_eq!(RealPoint2d, RealPoint2d::point2d(2.0/2.0, 2.0), RealPoint2d::point2d(1.0, 2.0)));
+        assert!(approx_eq!(f64, RealPoint1d::point1d(5.).dist(RealPoint1d::point1d(3.)), 2.));
+        assert!(approx_eq!(f64, RealPoint1d::point1d(3.).dist(RealPoint1d::point1d(5.)), 2.));
+        assert!(approx_eq!(f64, RealPoint3d::point3d(7., 4., 3.).dist(RealPoint3d::point3d(17., 6., 2.)), 105f64.sqrt()));
     }
 }

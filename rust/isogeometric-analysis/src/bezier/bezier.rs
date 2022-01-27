@@ -322,7 +322,9 @@ impl BezierCircle {
                 cpoints[idx + 2]
             ];
             let weights_ = vec![
-                1f64, 0.5f64, 1f64
+                weights[idx],
+                weights[idx + 1],
+                weights[idx + 2]
             ];
             idx += 2;
             curves.push(RatBezierCurve::<2, 3>::create(cpoints_, weights_));
