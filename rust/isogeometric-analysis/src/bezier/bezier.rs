@@ -400,7 +400,7 @@ mod tests {
                         let input = RealPoint1d::point1d((i as f64)/1000.);
                         ratbez.evaluate_fill(&input, &mut computed);
                         let dist = RealPoint2d::origin().dist(&computed);
-                        assert_approx_eq!(f64, dist, r as f64, epsilon = 0.00000001);
+                        assert_approx_eq!(f64, dist, r as f64, epsilon = 1E-6);
                     }
                 }
             }
