@@ -287,27 +287,27 @@ impl BezierCircle {
         if self.segments < 2 { return None; }
         let r = self.radius as f64;
         let n = self.segments as f64;
-        let alpha = 2.0*PI/(2.0*n);
+        let alpha = 2.*PI/(2.*n);
         let outerr = r/alpha.cos();
         let mut cpoints = Vec::<RealPoint2d>::new();
         let mut weights = Vec::<f64>::new();
         for i in 0..=self.segments {
+            let mut a = 2.*(i as f64)*alpha;
             let mut p = RealPoint2d::point2d(
-                r*(2.0*(i as f64)*alpha).sin(),
-                -1.0*r*(2.0*(i as f64)*alpha).cos()
+                r*(a).sin(),
+                -r*(a).cos()
             );
-            let mut w = 1.0;
             cpoints.push(p);
-            weights.push(w);
+            weights.push(1.);
 
             if i < self.segments {
+                a = (2.*(i as f64) + 1.)*alpha;
                 p = RealPoint2d::point2d(
-                    outerr*((2.0*(i as f64) + 1.0)*alpha).sin(),
-                    -1.0*outerr*((2.0*(i as f64) + 1.0)*alpha).cos()
+                    outerr*a.sin(),
+                    -outerr*a.cos()
                 );
-                w = alpha.cos();
                 cpoints.push(p);
-                weights.push(w);
+                weights.push(alpha.cos());
             }
         }
 
