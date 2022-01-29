@@ -40,7 +40,7 @@ fn main() {
             RealPoint2d::point2d(0.6f64, 1.5f64),
             RealPoint2d::point2d(1.5f64, 0f64)
         ];
-        let bez = isogeometric_analysis::bezier::BezierCurve { p: cpoints };
+        let bez = isogeometric_analysis::bezier::BezierCurve::create(cpoints);
         let before = Instant::now();
         for _i in 0..iterations {
             let (_xpoints, _ypoints) = Evaluator::<2, 2, 10000>::evaluate_parametric_range1d(&bez, &0f64, &1f64);
@@ -57,7 +57,7 @@ fn main() {
             RealPoint2d::point2d(3f64, 5f64),
             RealPoint2d::point2d(4f64, 2f64)
         ];
-        let bez = isogeometric_analysis::bezier::BezierCurve { p: cpoints };
+        let bez = isogeometric_analysis::bezier::BezierCurve::create(cpoints);
         let mut before = Instant::now();
         for i in 0..100 {
             flocurve.point_at_pos((i as f64)/100.);

@@ -28,7 +28,8 @@ use num::traits::Pow;
 use array2d::Array2D;
 
 ///
-/// Represents a Bernstein basis polynomial.
+/// Represents a Bernstein polynomial. Bernstein polynomials are functions
+/// f:ℝ→ℝ.
 /// 
 /// # Example
 /// 
@@ -73,7 +74,8 @@ impl Bernstein {
 /// Implements Bezier curves and surfaces.
 /// 
 pub struct BezierCurve<const SIZE: usize> {
-    pub p: Vec<RealPoint<SIZE>>
+    pub p: Vec<RealPoint<SIZE>>,
+    bernstein: Vec<Bernstein>
 }
 
 impl<const SIZE: usize> Evaluatable<f64, f64, 1, SIZE> for BezierCurve<SIZE> {
@@ -86,6 +88,19 @@ impl<const SIZE: usize> Evaluatable<f64, f64, 1, SIZE> for BezierCurve<SIZE> {
 }
 
 impl<const SIZE: usize> BezierCurve<SIZE> {
+    pub fn create(cpoints: Vec<RealPoint<SIZE>>) -> BezierCurve<SIZE> {
+        let n = (cpoints.len() - 1) as u32;
+        let mut b = Vec::<Bernstein>::new();
+        for i in 0u32..=n {
+            b.push(Bernstein::create(n, i).unwrap());
+        }
+
+        BezierCurve {
+            p: cpoints,
+            bernstein: b
+        }
+    }
+
     ///
     /// Computes the value of the Bezier curve in xi using the direct algorithm. This
     /// technique is not numerically stable.
@@ -95,8 +110,7 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
         let mut tmp = RealPoint1d::origin();
         output.reset();
         for i in 0..n {
-            let bernstein = Bernstein::create((n - 1) as u32, i as u32).unwrap();
-            let bout = bernstein.evaluate_fill(&input, &mut tmp).x();
+            let bout = self.bernstein[i].evaluate_fill(&input, &mut tmp).x();
             *output += self.p[i]*bout;
         }
 
@@ -201,11 +215,11 @@ impl<const S: usize> BezierSurf<S> {
         let xi = RealPoint1d::point1d(input.x());
         let mut q = Vec::<RealPoint<S>>::new();
         for i in 0..=n {
-            let bezcurve1 = BezierCurve::<S> { p: self.data.as_rows()[i as usize].clone() };
+            let bezcurve1 = BezierCurve::<S>::create(self.data.as_rows()[i as usize].clone());
             q.push(bezcurve1.evaluate_de_casteljau(&eta));
         }
 
-        let bezcurve2 = BezierCurve::<S> { p: q };
+        let bezcurve2 = BezierCurve::<S>::create(q);
         let res = bezcurve2.evaluate_de_casteljau(&xi);
 
         for i in 0..output.dim() {
@@ -244,9 +258,7 @@ impl<const S: usize, const H: usize> RatBezierCurve<S, H> {
             p: p,
             weights: weights,
             pw: pw.clone(),
-            bez: BezierCurve::<H> {
-                p: pw.clone()
-            }
+            bez: BezierCurve::<H>::create(pw.clone())
         }
     }
 }
@@ -342,16 +354,14 @@ impl BezierCurveDemo1 {
     /// Returns the BezierCurve.
     /// 
     pub fn create() -> BezierCurve<2> {
-        BezierCurve {
-            p: vec![
-                p2(0f64, 0f64),
-                p2(1f64, 1f64),
-                p2(2f64, 0.5f64),
-                p2(3f64, 0.5f64),
-                p2(0.6f64, 1.5f64),
-                p2(1.5f64, 0f64)
-            ]
-        }
+        BezierCurve::<2>::create(vec![
+            p2(0f64, 0f64),
+            p2(1f64, 1f64),
+            p2(2f64, 0.5f64),
+            p2(3f64, 0.5f64),
+            p2(0.6f64, 1.5f64),
+            p2(1.5f64, 0f64)
+        ])
     }
 }
 
