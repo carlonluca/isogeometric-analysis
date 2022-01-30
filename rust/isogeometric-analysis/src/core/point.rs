@@ -30,6 +30,7 @@ use std::fmt::Formatter;
 use std::fmt::Result;
 use num::traits::{pow, Float};
 use float_cmp::ApproxEq;
+use unroll::unroll_for_loops;
 
 ///
 /// Represents a point.
@@ -174,15 +175,16 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     /// Converts this point to a corresponding point in homogeneous coordinates on the plane w.
     ///
     #[inline(always)]
+    #[unroll_for_loops]
     pub fn to_homogeneous<const HOMSIZE: usize>(&self, w: T) -> Point<T, HOMSIZE> {
         let mut res = Point::<T, HOMSIZE>::origin();
         if res.dim() != self.dim() + 1 {
             panic!();
         }
-        for i in 0..self.dim() {
+        for i in 0..SIZE {
             res.set_value(i, self.value(i)*w);
         }
-        res.set_value(self.dim(), w);
+        res.set_value(SIZE, w);
         return res;
     }
 
@@ -190,13 +192,14 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     /// Converts this point to a corresponding point in cartesian coordinates.
     ///
     #[inline(always)]
+    #[unroll_for_loops]
     pub fn to_cartesian<const CARTSIZE: usize>(&self) -> Point<T, CARTSIZE> {
         if self.value(self.dim() - 1) == T::zero() {
             panic!("Invalid plane")
         }
         let mut res = Point::<T, CARTSIZE>::origin();
-        for i in 0..res.dim() {
-            res.set_value(i, self.value(i)/self.value(self.dim() - 1));
+        for i in 0..CARTSIZE {
+            res.set_value(i, self.value(i)/self.value(SIZE - 1));
         }
         res
     }
@@ -325,6 +328,7 @@ impl<T: Float + MatElement, const SIZE: usize> Point<T, SIZE> {
     /// Returns the euclidean disance between the two points d(self, p2).
     ///
     #[inline(always)]
+    #[unroll_for_loops]
     pub fn dist(&self, p2: &Point<T, SIZE>) -> T {
         let mut sum = T::zero();
         for i in 0..SIZE {
