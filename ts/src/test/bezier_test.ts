@@ -20,6 +20,7 @@
  */
 
 import { BezierCurve } from "../bezier/bezier"
+import { Point } from "../core/point";
 import { measure } from "../core/time";
 import { exampleCurve2D1, exampleCurve3D1 } from "../examples/exampleCurves"
 // @ts-expect-error
@@ -29,17 +30,21 @@ var assert = require("assert")
 {
     measure("2D Bezier curve", () => {
         let bezier = new BezierCurve(exampleCurve2D1);
+        let output = new Point(0, 0);
+        let points = []
         for (let i = 0; i < 10000; i++) {
             let xi = i/10000;
-            bezier.evaluate(xi);
+            points.push(bezier.evaluate_fill(xi, output));
         }
     })
 
     measure("3D Bezier curve", () => {
         let bezier = new BezierCurve(exampleCurve3D1);
+        let output = new Point(0, 0);
+        let points = []
         for (let i = 0; i < 10000; i++) {
             let xi = i/10000;
-            bezier.evaluate(xi);
+            points.push(bezier.evaluate_fill(xi, output));
         }
     })
 }

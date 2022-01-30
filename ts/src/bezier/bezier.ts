@@ -40,6 +40,11 @@ export class BezierCurve {
      * @returns 
      */
     public evaluate(xi: number): Point {
+       let ret = new Point(0, 0);
+       return this.evaluate_fill(xi, ret);
+    }
+
+    public evaluate_fill(xi: number, output: Point): Point {
         let x = 0
         let y = 0
         let z = 0
@@ -51,7 +56,11 @@ export class BezierCurve {
             z = z + b*this.controlPoints[i].z()
         }
 
-        return new Point(x, y, z)
+        output.setValue(0, x);
+        output.setValue(0, y);
+        output.setValue(0, z);
+
+        return output;
     }
 }
 
