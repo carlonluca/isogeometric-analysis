@@ -48,7 +48,8 @@ pub struct Bernstein {
 impl Evaluatable<f64, f64, 1, 1> for Bernstein {
     ///
     /// Evaluate without creating a new object.
-    /// 
+    ///
+    #[inline(always)]
     fn evaluate_fill<'a>(&self, input: &RealPoint1d, output: &'a mut RealPoint1d) -> &'a mut RealPoint1d {
         let num = (fact(self.n) as f64)*input.x().pow(self.i as f64)*(1f64 - input.x()).pow((self.n - self.i) as f64);
         let den = (fact(self.i)*fact(self.n - self.i)) as f64;
@@ -81,13 +82,15 @@ pub struct BezierCurve<const SIZE: usize> {
 impl<const SIZE: usize> Evaluatable<f64, f64, 1, SIZE> for BezierCurve<SIZE> {
     ///
     /// Evaluates the Bezier curve in point xi. Point xi exists in the parametric space.
-    /// 
+    ///
+    #[inline(always)]
     fn evaluate_fill<'a>(&self, xi: &RealPoint1d, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
         self.evaluate_direct(xi, output)
     }
 }
 
 impl<const SIZE: usize> BezierCurve<SIZE> {
+    #[inline(always)]
     pub fn create(cpoints: Vec<RealPoint<SIZE>>) -> BezierCurve<SIZE> {
         let n = (cpoints.len() - 1) as u32;
         let mut b = Vec::<Bernstein>::new();
@@ -105,6 +108,7 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
     /// Computes the value of the Bezier curve in xi using the direct algorithm. This
     /// technique is not numerically stable.
     ///
+    #[inline(always)]
     pub fn evaluate_direct<'a>(&self, input: &RealPoint<1>, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
         let n = self.p.len();
         let mut tmp = RealPoint1d::origin();
@@ -120,6 +124,7 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
     ///
     /// Computes the value of the Bezier curve in xi using the De Casteljau's algorithm.
     ///
+    #[inline(always)]
     pub fn evaluate_de_casteljau(&self, xi: &RealPoint1d) -> RealPoint<SIZE> {
         let n = self.p.len() - 1;
         let mut q = Vec::<RealPoint<SIZE>>::new();
@@ -137,14 +142,16 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
 
     ///
     /// Returns the degree of the Bezier curve.
-    /// 
+    ///
+    #[inline(always)]
     pub fn degree(&self) -> u32 {
         (self.p.len() - 1) as u32
     }
 
     ///
     /// Returns a copy of the control points.
-    /// 
+    ///
+    #[inline(always)]
     pub fn control_points(&self) -> &Vec<RealPoint<SIZE>> {
         &self.p
     }
@@ -160,19 +167,22 @@ pub struct BezierSurf<const S: usize> {
 impl<const S: usize> BezierSurf<S> {
     ///
     /// Returns the degree on the Xi axis.
-    /// 
+    ///
+    #[inline(always)]
     pub fn degree_xi(&self) -> u32 { (self.data.column_len() - 1) as u32 }
 
     ///
     /// Returns the degree on the Eta axis.
-    /// 
+    ///
+    #[inline(always)]
     pub fn degree_eta(&self) -> u32 { (self.data.row_len() - 1) as u32 }
 }
 
 impl<const S: usize> Evaluatable<f64, f64, 2, S> for BezierSurf<S> {
     ///
     /// Evaluates the Bezier curve in point xi. Point xi exists in the parametric space.
-    /// 
+    ///
+    #[inline(always)]
     fn evaluate_fill<'a>(&self, input: &RealPoint2d, output: &'a mut RealPoint<S>) -> &'a mut RealPoint<S> {
         self.evaluate_de_casteljau(input, output)
     }
@@ -181,7 +191,8 @@ impl<const S: usize> Evaluatable<f64, f64, 2, S> for BezierSurf<S> {
 impl<const S: usize> BezierSurf<S> {
     ///
     /// Evaluates a Bezier surface by using the definition.
-    /// 
+    ///
+    #[inline(always)]
     pub fn evaluate_direct<'a>(&self, input: &RealPoint2d, output: &'a mut RealPoint<S>) -> &'a mut RealPoint<S> {
         output.reset();
         let n = self.degree_xi();
@@ -207,7 +218,8 @@ impl<const S: usize> BezierSurf<S> {
 
     ///
     /// Evaluates a Bezier surface by using the De Casteljau's algorithm.
-    /// 
+    ///
+    #[inline(always)]
     pub fn evaluate_de_casteljau<'a>(&self, input: &RealPoint2d, output: &'a mut RealPoint<S>) -> &'a mut RealPoint<S> {
         output.reset();
         let n = self.degree_xi();
@@ -243,7 +255,8 @@ pub struct RatBezierCurve<const S: usize, const H: usize> {
 impl<const S: usize, const H: usize> RatBezierCurve<S, H> {
     ///
     /// Creates a new rational Bezier curve by passing control points and weights.
-    /// 
+    ///
+    #[inline(always)]
     pub fn create(p: Vec<RealPoint<S>>, weights: Vec<f64>) -> RatBezierCurve<S, H> {
         if p.len() != weights.len() {
             panic!()
@@ -266,7 +279,8 @@ impl<const S: usize, const H: usize> RatBezierCurve<S, H> {
 impl<const S: usize, const H: usize> Evaluatable<f64, f64, 1, S> for RatBezierCurve<S, H> {
     ///
     /// Evaluates the Bezier curve in point xi. Point xi exists in the parametric space.
-    /// 
+    ///
+    #[inline(always)]
     fn evaluate_fill<'a>(&self, input: &RealPoint1d, output: &'a mut RealPoint<S>) -> &'a mut RealPoint<S> {
         let mut cw = RealPoint::<H>::origin();
         self.bez.evaluate_direct(&input, &mut cw);
@@ -287,14 +301,16 @@ pub struct BezierCircle {
 impl BezierCircle {
     ///
     /// Returns the number of points for this circle.
-    /// 
+    ///
+    #[inline(always)]
     pub fn points(&self) -> u32 {
         self.segments*2 + 1
     }
 
     ///
     /// Computes the rational Bezier curve that will draw the requested circle.
-    /// 
+    ///
+    #[inline(always)]
     pub fn compute(&self) -> Option<Vec<RatBezierCurve::<2, 3>>> {
         if self.segments < 2 { return None; }
         let r = self.radius as f64;

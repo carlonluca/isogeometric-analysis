@@ -53,7 +53,7 @@ pub struct Evaluator<const DIMIN: usize, const DIMOUT: usize, const C: usize> {}
 impl<const DIMIN: usize, const DIMOUT: usize, const C: usize> Evaluator<DIMIN, DIMOUT, C> {
     ///
     /// Computes a geometric element for a sequence of points.
-    /// 
+    ///
     pub fn evaluate(element: &impl Evaluatable<f64, f64, DIMIN, DIMOUT>, values: &Vec<RealPoint<DIMIN>>) -> Vec<RealPoint<DIMOUT>> {
         let mut ret: Vec<RealPoint<DIMOUT>> = Vec::new();
         for p in values.iter() {

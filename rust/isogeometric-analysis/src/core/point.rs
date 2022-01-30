@@ -66,7 +66,8 @@ pub type RealPoint4d = RealPoint<4>;
 impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     ///
     /// Creates a point on a straight line.
-    /// 
+    ///
+    #[inline(always)]
     pub fn point1d(x: T) -> Point<T, 1> {
         Point {
             data: RowVector::row_from_vec(&[x])
@@ -75,7 +76,8 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
 
     ///
     /// Creates a point in the 2D space.
-    /// 
+    ///
+    #[inline(always)]
     pub fn point2d(x: T, y: T) -> Point<T, 2> {
         Point {
             data: RowVector::row_from_vec(&[x, y])
@@ -85,12 +87,14 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     ///
     /// Creates a point in the 3D space.
     /// 
+    #[inline(always)]
     pub fn point3d(x: T, y: T, z: T) -> Point<T, 3> {
         Point {
             data: RowVector::row_from_vec(&[x, y, z])
         }
     }
 
+    #[inline(always)]
     pub fn origin() -> Point<T, SIZE> {
         Point {
             data: RowVector::zeros()
@@ -99,14 +103,16 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
 
     ///
     /// Returns the dimension of the space containing this point.
-    /// 
+    ///
+    #[inline(always)]
     pub fn dim(&self) -> usize {
         self.data.cols()
     }
 
     ///
     /// Sets all values to zero.
-    /// 
+    ///
+    #[inline(always)]
     pub fn reset(&mut self) {
         self.data.reset()
     }
@@ -133,6 +139,7 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     ///
     /// Returns the idx-th element or zero.
     ///
+    #[inline(always)]
     pub fn value(&self, idx: usize) -> T {
         return if self.dim() > idx as usize {
             self.data.value(0, idx)
@@ -144,7 +151,8 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
 
     ///
     /// Sets the coordinate of the point.
-    /// 
+    ///
+    #[inline(always)]
     pub fn set_value(&mut self, idx: usize, val: T) -> &mut Self {
         if self.dim() > idx {
             self.data.set_value(0, idx, val);
@@ -154,7 +162,8 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
 
     ///
     /// Clones this point to another one.
-    /// 
+    ///
+    #[inline(always)]
     pub fn clone_to(&self, dest: &mut Point<T, SIZE>) {
         dest.data = self.data.clone();
     }
@@ -164,6 +173,7 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
     ///
     /// Converts this point to a corresponding point in homogeneous coordinates on the plane w.
     ///
+    #[inline(always)]
     pub fn to_homogeneous<const HOMSIZE: usize>(&self, w: T) -> Point<T, HOMSIZE> {
         let mut res = Point::<T, HOMSIZE>::origin();
         if res.dim() != self.dim() + 1 {
@@ -178,7 +188,8 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
 
     ///
     /// Converts this point to a corresponding point in cartesian coordinates.
-    /// 
+    ///
+    #[inline(always)]
     pub fn to_cartesian<const CARTSIZE: usize>(&self) -> Point<T, CARTSIZE> {
         if self.value(self.dim() - 1) == T::zero() {
             panic!("Invalid plane")
@@ -192,27 +203,40 @@ impl<T: MatElement, const SIZE: usize> Point<T, SIZE> {
 }
 
 impl<T: MatElement> Point<T, 1> {
+    #[inline(always)]
     pub fn x(&self) -> T { self.value(0) }
+    #[inline(always)]
     pub fn set_x(&mut self, x: T) { self.set_value(0, x); }
 }
 
 impl<T: MatElement> Point<T, 2> {
+    #[inline(always)]
     pub fn x(&self) -> T { self.value(0) }
+    #[inline(always)]
     pub fn set_x(&mut self, x: T) { self.set_value(0, x); }
+    #[inline(always)]
     pub fn y(&self) -> T { self.value(1) }
+    #[inline(always)]
     pub fn set_y(&mut self, y: T) { self.set_value(1, y); }
 }
 
 impl<T: MatElement> Point<T, 3> {
+    #[inline(always)]
     pub fn x(&self) -> T { self.value(0) }
+    #[inline(always)]
     pub fn set_x(&mut self, x: T) { self.set_value(0, x); }
+    #[inline(always)]
     pub fn y(&self) -> T { self.value(1) }
+    #[inline(always)]
     pub fn set_y(&mut self, y: T) { self.set_value(1, y); }
+    #[inline(always)]
     pub fn z(&self) -> T { self.value(2) }
+    #[inline(always)]
     pub fn set_z(&mut self, z: T) { self.set_value(2, z); }
 }
 
 impl<T: MatElement, const SIZE: usize> PartialEq for Point<T, SIZE> {
+    #[inline(always)]
     fn eq(&self, other: &Self) -> bool {
         self.data == other.data
     }
@@ -224,6 +248,7 @@ impl<T: MatElement, const SIZE: usize> Add for Point<T, SIZE> {
     ///
     /// Adds another matrix.
     ///
+    #[inline(always)]
     fn add(self, other: Self) -> Self {
         if self.dim() != other.dim() { panic!() }
         let data = self.data + other.data;
@@ -234,6 +259,7 @@ impl<T: MatElement, const SIZE: usize> Add for Point<T, SIZE> {
 }
 
 impl<T: MatElement, const SIZE: usize> AddAssign for Point<T, SIZE> {
+    #[inline(always)]
     fn add_assign(&mut self, rhs: Point<T, SIZE>) {
         if self.dim() != rhs.dim() { panic!() }
         self.data += rhs.data;
@@ -245,7 +271,8 @@ impl<T: MatElement, const SIZE: usize> Sub for Point<T, SIZE> {
 
     ///
     /// Subtracts another matrix.
-    /// 
+    ///
+    #[inline(always)]
     fn sub(self, other: Self) -> Self::Output {
         if self.dim() != other.dim() { panic!() }
         let data = self.data - other.data;
@@ -256,6 +283,7 @@ impl<T: MatElement, const SIZE: usize> Sub for Point<T, SIZE> {
 }
 
 impl<T: MatElement, const SIZE: usize> SubAssign for Point<T, SIZE> {
+    #[inline(always)]
     fn sub_assign(&mut self, rhs: Point<T, SIZE>) {
         if self.dim() != rhs.dim() { panic!() }
         self.data -= rhs.data
@@ -267,7 +295,8 @@ impl<T: MatElement, const SIZE: usize> Mul<T> for Point<T, SIZE> {
 
     ///
     /// Multiplication by a scalar.
-    /// 
+    ///
+    #[inline(always)]
     fn mul(self, scalar: T) -> Self::Output {
         let data = self.data*scalar;
         Self {
@@ -277,6 +306,7 @@ impl<T: MatElement, const SIZE: usize> Mul<T> for Point<T, SIZE> {
 }
 
 impl<T: MatElement, const SIZE: usize> MulAssign<T> for Point<T, SIZE> {
+    #[inline(always)]
     fn mul_assign(&mut self, rhs: T) {
         self.data *= rhs;
     }
@@ -293,7 +323,8 @@ impl<M: Copy + Default, F: MatElement + ApproxEq<Margin=M>, const SIZE: usize> A
 impl<T: Float + MatElement, const SIZE: usize> Point<T, SIZE> {
     ///
     /// Returns the euclidean disance between the two points d(self, p2).
-    /// 
+    ///
+    #[inline(always)]
     pub fn dist(&self, p2: &Point<T, SIZE>) -> T {
         let mut sum = T::zero();
         for i in 0..SIZE {
@@ -303,14 +334,17 @@ impl<T: Float + MatElement, const SIZE: usize> Point<T, SIZE> {
     }
 }
 
+#[inline(always)]
 pub fn p1(x: f64) -> Point<f64, 1> {
     Point { data: RowVector::row_from_vec(&[x]) }
 }
 
+#[inline(always)]
 pub fn p2(x: f64, y: f64) -> Point<f64, 2> {
     Point { data: RowVector::row_from_vec(&[x, y]) }
 }
 
+#[inline(always)]
 pub fn p3(x: f64, y: f64, z: f64) -> Point<f64, 3> {
     Point { data: RowVector::row_from_vec(&[x, y, z]) }
 }

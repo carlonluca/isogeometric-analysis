@@ -50,7 +50,15 @@ fn main() {
 
     {
         // flo_curves is measured for reference
+        let mut before = Instant::now();
         let flocurve = flo_curves::bezier::Curve::from_points(Coord2(1.0, 2.0), (Coord2(2.0, 0.0), Coord2(3.0, 5.0)), Coord2(4.0, 2.0));
+        let mut flopoints = Vec::new();
+        for i in 0..10000 {
+            flopoints.push(flocurve.point_at_pos((i as f64)/10000.));
+        }
+        log::info!("Bezier curve computed by flo_curves in {} points in: {} μs", flopoints.len(), before.elapsed().as_micros());
+
+        before = Instant::now();
         let cpoints = vec![
             RealPoint2d::point2d(1f64, 2f64),
             RealPoint2d::point2d(2f64, 0f64),
@@ -58,20 +66,8 @@ fn main() {
             RealPoint2d::point2d(4f64, 2f64)
         ];
         let bez = isogeometric_analysis::bezier::BezierCurve::create(cpoints);
-        let mut before = Instant::now();
-        for i in 0..100 {
-            flocurve.point_at_pos((i as f64)/100.);
-        }
-        log::info!("Bezier curve computed by flo_curves in 10000 points in: {} μs", before.elapsed().as_micros());
-
-        before = Instant::now();
-        let mut input = RealPoint1d::origin();
-        let mut output = RealPoint2d::origin();
-        for i in 0..100 {
-            input.set_value(0, (i as f64)/100.);
-            bez.evaluate_fill(&input, &mut output);
-        }
-        log::info!("Bezier curve computed by iga in 10000 points in: {} μs", before.elapsed().as_micros());
+        let (_, igaout) = Evaluator::<1, 2, 10000>::evaluate_parametric_range1d(&bez, &0f64, &1f64);
+        log::info!("Bezier curve computed by iga in {} points in: {} μs", igaout.len(), before.elapsed().as_micros());
     }
     
     { // Bernstein

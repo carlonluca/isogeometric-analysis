@@ -25,14 +25,9 @@ import { nurbsCurveSample2D } from "../examples/exampleCurves"
 import { NurbsCirle } from "../examples/nurbsCircle"
 import { NurbsPlateHole } from "../examples/nurbsPlate"
 import { NurbsCurve, NurbsSurf } from "../nurbs/nurbs"
+import { measure } from "../core/time"
 // @ts-expect-error
 var assert = require("assert")
-
-function measure(label: string, f: () => void) {
-    console.time(label)
-    f()
-    console.timeEnd(label)
-}
 
 function testEvaluationNurbs(nurbs: NurbsCurve) {
     for (let xi = 0; xi < 1; xi += 0.05)
