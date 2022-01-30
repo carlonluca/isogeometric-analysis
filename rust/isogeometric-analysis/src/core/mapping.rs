@@ -29,7 +29,7 @@ use crate::core::RealRange;
 ///
 /// Generic interface for an evaluatable element from ℝ^DIMDOM to ℝ^DIMCOD.
 ///
-pub trait Evaluatable<I: MatElement, O: MatElement, const DIMDOM: usize, const DIMCOD: usize> {
+pub trait Mapping<I: MatElement, O: MatElement, const DIMDOM: usize, const DIMCOD: usize> {
     ///
     /// Evaluates the function.
     /// 
@@ -54,7 +54,7 @@ impl<const DIMIN: usize, const DIMOUT: usize, const C: usize> Evaluator<DIMIN, D
     ///
     /// Computes a geometric element for a sequence of points.
     ///
-    pub fn evaluate(element: &impl Evaluatable<f64, f64, DIMIN, DIMOUT>, values: &Vec<RealPoint<DIMIN>>) -> Vec<RealPoint<DIMOUT>> {
+    pub fn evaluate(element: &impl Mapping<f64, f64, DIMIN, DIMOUT>, values: &Vec<RealPoint<DIMIN>>) -> Vec<RealPoint<DIMOUT>> {
         let mut ret: Vec<RealPoint<DIMOUT>> = Vec::new();
         for p in values.iter() {
             ret.push(element.evaluate(p));
@@ -65,7 +65,7 @@ impl<const DIMIN: usize, const DIMOUT: usize, const C: usize> Evaluator<DIMIN, D
     ///
     /// Evalutes a parametric element as a map from ℝ to ℝ^DIMOUT.
     /// 
-    pub fn evaluate_parametric_range1d(element: &impl Evaluatable<f64, f64, 1, DIMOUT>, from: &f64, to: &f64) -> (Vec<RealPoint<1>>, Vec<RealPoint<DIMOUT>>) {
+    pub fn evaluate_parametric_range1d(element: &impl Mapping<f64, f64, 1, DIMOUT>, from: &f64, to: &f64) -> (Vec<RealPoint<1>>, Vec<RealPoint<DIMOUT>>) {
         let rv = RowVector::<f64, C>::evenly_spaced(from, to);
         let values = rv.row_to_vec(0);
         let mut input: Vec<RealPoint<1>> = Vec::new();
@@ -83,7 +83,7 @@ impl<const DIMIN: usize, const DIMOUT: usize, const C: usize> Evaluator<DIMIN, D
         return (input, output);
     }
 
-    pub fn evaluate_parametric_range2d(element: &impl Evaluatable<f64, f64, 2, DIMOUT>, r1: &RealRange, r2: &RealRange) -> (Vec<RealPoint2d>, Vec<RealPoint<DIMOUT>>) {
+    pub fn evaluate_parametric_range2d(element: &impl Mapping<f64, f64, 2, DIMOUT>, r1: &RealRange, r2: &RealRange) -> (Vec<RealPoint2d>, Vec<RealPoint<DIMOUT>>) {
         let r1seq = RowVector::<f64, C>::evenly_spaced(&r1.a, &r1.b).row_to_vec(0);
         let r2seq = RowVector::<f64, C>::evenly_spaced(&r2.a, &r2.b).row_to_vec(0);
         let mut input = Vec::<RealPoint2d>::new();

@@ -20,7 +20,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-use isogeometric_analysis::core::{RealPoint1d, RealPoint2d, Evaluator, Evaluatable};
+use isogeometric_analysis::core::{RealPoint2d, Evaluator};
 use isogeometric_analysis::bezier::{Bernstein};
 use std::time::Instant;
 use flo_curves::*;

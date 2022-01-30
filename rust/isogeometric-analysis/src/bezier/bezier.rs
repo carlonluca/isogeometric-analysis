@@ -22,7 +22,7 @@
 
 use crate::core::fact;
 use crate::core::{RealPoint, RealPoint1d, RealPoint2d, p2};
-use crate::core::Evaluatable;
+use crate::core::Mapping;
 use std::f64::consts::PI;
 use num::traits::Pow;
 use array2d::Array2D;
@@ -45,7 +45,7 @@ pub struct Bernstein {
     i: u32
 }
 
-impl Evaluatable<f64, f64, 1, 1> for Bernstein {
+impl Mapping<f64, f64, 1, 1> for Bernstein {
     ///
     /// Evaluate without creating a new object.
     ///
@@ -72,14 +72,35 @@ impl Bernstein {
 }
 
 ///
-/// Implements Bezier curves and surfaces.
+/// Implements Bezier curves and surfaces. Bezier surfaces can be computed with
+/// a direct method based on the definition of with the De Casteljau's algorithm.
+/// BezierCurve is therefore a function f:ℝ→ℝ^SIZE, where SIZE is the dimension
+/// of the space in which the curve is to be defined (typically 2).
+/// 
+/// # Example
+/// 
+/// ```rust
+/// use isogeometric_analysis::core::p2;
+/// use isogeometric_analysis::bezier::{Bernstein, BezierCurve, BezierSurf, BezierCircle, RatBezierCurve};
+/// use isogeometric_analysis::core::Evaluator;
+/// let cpoints = vec![
+///     p2(0f64, 0f64),
+///     p2(1f64, 1f64),
+///     p2(2f64, 0.5f64),
+///     p2(3f64, 0.5f64),
+///     p2(0.6f64, 1.5f64),
+///     p2(1.5f64, 0f64)
+/// ];
+/// let bez = BezierCurve::create(cpoints);
+/// let (xpoints, ypoints) = Evaluator::<1, 2, 10>::evaluate_parametric_range1d(&bez, &0f64, &1f64);
+/// ```
 /// 
 pub struct BezierCurve<const SIZE: usize> {
     pub p: Vec<RealPoint<SIZE>>,
     bernstein: Vec<Bernstein>
 }
 
-impl<const SIZE: usize> Evaluatable<f64, f64, 1, SIZE> for BezierCurve<SIZE> {
+impl<const SIZE: usize> Mapping<f64, f64, 1, SIZE> for BezierCurve<SIZE> {
     ///
     /// Evaluates the Bezier curve in point xi. Point xi exists in the parametric space.
     ///
@@ -178,7 +199,7 @@ impl<const S: usize> BezierSurf<S> {
     pub fn degree_eta(&self) -> u32 { (self.data.row_len() - 1) as u32 }
 }
 
-impl<const S: usize> Evaluatable<f64, f64, 2, S> for BezierSurf<S> {
+impl<const S: usize> Mapping<f64, f64, 2, S> for BezierSurf<S> {
     ///
     /// Evaluates the Bezier curve in point xi. Point xi exists in the parametric space.
     ///
@@ -276,7 +297,7 @@ impl<const S: usize, const H: usize> RatBezierCurve<S, H> {
     }
 }
 
-impl<const S: usize, const H: usize> Evaluatable<f64, f64, 1, S> for RatBezierCurve<S, H> {
+impl<const S: usize, const H: usize> Mapping<f64, f64, 1, S> for RatBezierCurve<S, H> {
     ///
     /// Evaluates the Bezier curve in point xi. Point xi exists in the parametric space.
     ///
@@ -388,7 +409,7 @@ mod tests {
     use crate::bezier::BezierCircle;
     use crate::core::RealPoint1d;
     use crate::core::RealPoint2d;
-    use crate::core::Evaluatable;
+    use crate::core::Mapping;
     use float_cmp::assert_approx_eq;
 
     #[test]

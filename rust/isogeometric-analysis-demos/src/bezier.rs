@@ -108,7 +108,7 @@ pub fn show_bezier_curve_demo<const SIZE: usize>(cpoints: Vec<RealPoint<SIZE>>, 
     }
 
     let n = cpoints.len() as u32;
-    let bez = BezierCurve { p: cpoints };
+    let bez = BezierCurve::create(cpoints);
     let before = Instant::now();
     let (_xpoints, ypoints) = Evaluator::<SIZE, SIZE, 10>::evaluate_parametric_range1d(&bez, &0f64, &1f64);
     log::info!("Bezier curve computed in: {} μs", before.elapsed().as_micros());
@@ -149,7 +149,7 @@ pub fn show_ratbezier_arc_demo() {
     ];
 
     {
-        let bez = BezierCurve { p: cp.clone() };
+        let bez = BezierCurve::create(cp.clone());
         let (_xpoints, ypoints) = Evaluator::<1, 2, 1000>::evaluate_parametric_range1d(&bez, &0f64, &1f64);
         let (xvalues, yvalues, _zvalues) = Evaluator::<1, 2, 0>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
         axes2d1.lines(&xvalues, &yvalues, &[Caption("Bezier"), Color("orange"), LineStyle(DashType::Dot)]);
