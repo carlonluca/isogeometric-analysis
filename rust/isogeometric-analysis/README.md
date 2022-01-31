@@ -10,4 +10,4 @@ The crate is a work in progress and currently only implements:
 
 ## More Info
 
-More info about Isogeometric Analysis and the topics can be downloaded from: https://bugfreeblog.duckdns.org/isogeometric-analysis.
+More info about Isogeometric Analysis and these topics can be downloaded from: https://bugfreeblog.duckdns.org/isogeometric-analysis.
