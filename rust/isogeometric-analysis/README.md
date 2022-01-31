@@ -1,0 +1,13 @@
+# Isogeometric Analysis
+
+This crate is a working in progress. The idea is that it should contain a trivial implementation of the algorithms involved in the approximation of partial differential equations through an isogeometric approach. The crate includes trivial implementations of Bezier, B-spline and NURBS curves and surfaces, numerical integration and basic linear algebra.
+
+The crate is a work in progress and currently only implements:
+
+* Bezier curves
+* Bezier surfaces
+* Rational Bezier curves
+
+## More Info
+
+More info about Isogeometric Analysis and the topics can be downloaded from: https://bugfreeblog.duckdns.org/isogeometric-analysis.
