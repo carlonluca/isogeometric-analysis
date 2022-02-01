@@ -81,16 +81,9 @@ impl Bernstein {
 /// 
 /// ```rust
 /// use isogeometric_analysis::core::p2;
-/// use isogeometric_analysis::bezier::{Bernstein, BezierCurve, BezierSurf, BezierCircle, RatBezierCurve};
+/// use isogeometric_analysis::bezier::{BezierCurve, BezierCurveDemo1};
 /// use isogeometric_analysis::core::Evaluator;
-/// let cpoints = vec![
-///     p2(0f64, 0f64),
-///     p2(1f64, 1f64),
-///     p2(2f64, 0.5f64),
-///     p2(3f64, 0.5f64),
-///     p2(0.6f64, 1.5f64),
-///     p2(1.5f64, 0f64)
-/// ];
+/// let cpoints = BezierCurveDemo1::create().p;
 /// let bez = BezierCurve::create(cpoints);
 /// let (xpoints, ypoints) = Evaluator::<1, 2, 10>::evaluate_parametric_range1d(&bez, &0f64, &1f64);
 /// ```
@@ -383,6 +376,15 @@ impl BezierCircle {
 
 ///
 /// This struct can be used to build a sample Bezier curve for debugging.
+/// 
+/// # Example
+/// 
+/// ```rust
+/// use isogeometric_analysis::core::Evaluator;
+/// use isogeometric_analysis::bezier::{BezierCurveDemo1, BezierCurve};
+/// let bezier = BezierCurveDemo1::create();
+/// let (xpoints, ypoints) = Evaluator::<1, 2, 10>::evaluate_parametric_range1d(&bezier, &0f64, &1f64);
+/// ```
 /// 
 pub struct BezierCurveDemo1 {}
 

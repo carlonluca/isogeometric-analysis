@@ -20,12 +20,12 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-use isogeometric_analysis::bezier::{Bernstein, BezierCurve, BezierSurf, BezierCircle, RatBezierCurve};
+use isogeometric_analysis::bezier::{Bernstein, BezierCurve, BezierSurf, BezierCircle, RatBezierCurve, BezierCurveDemo1};
 use isogeometric_analysis::core::Evaluator;
 use isogeometric_analysis::core::HslProvider;
 use isogeometric_analysis::core::{RealPoint, RealPoint2d, RealPoint3d};
 use isogeometric_analysis::core::RealRange;
-use isogeometric_analysis::core::{p2, p3};
+use isogeometric_analysis::core::p3;
 use gnuplot::{Figure, Caption, Color, LineStyle, AxesCommon, Axes2D, DashType, AutoOption, PlotOption};
 use std::time::Instant;
 use array2d::Array2D;
@@ -55,14 +55,7 @@ pub fn show_bernstein_2() {
 /// Shows the first demo of a Bezier curve.
 /// 
 pub fn show_bezier_curve_demo_1(multiplot: bool) {
-    let cpoints = vec![
-        p2(0f64, 0f64),
-        p2(1f64, 1f64),
-        p2(2f64, 0.5f64),
-        p2(3f64, 0.5f64),
-        p2(0.6f64, 1.5f64),
-        p2(1.5f64, 0f64)
-    ];
+    let cpoints = BezierCurveDemo1::create().p;
     show_bezier_curve_demo(cpoints, multiplot);
 }
 
@@ -110,7 +103,7 @@ pub fn show_bezier_curve_demo<const SIZE: usize>(cpoints: Vec<RealPoint<SIZE>>, 
     let n = cpoints.len() as u32;
     let bez = BezierCurve::create(cpoints);
     let before = Instant::now();
-    let (_xpoints, ypoints) = Evaluator::<SIZE, SIZE, 10>::evaluate_parametric_range1d(&bez, &0f64, &1f64);
+    let (_xpoints, ypoints) = Evaluator::<SIZE, SIZE, 1000>::evaluate_parametric_range1d(&bez, &0f64, &1f64);
     log::info!("Bezier curve computed in: {} μs", before.elapsed().as_micros());
     let (xvalues, yvalues, _zvalues) = Evaluator::<1, SIZE, 0>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
     axes2d1.lines(&xvalues, &yvalues, &[Caption("Bezier"), Color("orange")]);
