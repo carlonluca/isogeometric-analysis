@@ -20,6 +20,10 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+use crate::core::RealPoint3d;
+use crate::core::RectMatrix;
+use crate::bezier::BezierCurve;
+
 pub const TEAPOT_PACTHES: [[u32; 16]; 32] = [
     [  1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16], 
 	[  4,  17,  18,  19,   8,  20,  21,  22,  12,  23,  24,  25,  16,  26,  27,  28], 
@@ -363,3 +367,18 @@ pub const TEAPOT_VERTICES: [[f64; 3]; 306] = [
 	[ 0.7980, -1.4250,  0.0000], 
 	[ 1.4250, -0.7980,  0.0000] 
 ]; 
+
+pub struct BezierTeapot {}
+
+impl BezierTeapot {
+    ///
+    /// Returns the vertices for the teapot.
+    /// 
+    pub fn build_vertices() -> Vec<RealPoint3d> {
+        let mut ret = Vec::<RealPoint3d>::new();
+        for i in 0..TEAPOT_VERTICES.len() {
+            ret.push(RealPoint3d::point3d(TEAPOT_VERTICES[i][0], TEAPOT_VERTICES[i][1], TEAPOT_VERTICES[i][2]));
+        }
+        ret
+    }
+}
