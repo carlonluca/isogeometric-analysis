@@ -33,6 +33,8 @@ struct Opt {
     bezier2: bool,
     #[structopt(long, help = "Shows the Bezier surface demo 1")]
     bezier_surf1: bool,
+    #[structopt(long, help = "Shows the teapot")]
+    bezier_teapot: bool,
     #[structopt(long, help = "Shows a circle drawn with a rational bezier curve")]
     ratbezier_circle1: bool,
     #[structopt(long, help = "Shows an arc")]
@@ -72,6 +74,11 @@ fn main() {
 
     if opt.ratbezier_arc1 {
         bezier::show_ratbezier_arc_demo();
+        return;
+    }
+
+    if opt.bezier_teapot {
+        bezier::show_teapot();
         return;
     }
 }

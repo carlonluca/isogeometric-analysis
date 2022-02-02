@@ -26,9 +26,28 @@ use isogeometric_analysis::core::HslProvider;
 use isogeometric_analysis::core::{RealPoint, RealPoint2d, RealPoint3d};
 use isogeometric_analysis::core::RealRange;
 use isogeometric_analysis::core::p3;
-use gnuplot::{Figure, Caption, Color, LineStyle, AxesCommon, Axes2D, DashType, AutoOption, PlotOption};
+use isogeometric_analysis::bezier::BezierTeapot;
+use gnuplot::{Figure, Caption, Color, LineStyle, AxesCommon, Axes2D, Axes3D, DashType, AutoOption, PlotOption};
 use std::time::Instant;
 use array2d::Array2D;
+
+pub fn show_teapot() {
+    let mut fg = Figure::new();
+
+    let axes3d = fg.axes3d()
+        .set_aspect_ratio(AutoOption::Fix(1.0))
+        .set_x_range(AutoOption::Fix(0.), AutoOption::Fix(1.))
+        .set_y_range(AutoOption::Fix(0.), AutoOption::Fix(1.))
+        .set_y_grid(true)
+        .set_x_grid(true)
+        .set_x_label("x", &[])
+        .set_y_label("y", &[]);
+
+    let patches = BezierTeapot::build_patches();
+    for patch in patches {
+        show_control_points_3d(axes3d, &patch.data.as_row_major(), false);
+    }
+}
 
 pub fn show_bernstein_2() {
     let mut fg = Figure::new();
@@ -248,8 +267,8 @@ pub fn show_bezier_surf_demo(cpoints: Array2D<RealPoint3d>, multiplot: bool)
 ///
 /// Draws the control points.
 /// 
-pub fn show_control_points(axes: &mut Axes2D, cp: &Vec<RealPoint2d>, add_legend: bool) {
-    let (xpoints, ypoints, _) = Evaluator::<1, 2, 0>::split_coords(0, &cp, 1, &cp, 2, &cp);
+pub fn show_control_points<const S: usize>(axes: &mut Axes2D, cp: &Vec<RealPoint<S>>, add_legend: bool) {
+    let (xpoints, ypoints, _) = Evaluator::<1, S, 0>::split_coords(0, &cp, 1, &cp, 2, &cp);
     let mut p_options = vec![ Color("black"), PlotOption::PointSymbol('O') ];
     let mut l_options = vec![ Color("black"), LineStyle(DashType::Dash) ];
     if add_legend {
@@ -258,6 +277,21 @@ pub fn show_control_points(axes: &mut Axes2D, cp: &Vec<RealPoint2d>, add_legend:
     }
     axes.points(&xpoints, &ypoints, &p_options);
     axes.lines(&xpoints, &ypoints, &l_options);
+}
+
+///
+/// Draws the control points.
+/// 
+pub fn show_control_points_3d<const S: usize>(axes: &mut Axes3D, cp: &Vec<RealPoint<S>>, add_legend: bool) {
+    let (xpoints, ypoints, zpoints) = Evaluator::<1, S, 0>::split_coords(0, &cp, 1, &cp, 2, &cp);
+    let mut p_options = vec![ Color("black"), PlotOption::PointSymbol('O') ];
+    let mut l_options = vec![ Color("black"), LineStyle(DashType::Dash) ];
+    if add_legend {
+        p_options.push(Caption("Control points"));
+        l_options.push(Caption("Control points"));
+    }
+    axes.points(&xpoints, &ypoints, &zpoints, &p_options);
+    axes.lines(&xpoints, &ypoints, &zpoints, &l_options);
 }
 
 ///

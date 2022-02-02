@@ -21,10 +21,10 @@
  */
 
 use crate::core::RealPoint3d;
-use crate::core::RectMatrix;
-use crate::bezier::BezierCurve;
+use crate::bezier::BezierSurf;
+use array2d::Array2D;
 
-pub const TEAPOT_PACTHES: [[u32; 16]; 32] = [
+pub const TEAPOT_PACTHES: [[usize; 16]; 32] = [
     [  1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16], 
 	[  4,  17,  18,  19,   8,  20,  21,  22,  12,  23,  24,  25,  16,  26,  27,  28], 
 	[ 19,  29,  30,  31,  22,  32,  33,  34,  25,  35,  36,  37,  28,  38,  39,  40], 
@@ -368,6 +368,9 @@ pub const TEAPOT_VERTICES: [[f64; 3]; 306] = [
 	[ 1.4250, -0.7980,  0.0000] 
 ]; 
 
+///
+/// Builds the pacthes needed to draw the teapot.
+/// 
 pub struct BezierTeapot {}
 
 impl BezierTeapot {
@@ -381,4 +384,22 @@ impl BezierTeapot {
         }
         ret
     }
+
+	///
+	/// Build the patches from raw data.
+	/// 
+	pub fn build_patches() -> Vec<BezierSurf<3>> {
+		let vertices = BezierTeapot::build_vertices();
+		let mut patches = Vec::<BezierSurf<3>>::new();
+		for i in 0..TEAPOT_PACTHES.len() {
+			let mut patch_cps = Vec::<RealPoint3d>::new();
+			for j in 0..TEAPOT_PACTHES[i].len() {
+				let idx = TEAPOT_PACTHES[i][j];
+				patch_cps.push(vertices[idx].clone());
+			}
+			let bdata = Array2D::<RealPoint3d>::from_row_major(&patch_cps, 4, 4);
+			patches.push(BezierSurf::<3> { data: bdata });
+		}
+		patches
+	}
 }
