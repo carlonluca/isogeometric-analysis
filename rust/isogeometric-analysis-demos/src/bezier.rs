@@ -36,16 +36,23 @@ pub fn show_teapot() {
 
     let axes3d = fg.axes3d()
         .set_aspect_ratio(AutoOption::Fix(1.0))
-        .set_x_range(AutoOption::Fix(0.), AutoOption::Fix(1.))
-        .set_y_range(AutoOption::Fix(0.), AutoOption::Fix(1.))
+        .set_x_range(AutoOption::Fix(-4.), AutoOption::Fix(4.))
+        .set_y_range(AutoOption::Fix(-4.), AutoOption::Fix(4.))
+        .set_z_range(AutoOption::Fix(0.), AutoOption::Fix(4.))
         .set_y_grid(true)
         .set_x_grid(true)
         .set_x_label("x", &[])
-        .set_y_label("y", &[]);
+        .set_y_label("y", &[])
+        .set_z_label("z", &[]);
 
     let patches = BezierTeapot::build_patches();
     for patch in patches {
         show_control_points_3d(axes3d, &patch.data.as_row_major(), false);
+    }
+
+    match fg.show() {
+        Err(_e) => { log::warn!("Could not show plot") },
+        Ok(_v) => {}
     }
 }
 

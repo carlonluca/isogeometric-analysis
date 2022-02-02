@@ -394,7 +394,8 @@ impl BezierTeapot {
 		for i in 0..TEAPOT_PACTHES.len() {
 			let mut patch_cps = Vec::<RealPoint3d>::new();
 			for j in 0..TEAPOT_PACTHES[i].len() {
-				let idx = TEAPOT_PACTHES[i][j];
+				let idx = TEAPOT_PACTHES[i][j] - 1;
+				log::info!("idx: {}", idx);
 				patch_cps.push(vertices[idx].clone());
 			}
 			let bdata = Array2D::<RealPoint3d>::from_row_major(&patch_cps, 4, 4);
