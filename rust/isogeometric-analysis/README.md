@@ -4,8 +4,8 @@ This crate is a working in progress. The idea is that it should contain a trivia
 
 The crate is a work in progress and currently only implements:
 
-* Bezier curves
-* Bezier surfaces
+* Bezier curves (direct method and De Casteljau's)
+* Bezier surfaces (direct method and De Casteljau's)
 * Rational Bezier curves
 
 ## Examples

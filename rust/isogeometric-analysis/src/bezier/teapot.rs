@@ -24,6 +24,9 @@ use crate::core::RealPoint3d;
 use crate::bezier::BezierSurf;
 use array2d::Array2D;
 
+///
+/// This structure contains the patches to draw the teapot.
+/// 
 pub const TEAPOT_PACTHES: [[usize; 16]; 32] = [
     [  1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14,  15,  16], 
 	[  4,  17,  18,  19,   8,  20,  21,  22,  12,  23,  24,  25,  16,  26,  27,  28], 
@@ -59,6 +62,9 @@ pub const TEAPOT_PACTHES: [[usize; 16]; 32] = [
 	[270, 270, 270, 270, 300, 305, 306, 279, 297, 303, 304, 275, 294, 301, 302, 271]
 ];
 
+///
+/// This array contains the vertices to draw the teapot.
+/// 
 pub const TEAPOT_VERTICES: [[f64; 3]; 306] = [ 
 	[ 1.4000,  0.0000,  2.4000], 
 	[ 1.4000, -0.7840,  2.4000], 
@@ -370,6 +376,18 @@ pub const TEAPOT_VERTICES: [[f64; 3]; 306] = [
 
 ///
 /// Builds the pacthes needed to draw the teapot.
+/// 
+/// ```rust
+/// use isogeometric_analysis::bezier::BezierTeapot;
+/// use isogeometric_analysis::core::RealRange;
+/// use isogeometric_analysis::core::Evaluator;
+/// let patches = BezierTeapot::build_patches();
+/// for patch in patches {
+///     let r = RealRange { a: 0f64, b: 1f64 };
+///     let (_xpoints, ypoints) = Evaluator::<2, 3, 100>::evaluate_parametric_range2d(&patch, &r, &r);
+///     let (xvalues, yvalues, zvalues) = Evaluator::<2, 3, 0>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
+/// }
+/// ```
 /// 
 pub struct BezierTeapot {}
 
