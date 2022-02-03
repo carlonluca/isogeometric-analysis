@@ -27,7 +27,7 @@ use isogeometric_analysis::core::{RealPoint, RealPoint2d, RealPoint3d};
 use isogeometric_analysis::core::RealRange;
 use isogeometric_analysis::core::p3;
 use isogeometric_analysis::bezier::BezierTeapot;
-use gnuplot::{Figure, Caption, Color, LineStyle, AxesCommon, Axes2D, Axes3D, DashType, AutoOption, PlotOption};
+use gnuplot::{Figure, Caption, Color, LineStyle, AxesCommon, Axes2D, Axes3D, DashType, AutoOption, PlotOption, PointSymbol};
 use std::time::Instant;
 use array2d::Array2D;
 
@@ -48,6 +48,10 @@ pub fn show_teapot() {
     let patches = BezierTeapot::build_patches();
     for patch in patches {
         show_control_points_3d(axes3d, &patch.data.as_row_major(), false);
+        let r = RealRange { a: 0f64, b: 1f64 };
+        let (_xpoints, ypoints) = Evaluator::<2, 3, 100>::evaluate_parametric_range2d(&patch, &r, &r);
+        let (xvalues, yvalues, zvalues) = Evaluator::<2, 3, 0>::split_coords(0, &ypoints, 1, &ypoints, 2, &ypoints);
+        axes3d.points(xvalues, yvalues, zvalues, &[Caption(""), Color("orange"), PointSymbol('.')]);
     }
 
     match fg.show() {
