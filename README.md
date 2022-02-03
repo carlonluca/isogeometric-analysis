@@ -125,6 +125,12 @@ Directory [ts](ts) includes a complete TypeScript implementation of many of the 
 
 ![toroid](ts/ki_toroid.webp)
 
+## Rust Implementation
+
+The Rust implementation is a work in progress. Go into the [rust](rust/isogeometric-analysis) dir for more info.
+
+![teapot](rust/isogeometric-analysis/images/bezier_teapot.png)
+
 ## Links
 
 The code was tested on [**GNU Octave version 6.2.0**](https://www.gnu.org/software/octave/index).

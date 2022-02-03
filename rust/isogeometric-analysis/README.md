@@ -15,6 +15,8 @@ Examples can be found in the documentation, in the unit tests and in two other c
 * https://github.com/carlonluca/isogeometric-analysis/tree/master/rust/isogeometric-analysis-benchmarks
 * https://github.com/carlonluca/isogeometric-analysis/tree/master/rust/isogeometric-analysis-demos
 
+![teapot](images/bezier_teapot.png)
+
 ## More Info
 
 More info about Isogeometric Analysis and these topics can be downloaded from: https://bugfreeblog.duckdns.org/isogeometric-analysis.
