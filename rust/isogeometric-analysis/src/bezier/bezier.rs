@@ -123,12 +123,21 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
     /// technique is not numerically stable.
     ///
     #[inline(always)]
-    pub fn evaluate_direct<'a>(&self, input: &RealPoint<1>, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
-        let n = self.p.len();
+    pub fn evaluate_direct<'a>(&self, xi: &RealPoint<1>, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
+        let n = self.p.len() - 1;
+        if n == 1 {
+            return self.evaluate_direct_linear(&xi, output);
+        }
+        else if n == 2 {
+            return self.evaluate_direct_quadratic(&xi, output);
+        }
+        else if n == 3 {
+            return self.evaluate_direct_cubic(&xi, output);
+        }
         let mut tmp = RealPoint1d::origin();
         output.reset();
-        for i in 0..n {
-            let bout = self.bernstein[i].evaluate_fill(&input, &mut tmp).x();
+        for i in 0..=n {
+            let bout = self.bernstein[i].evaluate_fill(&xi, &mut tmp).x();
             *output += self.p[i]*bout;
         }
 
@@ -152,6 +161,30 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
         }
 
         return q[0];
+    }
+
+    pub fn evaluate_direct_linear<'a>(&self, xi: &RealPoint1d, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
+        output.reset();
+        *output += self.p[0]*(1. - xi.x());
+        *output += self.p[1]*xi.x();
+        output
+    }
+
+    pub fn evaluate_direct_quadratic<'a>(&self, xi: &RealPoint1d, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
+        output.reset();
+        *output += self.p[0]*(Pow::<f64>::pow(1. - xi.x(), 3.));
+        *output += self.p[1]*(2.*xi.x()*(1. - xi.x()));
+        *output += self.p[2]*Pow::<f64>::pow(xi.x(), 2.);
+        output
+    }
+
+    pub fn evaluate_direct_cubic<'a>(&self, xi: &RealPoint1d, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
+        output.reset();
+        *output += self.p[0]*Pow::<f64>::pow(1. - xi.x(), 3.);
+        *output += self.p[1]*3.*xi.x()*Pow::<f64>::pow(1. - xi.x(), 2.);
+        *output += self.p[2]*2.*Pow::<f64>::pow(xi.x(), 2.)*(1. - xi.x());
+        *output += self.p[3]*Pow::<f64>::pow(xi.x(), 3.);
+        output
     }
 
     ///
