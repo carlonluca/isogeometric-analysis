@@ -165,7 +165,8 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
 
     ///
     /// Evaluates quickly a linear Bezier.
-    /// 
+    ///
+    #[inline(always)]
     pub fn evaluate_direct_linear<'a>(&self, xi: &RealPoint1d, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
         *output = self.p[0]*(1. - xi.x());
         *output += self.p[1]*xi.x();
@@ -174,7 +175,8 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
 
     ///
     /// Evaluates quickly a quadratic Bezier.
-    /// 
+    ///
+    #[inline(always)]
     pub fn evaluate_direct_quadratic<'a>(&self, xi: &RealPoint1d, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
         *output = self.p[0]*(Pow::<f64>::pow(1. - xi.x(), 2.));
         *output += self.p[1]*(2.*xi.x()*(1. - xi.x()));
@@ -184,7 +186,8 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
 
     ///
     /// Evaluates quickly a cubic Bezier.
-    /// 
+    ///
+    #[inline(always)]
     pub fn evaluate_direct_cubic<'a>(&self, xi: &RealPoint1d, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
         *output = self.p[0]*Pow::<f64>::pow(1. - xi.x(), 3.);
         *output += self.p[1]*3.*xi.x()*Pow::<f64>::pow(1. - xi.x(), 2.);
