@@ -172,7 +172,7 @@ impl<const SIZE: usize> BezierCurve<SIZE> {
 
     pub fn evaluate_direct_quadratic<'a>(&self, xi: &RealPoint1d, output: &'a mut RealPoint<SIZE>) -> &'a mut RealPoint<SIZE> {
         output.reset();
-        *output += self.p[0]*(Pow::<f64>::pow(1. - xi.x(), 3.));
+        *output += self.p[0]*(Pow::<f64>::pow(1. - xi.x(), 2.));
         *output += self.p[1]*(2.*xi.x()*(1. - xi.x()));
         *output += self.p[2]*Pow::<f64>::pow(xi.x(), 2.);
         output
