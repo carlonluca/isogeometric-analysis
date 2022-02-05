@@ -26,6 +26,7 @@ pub use self::bezier::BezierSurf;
 pub use self::bezier::RatBezierCurve;
 pub use self::bezier::BezierCircle;
 pub use self::bezier::BezierCurveDemo1;
+pub use self::bezier::BezierFactory;
 pub use self::teapot::TEAPOT_PACTHES;
 pub use self::teapot::TEAPOT_VERTICES;
 pub use self::teapot::BezierTeapot;

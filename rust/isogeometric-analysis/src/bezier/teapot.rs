@@ -20,9 +20,8 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-use crate::core::RealPoint3d;
 use crate::bezier::BezierSurf;
-use array2d::Array2D;
+use crate::bezier::BezierFactory;
 
 ///
 /// This structure contains the patches to draw the teapot.
@@ -392,33 +391,10 @@ pub const TEAPOT_VERTICES: [[f64; 3]; 306] = [
 pub struct BezierTeapot {}
 
 impl BezierTeapot {
-    ///
-    /// Returns the vertices for the teapot.
-    /// 
-    pub fn build_vertices() -> Vec<RealPoint3d> {
-        let mut ret = Vec::<RealPoint3d>::new();
-        for i in 0..TEAPOT_VERTICES.len() {
-            ret.push(RealPoint3d::point3d(TEAPOT_VERTICES[i][0], TEAPOT_VERTICES[i][1], TEAPOT_VERTICES[i][2]));
-        }
-        ret
-    }
-
 	///
 	/// Build the patches from raw data.
 	/// 
 	pub fn build_patches() -> Vec<BezierSurf<3>> {
-		let vertices = BezierTeapot::build_vertices();
-		let mut patches = Vec::<BezierSurf<3>>::new();
-		for i in 0..TEAPOT_PACTHES.len() {
-			let mut patch_cps = Vec::<RealPoint3d>::new();
-			for j in 0..TEAPOT_PACTHES[i].len() {
-				let idx = TEAPOT_PACTHES[i][j] - 1;
-				log::info!("idx: {}", idx);
-				patch_cps.push(vertices[idx].clone());
-			}
-			let bdata = Array2D::<RealPoint3d>::from_row_major(&patch_cps, 4, 4);
-			patches.push(BezierSurf::<3> { data: bdata });
-		}
-		patches
+		BezierFactory::from_indexed_vertices::<32, 306>(TEAPOT_PACTHES, TEAPOT_VERTICES)
 	}
 }

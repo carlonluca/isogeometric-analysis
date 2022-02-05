@@ -21,7 +21,7 @@
  */
 
 use crate::core::fact;
-use crate::core::{RealPoint, RealPoint1d, RealPoint2d, p2};
+use crate::core::{RealPoint, RealPoint1d, RealPoint2d, RealPoint3d, p2};
 use crate::core::Mapping;
 use std::f64::consts::PI;
 use num::traits::Pow;
@@ -443,6 +443,30 @@ impl BezierCurveDemo1 {
             p2(0.6f64, 1.5f64),
             p2(1.5f64, 0f64)
         ])
+    }
+}
+
+pub struct BezierFactory {}
+
+impl BezierFactory {
+    pub fn from_indexed_vertices<const PATCHES: usize, const VERTICES: usize>(patch_array: [[usize; 16]; PATCHES], vertex_array: [[f64; 3]; VERTICES]) -> Vec<BezierSurf<3>> {
+        let mut vertices = Vec::<RealPoint3d>::new();
+        for i in 0..vertex_array.len() {
+            vertices.push(RealPoint3d::point3d(vertex_array[i][0], vertex_array[i][1], vertex_array[i][2]));
+        }
+
+        let mut patches = Vec::<BezierSurf<3>>::new();
+		for i in 0..patch_array.len() {
+			let mut patch_cps = Vec::<RealPoint3d>::new();
+			for j in 0..patch_array[i].len() {
+				let idx = patch_array[i][j] - 1;
+				patch_cps.push(vertices[idx].clone());
+			}
+			let bdata = Array2D::<RealPoint3d>::from_row_major(&patch_cps, 4, 4);
+			patches.push(BezierSurf::<3> { data: bdata });
+		}
+
+		patches
     }
 }
 
