@@ -459,7 +459,6 @@ impl BezierFactory {
 		for i in 0..patch_array.len() {
 			let mut patch_cps = Vec::<RealPoint3d>::new();
 			for j in 0..patch_array[i].len() {
-                log::info!("IDX: {}", patch_array[i][j]);
 				let idx = patch_array[i][j] - 1;
 				patch_cps.push(vertices[idx].clone());
 			}

@@ -45,6 +45,15 @@ fn parse_patch(line: &String) -> [usize; 16] {
 /// 
 fn parse_vertex(line: &String) -> [f64; 3] {
     let v = line.split(",").collect::<Vec<&str>>();
+
+    //{
+    //    let mut iter = v.iter();
+    //    log::info!("[ {:+.9}, {:+.9}, {:+.9} ],",
+    //iter.next().unwrap().parse::<f64>().unwrap(),
+    //iter.next().unwrap().parse::<f64>().unwrap(),
+    //iter.next().unwrap().parse::<f64>().unwrap());
+    //}
+
     let mut iter = v.iter();
     [
         iter.next().unwrap().parse().unwrap(),
