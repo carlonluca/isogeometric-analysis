@@ -26,12 +26,11 @@ use isogeometric_analysis::core::HslProvider;
 use isogeometric_analysis::core::{RealPoint, RealPoint2d, RealPoint3d};
 use isogeometric_analysis::core::RealRange;
 use isogeometric_analysis::core::p3;
-use isogeometric_analysis::bezier::BezierTeapot;
 use gnuplot::{Figure, Caption, Color, LineStyle, AxesCommon, Axes2D, Axes3D, DashType, AutoOption, PlotOption, PointSymbol};
 use std::time::Instant;
 use array2d::Array2D;
 
-pub fn show_teapot() {
+pub fn show_teapot(patches: Vec<BezierSurf<3>>) {
     let mut fg = Figure::new();
 
     let axes3d = fg.axes3d()
@@ -45,7 +44,6 @@ pub fn show_teapot() {
         .set_y_label("y", &[])
         .set_z_label("z", &[]);
 
-    let patches = BezierTeapot::build_patches();
     for patch in patches {
         show_control_points_3d(axes3d, &patch.data.as_row_major(), false);
         let r = RealRange { a: 0f64, b: 1f64 };

@@ -20,6 +20,9 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 mod bezier;
+use isogeometric_analysis::bezier::BezierTeacup;
+use isogeometric_analysis::bezier::BezierTeaspoon;
+use isogeometric_analysis::bezier::BezierTeapot;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -35,6 +38,10 @@ struct Opt {
     bezier_surf1: bool,
     #[structopt(long, help = "Shows the teapot")]
     bezier_teapot: bool,
+    #[structopt(long, help = "Shows the teacup")]
+    bezier_teacup: bool,
+    #[structopt(long, help = "Shows the teaspoon")]
+    bezier_teaspoon: bool,
     #[structopt(long, help = "Shows a circle drawn with a rational bezier curve")]
     ratbezier_circle1: bool,
     #[structopt(long, help = "Shows an arc")]
@@ -78,7 +85,17 @@ fn main() {
     }
 
     if opt.bezier_teapot {
-        bezier::show_teapot();
+        bezier::show_teapot(BezierTeapot::build_patches());
+        return;
+    }
+
+    if opt.bezier_teacup {
+        bezier::show_teapot(BezierTeacup::build_patches());
+        return;
+    }
+
+    if opt.bezier_teaspoon {
+        bezier::show_teapot(BezierTeaspoon::build_patches());
         return;
     }
 }
