@@ -449,7 +449,7 @@ impl BezierCurveDemo1 {
 pub struct BezierFactory {}
 
 impl BezierFactory {
-    pub fn from_indexed_vertices<const PATCHES: usize, const VERTICES: usize>(patch_array: [[usize; 16]; PATCHES], vertex_array: [[f64; 3]; VERTICES]) -> Vec<BezierSurf<3>> {
+    pub fn from_indexed_vertices(patch_array: Vec<[usize; 16]>, vertex_array: Vec<[f64; 3]>) -> Vec<BezierSurf<3>> {
         let mut vertices = Vec::<RealPoint3d>::new();
         for i in 0..vertex_array.len() {
             vertices.push(RealPoint3d::point3d(vertex_array[i][0], vertex_array[i][1], vertex_array[i][2]));
@@ -459,6 +459,7 @@ impl BezierFactory {
 		for i in 0..patch_array.len() {
 			let mut patch_cps = Vec::<RealPoint3d>::new();
 			for j in 0..patch_array[i].len() {
+                log::info!("IDX: {}", patch_array[i][j]);
 				let idx = patch_array[i][j] - 1;
 				patch_cps.push(vertices[idx].clone());
 			}

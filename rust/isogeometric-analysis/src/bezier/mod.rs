@@ -30,5 +30,8 @@ pub use self::bezier::BezierFactory;
 pub use self::teapot::TEAPOT_PACTHES;
 pub use self::teapot::TEAPOT_VERTICES;
 pub use self::teapot::BezierTeapot;
+pub use self::utahdata::read_utah_format;
 mod bezier;
 mod teapot;
+mod teaspoon;
+mod utahdata;

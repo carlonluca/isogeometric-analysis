@@ -395,6 +395,6 @@ impl BezierTeapot {
 	/// Build the patches from raw data.
 	/// 
 	pub fn build_patches() -> Vec<BezierSurf<3>> {
-		BezierFactory::from_indexed_vertices::<32, 306>(TEAPOT_PACTHES, TEAPOT_VERTICES)
+		BezierFactory::from_indexed_vertices(TEAPOT_PACTHES.to_vec(), TEAPOT_VERTICES.to_vec())
 	}
 }
