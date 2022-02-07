@@ -1,6 +1,6 @@
 [package]
 name = "isogeometric_analysis"
-version = "0.2.1"
+version = "0.3.0"
 edition = "2018"
 license = "LGPL-3.0+"
 description = "Create implementing algorithms related to Isogeometric Analysis. Bezier, B-spline, NURBS, numerical integration and isogeometric approach to PDE approximation."
