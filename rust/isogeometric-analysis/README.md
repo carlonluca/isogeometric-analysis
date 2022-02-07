@@ -17,6 +17,8 @@ Examples can be found in the documentation, in the unit tests and in two other c
 
 ## Demo
 
+The library includes procedures to load data for the Utah teapot, teacup and teaspoon: https://github.com/rm-hull/newell-teapot. This is a demo of how patches are computed by the crate and rendered through gnuplot.
+
 ![teapot](https://github.com/carlonluca/isogeometric-analysis/raw/master/rust/isogeometric-analysis/images/bezier_teapot.png)
 ![teapot](https://github.com/carlonluca/isogeometric-analysis/raw/master/rust/isogeometric-analysis/images/bezier_teacup.png)
 ![teapot](https://github.com/carlonluca/isogeometric-analysis/raw/master/rust/isogeometric-analysis/images/bezier_teaspoon.png)
