@@ -15,7 +15,11 @@ Examples can be found in the documentation, in the unit tests and in two other c
 * https://github.com/carlonluca/isogeometric-analysis/tree/master/rust/isogeometric-analysis-benchmarks
 * https://github.com/carlonluca/isogeometric-analysis/tree/master/rust/isogeometric-analysis-demos
 
+## Demo
+
 ![teapot](https://github.com/carlonluca/isogeometric-analysis/raw/master/rust/isogeometric-analysis/images/bezier_teapot.png)
+![teapot](https://github.com/carlonluca/isogeometric-analysis/raw/master/rust/isogeometric-analysis/images/bezier_teacup.png)
+![teapot](https://github.com/carlonluca/isogeometric-analysis/raw/master/rust/isogeometric-analysis/images/bezier_teaspoon.png)
 
 ## More Info
 
