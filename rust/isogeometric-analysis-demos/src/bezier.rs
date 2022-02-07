@@ -30,14 +30,19 @@ use gnuplot::{Figure, Caption, Color, LineStyle, AxesCommon, Axes2D, Axes3D, Das
 use std::time::Instant;
 use array2d::Array2D;
 
-pub fn show_teapot(patches: Vec<BezierSurf<3>>) {
+pub struct AxisRange {
+    pub min: AutoOption<f64>,
+    pub max: AutoOption<f64>
+}
+
+pub fn show_3d_patches(patches: Vec<BezierSurf<3>>, xrange: AxisRange, yrange: AxisRange, zrange: AxisRange) {
     let mut fg = Figure::new();
 
     let axes3d = fg.axes3d()
         .set_aspect_ratio(AutoOption::Fix(1.0))
-        .set_x_range(AutoOption::Fix(-4.), AutoOption::Fix(4.))
-        .set_y_range(AutoOption::Fix(-4.), AutoOption::Fix(4.))
-        .set_z_range(AutoOption::Fix(0.), AutoOption::Fix(4.))
+        .set_x_range(xrange.min, xrange.max)
+        .set_y_range(yrange.min, yrange.max)
+        .set_z_range(zrange.min, zrange.max)
         .set_y_grid(true)
         .set_x_grid(true)
         .set_x_label("x", &[])

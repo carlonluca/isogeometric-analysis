@@ -23,6 +23,8 @@ mod bezier;
 use isogeometric_analysis::bezier::BezierTeacup;
 use isogeometric_analysis::bezier::BezierTeaspoon;
 use isogeometric_analysis::bezier::BezierTeapot;
+use self::bezier::AxisRange;
+use gnuplot::AutoOption;
 use structopt::StructOpt;
 
 #[derive(Debug, StructOpt)]
@@ -85,17 +87,44 @@ fn main() {
     }
 
     if opt.bezier_teapot {
-        bezier::show_teapot(BezierTeapot::build_patches());
+        bezier::show_3d_patches(BezierTeapot::build_patches(), AxisRange {
+            min: AutoOption::Fix(-4.),
+            max: AutoOption::Fix(4.)
+        }, AxisRange {
+            min: AutoOption::Fix(-4.),
+            max: AutoOption::Fix(4.)
+        }, AxisRange {
+            min: AutoOption::Fix(0.),
+            max: AutoOption::Fix(4.)
+        });
         return;
     }
 
     if opt.bezier_teacup {
-        bezier::show_teapot(BezierTeacup::build_patches());
+        bezier::show_3d_patches(BezierTeacup::build_patches(), AxisRange {
+            min: AutoOption::Fix(-1.),
+            max: AutoOption::Fix(1.)
+        }, AxisRange {
+            min: AutoOption::Fix(-1.),
+            max: AutoOption::Fix(1.)
+        }, AxisRange {
+            min: AutoOption::Fix(-1.),
+            max: AutoOption::Fix(1.)
+        });
         return;
     }
 
     if opt.bezier_teaspoon {
-        bezier::show_teapot(BezierTeaspoon::build_patches());
+        bezier::show_3d_patches(BezierTeaspoon::build_patches(), AxisRange {
+            min: AutoOption::Fix(-1.),
+            max: AutoOption::Fix(1.)
+        }, AxisRange {
+            min: AutoOption::Fix(-2.),
+            max: AutoOption::Fix(2.)
+        }, AxisRange {
+            min: AutoOption::Fix(-0.5),
+            max: AutoOption::Fix(0.5)
+        });
         return;
     }
 }
