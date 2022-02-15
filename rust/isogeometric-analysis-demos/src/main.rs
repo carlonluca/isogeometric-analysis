@@ -44,8 +44,14 @@ struct Opt {
     bezier_teacup: bool,
     #[structopt(long, help = "Shows the teaspoon")]
     bezier_teaspoon: bool,
-    #[structopt(long, help = "Shows a circle drawn with a rational bezier curve")]
+    #[structopt(long, help = "Shows a circle drawn with 3 rational bezier curves")]
     ratbezier_circle1: bool,
+    #[structopt(long, help = "Shows a circle drawn with 6 rational bezier curves")]
+    ratbezier_circle2: bool,
+    #[structopt(long, help = "Shows a circle drawn with 9 rational bezier curves")]
+    ratbezier_circle3: bool,
+    #[structopt(long, help = "Shows a circle drawn with 12 rational bezier curves")]
+    ratbezier_circle4: bool,
     #[structopt(long, help = "Shows an arc")]
     ratbezier_arc1: bool,
     #[structopt(long, help = "Multiplot")]
@@ -77,7 +83,22 @@ fn main() {
     }
 
     if opt.ratbezier_circle1 {
-        bezier::show_ratbezier_circle_demo();
+        bezier::show_ratbezier_circle_demo(3, 3);
+        return;
+    }
+
+    if opt.ratbezier_circle2 {
+        bezier::show_ratbezier_circle_demo(5, 6);
+        return;
+    }
+
+    if opt.ratbezier_circle3 {
+        bezier::show_ratbezier_circle_demo(5, 9);
+        return;
+    }
+
+    if opt.ratbezier_circle4 {
+        bezier::show_ratbezier_circle_demo(5, 12);
         return;
     }
 

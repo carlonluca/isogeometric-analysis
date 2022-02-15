@@ -199,7 +199,7 @@ pub fn show_ratbezier_arc_demo() {
     }
 }
 
-pub fn show_ratbezier_circle_demo() {
+pub fn show_ratbezier_circle_demo(r: u32, segments: u32) {
     let mut fg = Figure::new();
 
     // Draw the Bezier curve.
@@ -213,8 +213,8 @@ pub fn show_ratbezier_circle_demo() {
         .set_y_label("y", &[]);
 
     let curves = BezierCircle {
-        radius: 3,
-        segments: 3
+        radius: r,
+        segments: segments
     }.compute().unwrap();
     let before = Instant::now();
 
