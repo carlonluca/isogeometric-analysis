@@ -26,6 +26,7 @@ use crate::core::Mapping;
 use std::f64::consts::PI;
 use num::traits::Pow;
 use array2d::Array2D;
+use embed_doc_image::embed_doc_image;
 
 ///
 /// Represents a Bernstein polynomial. Bernstein polynomials are functions
@@ -347,8 +348,12 @@ impl<const S: usize, const H: usize> Mapping<f64, f64, 1, S> for RatBezierCurve<
 }
 
 ///
-/// Struct to compute a circle with rational bezier curves.
+/// Struct to compute a circle with rational bezier curves. This is an example of a circle
+/// with radius 2 and with 6 segments:
 /// 
+/// ![circle][circle_2_6]
+///
+#[embed_doc_image("circle_2_6", "images/circle_2.png")]
 pub struct BezierCircle {
     pub radius: u32,
     pub segments: u32
