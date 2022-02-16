@@ -6,6 +6,8 @@ license = "LGPL-3.0+"
 description = "Create implementing algorithms related to Isogeometric Analysis. Bezier, B-spline, NURBS, numerical integration and isogeometric approach to PDE approximation."
 homepage = "https://bugfreeblog.duckdns.org/"
 readme = "README.md"
+keywords = ["iga", "bezier"]
+categories = ["algorithms", "graphics", "rendering", "science"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
