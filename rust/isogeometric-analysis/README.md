@@ -7,6 +7,7 @@ The crate is a work in progress and currently only implements:
 * Bezier curves (direct method and De Casteljau's)
 * Bezier surfaces (direct method and De Casteljau's)
 * Rational Bezier curves
+* Rational Bézier circular arcs and circles
 
 ## Examples
 
