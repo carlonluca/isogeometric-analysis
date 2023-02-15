@@ -4,8 +4,8 @@
 
 * Link to dissertation: https://bugfreeblog.page.link/isogeometric-analysis-dissertation.
 * Link to presentation: https://bugfreeblog.page.link/isogeometric-analysis-presentation.
-* FEM: [**blog post**](https://thebugfreeblog.blogspot.com/2021/04/igafem.html).
-* Bezier curves and surfaces: [**blog post**](https://thebugfreeblog.blogspot.com/2021/05/isogeometric-analysis-bezier-curves-and.html), [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/bezier.html).
+* FEM: [**blog post**](https://bugfreeblog.duckdns.org/2021/04/igafem.html).
+* Bezier curves and surfaces: [**blog post**](https://bugfreeblog.duckdns.org/2021/05/isogeometric-analysis-bezier-curves-and.html), [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/bezier.html).
 * B-spline curves and surfaces: [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/bspline.html).
 * NURBS curves and surfaces: [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/nurbs.html).
 * NURBS knot insertion on a circle: [**typescript demo**](https://carlonluca.github.io/isogeometric-analysis/nurbs_knot_insertion_curve.html)
@@ -43,7 +43,7 @@ Lagrande polynomials can be useful for the definition of nodal shape functions:
 
 ![example2](2.3/lagrange.svg.png)
 
-See [this blog post](https://thebugfreeblog.blogspot.com/2021/04/igafem.html) for more info.
+See [this blog post](https://bugfreeblog.duckdns.org/2021/04/igafem.html) for more info.
 
 ## [Curves and Surfaces with Implicit and Parametric Forms](3.1)
 
@@ -65,7 +65,7 @@ Implementation of Bezier curves and surfaces:
 
 ![surf](3.3/bezier_surf.svg.png)
 
-See [this blog post](https://thebugfreeblog.blogspot.com/2021/05/isogeometric-analysis-bezier-curves-and.html) for more info.
+See [this blog post](https://bugfreeblog.duckdns.org/2021/05/isogeometric-analysis-bezier-curves-and.html) for more info.
 
 ## [B-spline Curves and Surfaces](3.4)
 
